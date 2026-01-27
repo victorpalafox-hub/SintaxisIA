@@ -3,6 +3,10 @@
 # ===================================
 .env
 .env.local
+.env.*.local
+.env.dev
+.env.staging
+.env.prod          
 .env.production
 *.key
 *.pem
@@ -41,6 +45,17 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+
+# ===================================
+# TESTS
+# ===================================
+tests/logs/*.log
+tests/logs/*.log.gz
+tests/logs/test-summary.json
+!tests/logs/.gitkeep
+tests/reports/
+tests/test-results/
+tests/artifacts/
 
 # ===================================
 # CLAUDE CODE

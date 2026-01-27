@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 7
+    },
+    "auditLog": "C:\\Users\\DELL\\Documents\\Proyectos\\SintaxisIA\\Videos short\\tests\\logs\\.d15308c035d764971ad38544cbafc7cd76331278-audit.json",
+    "files": [
+        {
+            "date": 1769556262878,
+            "name": "C:\\Users\\DELL\\Documents\\Proyectos\\SintaxisIA\\Videos short\\tests\\logs\\test-combined-2026-01-27.log",
+            "hash": "eb149df29114b98c9d62ef416b0dd81205db01ccf7128c891c62d957889f289a"
+        }
+    ],
+    "hashType": "sha256"
+}

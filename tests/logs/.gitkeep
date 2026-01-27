@@ -1,0 +1,2 @@
+# Este archivo asegura que el directorio logs/ exista en git
+# Los archivos de log (*.log) están ignorados en .gitignore
