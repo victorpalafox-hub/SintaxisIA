@@ -1,115 +1,236 @@
-# Sintaxis IA - Generador de YouTube Shorts
+# Sintaxis IA - Videos Short
 
-Generador automatizado de videos cortos sobre noticias de Inteligencia Artificial.
+> AI-powered automated video generation system using Gemini API and Remotion
 
-## Estructura del Proyecto
-
-```
-sintaxis-ia/
-├── automation/           # Scripts de automatización
-│   ├── src/
-│   │   ├── config.ts        # Configuración centralizada
-│   │   ├── entityMapping.ts # Mapeo de entidades de IA
-│   │   ├── newsAPI.ts       # Fetch de noticias (NewsData.io)
-│   │   ├── scriptGen.ts     # Generación de guiones (Gemini)
-│   │   ├── audioGen.ts      # Generación de audio (ElevenLabs)
-│   │   ├── dataContract.ts  # Estructura de datos para Remotion
-│   │   └── index.ts         # Orquestador principal
-│   └── utils/
-│       ├── logger.ts        # Sistema de logs
-│       └── validators.ts    # Validaciones
-│
-├── remotion-app/         # Aplicación de video
-│   ├── src/
-│   │   ├── theme.ts         # Sistema de temas centralizado
-│   │   ├── components/
-│   │   │   ├── backgrounds/ # Fondos animados
-│   │   │   ├── effects/     # Efectos visuales
-│   │   │   ├── sequences/   # Secuencias del video
-│   │   │   └── ui/          # Componentes UI (Watermark, etc.)
-│   │   ├── Video.tsx        # Composición principal
-│   │   ├── Root.tsx         # Root de Remotion
-│   │   └── data.json        # Datos del video
-│   └── public/assets/       # Assets estáticos
-│
-├── output/               # Videos renderizados
-├── .env                  # Variables de entorno (no subir)
-└── .gitignore
-```
-
-## Requisitos
-
-- Node.js 18+
-- npm o yarn
-- APIs configuradas:
-  - NewsData.io
-  - Google AI Studio (Gemini)
-  - ElevenLabs
-
-## Instalación
-
-```bash
-# Instalar dependencias de todos los proyectos
-npm run install:all
-```
-
-## Uso
-
-### 1. Generar contenido (fetch noticias + guión + audio)
-
-```bash
-npm run generate
-```
-
-### 2. Previsualizar en Remotion Studio
-
-```bash
-npm run dev
-```
-
-### 3. Renderizar video final
-
-```bash
-npm run render
-```
-
-## Scripts Disponibles
-
-| Script | Descripcion |
-|--------|-------------|
-| `npm run fetch` | Obtener noticias y generar datos |
-| `npm run generate` | Pipeline completo de generacion |
-| `npm run dev` | Abrir Remotion Studio |
-| `npm run render` | Renderizar video HD (1080x1920) |
-| `npm run render:preview` | Renderizar preview de 10s |
-| `npm run render:lowres` | Renderizar en baja resolucion |
+Sistema automatizado para generar videos cortos (YouTube Shorts) a partir de prompts de texto utilizando inteligencia artificial. El sistema obtiene noticias de IA, genera guiones con Gemini, produce audio con ElevenLabs y renderiza videos con Remotion.
 
 ---
 
-## Configuracion
+## Table of Contents
 
-### Variables de entorno (.env)
+- [Technology Stack](#technology-stack)
+- [Project Structure](#project-structure)
+- [Installation](#installation)
+- [Available Scripts](#available-scripts)
+- [Environment Variables](#environment-variables)
+- [Testing Infrastructure](#testing-infrastructure)
+- [Implementation Status](#implementation-status)
+- [Video Specifications](#video-specifications)
+- [Configuration](#configuration)
+- [Contributing](#contributing)
+- [Resources](#resources)
 
-Crear archivo `.env` en la raiz del proyecto:
+---
+
+## Technology Stack
+
+### Backend/Services
+
+| Technology | Purpose |
+|------------|---------|
+| **Node.js** | Runtime environment |
+| **TypeScript** | Type-safe development |
+| **Gemini API** | AI script generation (Google Generative AI) |
+| **ElevenLabs** | Text-to-speech audio generation |
+| **Remotion** | Programmatic video rendering |
+| **FFmpeg** | Video processing and encoding |
+
+### Testing Infrastructure
+
+| Technology | Purpose |
+|------------|---------|
+| **Playwright** | E2E and API testing framework |
+| **Winston** | Structured logging with rotation |
+| **TypeScript** | Comprehensive JSDoc comments |
+| **Service Object Pattern** | POM adapted for API testing |
+
+---
+
+## Project Structure
+
+```
+sintaxis-ia/
+├── automation/                             # Content generation pipeline
+│   ├── src/
+│   │   ├── index.ts                       # Main orchestrator
+│   │   ├── config.ts                      # API configuration
+│   │   ├── codeValidator.ts               # Auto-review system
+│   │   ├── watcher.ts                     # File change monitor
+│   │   ├── newsAPI.ts                     # NewsData.io integration
+│   │   ├── scriptGen.ts                   # Gemini script generation
+│   │   ├── audioGen.ts                    # ElevenLabs audio generation
+│   │   ├── imageSearcher.ts               # Image search with fallback
+│   │   ├── entityMapping.ts               # AI entity recognition
+│   │   └── dataContract.ts                # Remotion data structure
+│   └── utils/
+│       ├── logger.ts                      # Production logger
+│       └── validators.ts                  # Input validation
+│
+├── remotion-app/                          # Video rendering application
+│   ├── src/
+│   │   ├── Video.tsx                      # Main composition
+│   │   ├── Root.tsx                       # Remotion root
+│   │   ├── theme.ts                       # Centralized theme system
+│   │   ├── data.json                      # Video data input
+│   │   └── components/
+│   │       ├── backgrounds/               # Animated backgrounds
+│   │       ├── effects/                   # Visual effects
+│   │       ├── sequences/                 # Video sequences
+│   │       └── ui/                        # UI components (Watermark)
+│   └── public/assets/                     # Static assets
+│
+├── src/                                   # Shared production code
+│   └── config/                            # Configuration management
+│       ├── EnvironmentManager.ts          # Multi-environment config loader
+│       ├── AppConfig.ts                   # Typed configuration access
+│       └── index.ts
+│
+├── tests/                                 # Test suite (Service Object Pattern)
+│   ├── config/
+│   │   ├── test-constants.ts              # Test configuration constants
+│   │   └── index.ts
+│   ├── utils/
+│   │   ├── TestLogger.ts                  # Test logging utility
+│   │   ├── log-formatter.ts               # Winston formatters
+│   │   └── index.ts
+│   ├── page-objects/                      # (Prompt #6 - Pending)
+│   │   ├── services/
+│   │   │   ├── GeminiServiceObject.ts     # Gemini API test wrapper
+│   │   │   └── VideoServiceObject.ts      # Video generation test wrapper
+│   │   └── base/
+│   │       └── BaseServiceObject.ts       # Base class for service objects
+│   ├── specs/
+│   │   ├── example.spec.ts                # Example test suite
+│   │   ├── api/                           # (Prompt #6 - Pending)
+│   │   ├── video/                         # (Prompt #7 - Pending)
+│   │   ├── content/                       # (Prompt #8 - Pending)
+│   │   └── e2e/                           # (Prompt #9 - Pending)
+│   ├── logs/                              # Test execution logs (gitignored)
+│   └── reports/                           # HTML test reports (gitignored)
+│
+├── output/                                # Rendered videos
+├── .env.example                           # Environment template
+├── .env.dev                               # Development config (gitignored)
+├── .env.staging                           # Staging config (gitignored)
+├── .env.prod                              # Production config (gitignored)
+├── playwright.config.ts                   # Playwright configuration
+├── package.json                           # Root package configuration
+└── tsconfig.json                          # TypeScript configuration
+```
+
+---
+
+## Installation
+
+### Prerequisites
+
+- Node.js 18+ and npm
+- Git
+- FFmpeg (for video rendering)
+
+### Installation Steps
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/victorpalafox-hub/SintaxisIA.git
+cd "Videos short"
+
+# 2. Install all dependencies (root + automation + remotion-app)
+npm run install:all
+
+# 3. Install Playwright browsers
+npx playwright install
+
+# 4. Configure environment
+cp .env.example .env.dev
+# Edit .env.dev with your API keys and configuration
+
+# 5. Validate setup
+npm run validate
+
+# 6. Run tests to verify installation
+npm test
+```
+
+---
+
+## Available Scripts
+
+### Content Generation
+
+| Script | Description |
+|--------|-------------|
+| `npm run fetch` | Fetch news from NewsData.io |
+| `npm run generate` | Complete pipeline: news + script + audio |
+| `npm run dev` | Open Remotion Studio for preview |
+| `npm run render` | Render full HD video (1080x1920) |
+| `npm run render:preview` | Render 10-second preview |
+| `npm run render:lowres` | Render low resolution for testing |
+
+### Code Quality
+
+| Script | Description |
+|--------|-------------|
+| `npm run validate` | Run full code validation (6 categories) |
+| `npm run watch` | Monitor files and auto-validate on changes |
+| `npm run check` | TypeScript type checking without build |
+| `npm run build:all` | Build automation and remotion-app |
+| `npm run clean` | Remove generated videos |
+
+### Testing
+
+| Script | Description |
+|--------|-------------|
+| `npm test` | Run all Playwright tests |
+| `npm run test:ui` | Open Playwright UI mode (interactive) |
+| `npm run test:example` | Run example test suite only |
+| `npm run test:headed` | Run tests with visible browser |
+| `npm run test:debug` | Run tests in debug mode |
+| `npm run test:report` | Open HTML test report |
+
+---
+
+## Environment Variables
+
+Create environment files based on `.env.example`:
+
+```bash
+cp .env.example .env.dev      # Development
+cp .env.example .env.staging  # Staging
+cp .env.example .env.prod     # Production
+```
+
+### Required Variables
 
 ```env
 # ============================
-# APIs (Requeridas)
+# APIs (Required)
 # ============================
-NEWSDATA_API_KEY=tu_api_key
-GEMINI_API_KEY=tu_api_key
-ELEVENLABS_API_KEY=tu_api_key
+GEMINI_API_KEY=your_gemini_api_key
+NEWSDATA_API_KEY=your_newsdata_api_key
+ELEVENLABS_API_KEY=your_elevenlabs_api_key
 ELEVENLABS_VOICE_ID=adam
 
 # ============================
-# Contenido
+# Environment
+# ============================
+NODE_ENV=development          # development | staging | production
+LOG_LEVEL=debug               # debug | info | warn | error
+API_TIMEOUT=30000             # API timeout in milliseconds
+```
+
+### Optional Variables
+
+```env
+# ============================
+# Content Settings
 # ============================
 TARGET_LANGUAGE=es
 MAX_SUBTITLE_WORDS=5
 MAX_NEWS_ITEMS=5
 
 # ============================
-# Video (Opcional - tiene defaults)
+# Video Settings
 # ============================
 VIDEO_WIDTH=1080
 VIDEO_HEIGHT=1920
@@ -117,7 +238,7 @@ VIDEO_FPS=30
 VIDEO_DURATION=60
 
 # ============================
-# Marca de agua (Opcional)
+# Watermark
 # ============================
 WATERMARK_ENABLED=true
 WATERMARK_OPACITY=0.3
@@ -125,107 +246,284 @@ WATERMARK_SIZE=80
 WATERMARK_MARGIN=20
 
 # ============================
-# Paths (Opcional)
+# Paths
 # ============================
 OUTPUT_DIR=./output
 ```
 
-### Personalizacion de colores (theme.ts)
+---
 
-Editar `remotion-app/src/theme.ts` para cambiar los colores del tema:
+## Testing Infrastructure
+
+### Test Logging (TestLogger)
+
+All test executions generate structured logs:
+
+```
+tests/logs/
+├── test-YYYY-MM-DD.log           # Daily JSON logs
+├── test-summary.json             # Execution summary
+└── error-YYYY-MM-DD.log          # Error-only logs
+```
+
+**Features:**
+- Timestamps with timezone
+- Color-coded console output
+- Sanitized sensitive data (API keys, tokens)
+- Request/response tracking with duration
+- Error stack traces
+- Daily log rotation (7 days retention, 20MB max)
+
+**Specialized Logging Methods:**
+
+```typescript
+// API interactions
+logger.logApiRequest('Gemini', { url, method, headers, body });
+logger.logApiResponse('Gemini', { statusCode, duration, body });
+
+// Video generation
+logger.logVideoGeneration({ id, status, progress, resolution });
+
+// Content validation
+logger.logValidationResults({ validator, target, passed, details });
+
+// Test lifecycle
+logger.logTestStart(testName);
+logger.logTestEnd(testName, status, duration);
+```
+
+### Service Object Pattern
+
+Test architecture following Service Object Pattern (POM adapted for APIs):
+
+```
+tests/
+├── page-objects/
+│   ├── base/
+│   │   └── BaseServiceObject.ts    # Common functionality
+│   └── services/
+│       ├── GeminiServiceObject.ts  # Gemini API wrapper
+│       └── VideoServiceObject.ts   # Video generation wrapper
+└── specs/
+    ├── api/                        # API integration tests
+    ├── video/                      # Video generation tests
+    ├── content/                    # Content validation tests
+    └── e2e/                        # End-to-end tests
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run with UI (interactive mode)
+npm run test:ui
+
+# Run specific test file
+npm run test:example
+
+# Run with visible browser
+npm run test:headed
+
+# Debug mode
+npm run test:debug
+
+# View HTML report after test run
+npm run test:report
+```
+
+---
+
+## Implementation Status
+
+### Completed (Prompts #4-5)
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| EnvironmentManager | ✅ Done | Multi-environment config (dev/staging/prod) |
+| AppConfig | ✅ Done | Type-safe configuration access |
+| TestLogger | ✅ Done | Structured logging with Winston |
+| Playwright Setup | ✅ Done | Test framework configuration |
+| Example Tests | ✅ Done | 4 tests demonstrating all features |
+
+**EnvironmentManager Features:**
+- Cascading config: `.env` → `.env.local` → `.env.[env]` → `.env.[env].local`
+- Built-in validators: `isNotEmpty`, `isUrl`, `isEmail`, `isPort`, etc.
+- Environment helpers: `isDevelopment()`, `isStaging()`, `isProduction()`
+
+**TestLogger Features:**
+- Log levels: debug, info, warn, error
+- Daily rotation (7 days, 20MB max)
+- Automatic credential sanitization
+- Duration formatting and tracking
+
+### Pending (Prompts #6-9)
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| Service Objects | ⏳ Prompt #6 | BaseServiceObject, GeminiServiceObject, VideoServiceObject |
+| Video Tests | ⏳ Prompt #7 | Rendering validation, metadata verification |
+| Content Tests | ⏳ Prompt #8 | OCR validation, STT audio checks, sync testing |
+| E2E Tests | ⏳ Prompt #9 | Complete pipeline: Prompt → Gemini → Video → Validation |
+
+---
+
+## Video Specifications
+
+| Property | Value |
+|----------|-------|
+| Resolution | 1080x1920 (9:16 vertical) |
+| Frame Rate | 30 FPS |
+| Duration | 60 seconds |
+| Video Codec | H.264 |
+| Audio Codec | AAC |
+| Watermark | Bottom-right, 30% opacity |
+
+### Video Structure
+
+| Segment | Time | Content |
+|---------|------|---------|
+| Hook | 0-3s | Explosive intro with logo |
+| Headline | 3-8s | News title |
+| Content | 8-50s | Main points with subtitles |
+| Impact | 50-55s | Key data highlight |
+| Outro | 55-60s | CTA and branding |
+
+---
+
+## Configuration
+
+### Theme Customization
+
+Edit `remotion-app/src/theme.ts` to customize colors:
 
 ```typescript
 export const theme = {
   colors: {
-    primary: '#00f0ff',      // Cyan - color principal
-    secondary: '#ff0099',    // Magenta - color secundario
-    accent: '#cc00ff',       // Purple - acento
-    gold: '#ffd700',         // Dorado - impacto
-    red: '#ff3366',          // Rojo - alertas
-    darkBg: '#0a0a0f',       // Fondo principal
-    // ... mas colores
+    primary: '#00f0ff',      // Cyan - main color
+    secondary: '#ff0099',    // Magenta - secondary
+    accent: '#cc00ff',       // Purple - accent
+    gold: '#ffd700',         // Gold - impact
+    red: '#ff3366',          // Red - alerts
+    darkBg: '#0a0a0f',       // Main background
   },
   fonts: {
     main: 'Arial, sans-serif',
     title: 'Arial Black, sans-serif',
-    subtitle: 'Roboto Condensed, sans-serif',
   },
-  // ... configuracion de animaciones, tamanos, etc.
 };
 ```
 
-### Agregar nuevas entidades (entityMapping.ts)
+### Highlight Keywords
 
-Para agregar nuevas empresas o productos de IA, editar `automation/src/entityMapping.ts`:
+Keywords highlighted in subtitles (defined in `theme.ts`):
+
+```typescript
+export const HIGHLIGHT_KEYWORDS = [
+  'OpenAI', 'Claude', 'GPT', 'Gemini', 'IA', 'AI',
+  'ChatGPT', 'Anthropic', 'Google', 'Microsoft',
+  // Add more keywords here
+];
+```
+
+### Entity Mapping
+
+Add new AI entities in `automation/src/entityMapping.ts`:
 
 ```typescript
 export const ENTITY_MAP: Record<string, EntityConfig> = {
-  // Agregar nueva entidad
   mistral: {
     domain: 'mistral.ai',
     displayName: 'Mistral AI',
     category: 'ai-company',
     aliases: ['mistral', 'mixtral'],
   },
-  // ...
 };
 ```
 
-### Keywords para resaltado
+---
 
-Las palabras clave que se resaltan en los subtitulos se definen en `remotion-app/src/theme.ts`:
+## Contributing
 
-```typescript
-export const HIGHLIGHT_KEYWORDS = [
-  'OpenAI', 'Claude', 'GPT', 'Gemini', 'IA', 'AI',
-  // Agregar mas keywords aqui
-];
+### Development Workflow
+
+1. Create feature branch from `main`
+2. Implement changes following existing patterns
+3. Add comprehensive JSDoc comments
+4. Write tests demonstrating functionality
+5. Run validation: `npm run validate`
+6. Run tests: `npm test`
+7. Commit with descriptive message
+8. Push and create pull request
+
+### Code Standards
+
+- **TypeScript** with strict mode enabled
+- **JSDoc** comments on all public methods
+- **Service Object Pattern** for test organization
+- **Structured logging** for all operations
+- **Environment-based configuration** (no hardcoded values)
+
+### Commit Message Format
+
+```
+type: Short description
+
+- Detailed change 1
+- Detailed change 2
+
+Co-Authored-By: Name <email>
 ```
 
----
-
-## Tema de Colores
-
-| Color | Hex | Uso |
-|-------|-----|-----|
-| Cyan Primary | `#00f0ff` | Color principal |
-| Magenta Secondary | `#ff0099` | Acentos |
-| Purple Accent | `#cc00ff` | Degradados |
-| Dark BG | `#0a0a0f` | Fondo |
-| Gold Accent | `#ffd700` | Impacto |
-| Red Accent | `#ff3366` | Alertas |
-
-## Especificaciones del Video
-
-- **Resolucion:** 1080x1920 (9:16 vertical)
-- **FPS:** 30
-- **Duracion:** 60 segundos
-- **Codec:** H.264
-- **Audio:** AAC
-- **Marca de agua:** Esquina inferior derecha, 30% opacidad
-
-## Estructura del Video
-
-1. **Gancho (0-3s):** Intro explosiva con logo
-2. **Headline (3-8s):** Titulo de la noticia
-3. **Contenido (8-50s):** Puntos principales con subtitulos
-4. **Impacto (50-55s):** Dato clave
-5. **Outro (55-60s):** CTA y branding
+Types: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`
 
 ---
 
-## Arquitectura
+## Resources
 
-### Configuracion Centralizada
+### Documentation
 
-- `automation/src/config.ts` - Configuracion de APIs, video, paths
-- `remotion-app/src/theme.ts` - Colores, fuentes, animaciones
-- `automation/src/entityMapping.ts` - Entidades de IA reconocidas
+| Resource | URL |
+|----------|-----|
+| Playwright | https://playwright.dev |
+| Winston | https://github.com/winstonjs/winston |
+| Gemini API | https://ai.google.dev/docs |
+| Remotion | https://www.remotion.dev |
+| ElevenLabs | https://elevenlabs.io/docs |
 
-### Componentes Reutilizables
+### Project Context
 
-Todos los componentes usan el tema centralizado para colores y estilos, permitiendo cambios globales desde un solo archivo.
+- **Target User:** QA Manual transitioning to QA Automation
+- **Focus:** Microservices testing with clear explanations
+- **Code Style:** Well-commented, educational, maintainable
 
 ---
 
-Creado con Remotion + Node.js + TypeScript
+## Color Reference
+
+| Color | Hex | Usage |
+|-------|-----|-------|
+| Cyan Primary | `#00f0ff` | Main color |
+| Magenta Secondary | `#ff0099` | Accents |
+| Purple Accent | `#cc00ff` | Gradients |
+| Dark Background | `#0a0a0f` | Background |
+| Gold | `#ffd700` | Impact highlights |
+| Red | `#ff3366` | Alerts |
+
+---
+
+## License
+
+MIT License - See [LICENSE](LICENSE) for details.
+
+---
+
+## Contact
+
+- **Repository:** https://github.com/victorpalafox-hub/SintaxisIA
+- **Issues:** https://github.com/victorpalafox-hub/SintaxisIA/issues
+
+---
+
+Built with Remotion + Node.js + TypeScript + Playwright
