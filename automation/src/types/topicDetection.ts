@@ -22,6 +22,15 @@ export interface TopicDetection {
 
   /** Nivel de confianza (0-1) */
   confidence: number;
+
+  /** Entidades alternativas detectadas (opcional) */
+  alternativeEntities?: string[];
+
+  /** URL de imagen encontrada automáticamente */
+  imageUrl?: string;
+
+  /** Fuente de la imagen (clearbit, logo-dev, fallback, etc.) */
+  imageSource?: string;
 }
 
 /**

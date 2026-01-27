@@ -13,6 +13,7 @@ import {
   TopicDetectionErrorCode,
   GeminiTopicResponse,
 } from './types/topicDetection';
+import { searchEntityImage } from './imageSearcher';
 import { logger } from '../utils/logger';
 
 // Inicializar cliente de Gemini
@@ -59,12 +60,25 @@ export async function detectTopicFromText(
       // Validar resultado
       validateDetection(detection);
 
+      // Buscar imagen automáticamente
+      logger.info('🖼️  Buscando imagen del tópico...');
+      const imageResult = await searchEntityImage({
+        entityName: detection.mainEntity,
+        entityType: detection.entityType,
+        verifyExists: true,
+      });
+
+      // Agregar imagen al resultado
+      detection.imageUrl = imageResult.url;
+      detection.imageSource = imageResult.source;
+
       const processingTime = Date.now() - startTime;
 
       logger.success(
         `✅ Tópico detectado: ${detection.mainEntity} ` +
         `(${detection.entityType}, confianza: ${(detection.confidence * 100).toFixed(0)}%)`
       );
+      logger.success(`✅ Imagen: ${imageResult.url} (${imageResult.source})`);
 
       return {
         success: true,
@@ -88,6 +102,18 @@ export async function detectTopicFromText(
   logger.error('❌ Detección con Gemini falló, usando fallback');
 
   const fallback = fallbackDetection(text);
+
+  // Buscar imagen para el fallback también
+  logger.info('🖼️  Buscando imagen para fallback...');
+  const imageResult = await searchEntityImage({
+    entityName: fallback.mainEntity,
+    entityType: fallback.entityType,
+    verifyExists: false, // No verificar en fallback para mayor velocidad
+  });
+
+  fallback.imageUrl = imageResult.url;
+  fallback.imageSource = imageResult.source;
+
   const processingTime = Date.now() - startTime;
 
   return {
