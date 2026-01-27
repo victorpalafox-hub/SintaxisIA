@@ -1,0 +1,46 @@
+{
+  "videoConfig": {
+    "title": "Sintaxis IA - 27 Ene 2025",
+    "themeColor": "#00f0ff",
+    "duration": 60,
+    "fps": 30,
+    "width": 1080,
+    "height": 1920
+  },
+  "newsItems": [
+    {
+      "id": "news_example_01",
+      "headline": "OPENAI LANZA GPT-5 Y CAMBIA TODO LO QUE CONOCÍAMOS",
+      "gancho": "¡ESTO VA A CAMBIAR TODO!",
+      "contenido": [
+        "OpenAI acaba de presentar GPT-5, su modelo más avanzado hasta la fecha.",
+        "Este nuevo modelo puede razonar en tiempo real y aprender de sus errores.",
+        "Las empresas ya están integrándolo en sus sistemas con resultados impresionantes.",
+        "Los expertos predicen que esto acelerará la adopción de IA en todos los sectores."
+      ],
+      "impacto": "GPT-5 es 10 veces más potente que su predecesor y consume 50% menos energía.",
+      "cta": "Sígueme para más noticias de IA todos los días",
+      "tags": ["OpenAI", "GPT5", "IA", "Tech"],
+      "imageUrl": null,
+      "audioPath": "./public/assets/audio/news_example.mp3",
+      "durationInFrames": 1500,
+      "subtitles": [
+        { "word": "OpenAI", "startFrame": 0, "endFrame": 20 },
+        { "word": "acaba", "startFrame": 20, "endFrame": 35 },
+        { "word": "de", "startFrame": 35, "endFrame": 45 },
+        { "word": "presentar", "startFrame": 45, "endFrame": 70 },
+        { "word": "GPT-5", "startFrame": 70, "endFrame": 100 },
+        { "word": "su", "startFrame": 100, "endFrame": 115 },
+        { "word": "modelo", "startFrame": 115, "endFrame": 140 },
+        { "word": "más", "startFrame": 140, "endFrame": 155 },
+        { "word": "avanzado", "startFrame": 155, "endFrame": 190 }
+      ],
+      "source": {
+        "name": "TechCrunch",
+        "url": "https://techcrunch.com/example",
+        "publishedAt": "2025-01-27T10:00:00Z"
+      }
+    }
+  ],
+  "generatedAt": "2025-01-27T12:00:00Z"
+}

@@ -1,0 +1,140 @@
+PROYECTO: Sintaxis IA - Generador Automatizado de Shorts
+
+CONTEXTO:
+Soy QA automation construyendo un canal YouTube Shorts faceless llamado "Sintaxis IA" sobre noticias de Inteligencia Artificial.
+Stack: Remotion + Node.js + TypeScript + Tailwind CSS.
+
+Ubicación actual: C:\Users\DELL\Documents\Proyectos\SintaxisIA\Videos short
+
+Ya configurado:
+- Archivo .env con NEWSDATA_API_KEY, GEMINI_API_KEY, ELEVENLABS_API_KEY
+- ELEVENLABS_VOICE_ID=adam
+- TARGET_LANGUAGE=es
+
+TAREA: Crear estructura completa del proyecto con TODOS los archivos.
+
+ESTRUCTURA DE CARPETAS Y ARCHIVOS:
+
+/automation
+  /src
+    config.ts         → Leer variables de .env usando dotenv
+    newsAPI.ts        → Fetch noticias de NewsData.io API
+    scriptGen.ts      → Generar guiones con Gemini API
+    audioGen.ts       → Generar audio con ElevenLabs TTS (voz Adam)
+    dataContract.ts   → Crear data.json para Remotion
+    index.ts          → Orquestador principal
+  /utils
+    logger.ts         → Sistema de logs con colores
+    validators.ts     → Validar estructura de datos
+  package.json        → Dependencies: dotenv, @google/generative-ai, axios, typescript
+  tsconfig.json       → TypeScript config strict mode
+
+/remotion-app
+  /src
+    /components
+      /backgrounds
+        CyberpunkBG.tsx       → Fondo degradado animado
+        ParticleField.tsx     → Partículas flotantes
+      /effects
+        GlitchEffect.tsx      → Efecto glitch
+        NeonBorder.tsx        → Bordes neón animados
+      /sequences
+        GanchoExplosivo.tsx   → Intro 0-3s (logo + flash)
+        HeadlineImpacto.tsx   → Headline 3-8s
+        ContenidoPrincipal.tsx → Contenido 8-50s
+        SeccionImpacto.tsx    → Impacto 50-55s
+        OutroBranding.tsx     → Outro 55-60s
+      /ui
+        KaraokeSubtitles.tsx  → Subtítulos palabra por palabra
+        FloatingTags.tsx      → Tags flotantes (empresas)
+        DataOverlay.tsx       → Overlays de datos
+    Video.tsx         → Composición principal que une todo
+    Root.tsx          → Root de Remotion
+    data.json         → Ejemplo de estructura de datos
+  /public
+    /assets
+      /logo
+      /audio
+      /fonts
+  package.json        → Dependencies: remotion, react, tailwindcss, @remotion/noise
+  remotion.config.ts  → Config: 1080x1920, 30fps, H.264, 60s
+  tailwind.config.js  → Tailwind con colores Sintaxis IA
+
+/output
+  (carpeta vacía para videos renderizados)
+
+package.json (raíz)   → Scripts globales
+README.md             → Documentación del proyecto
+.gitignore            → Ignorar .env, node_modules, output, *.mp4
+
+CONFIGURACIONES CRÍTICAS:
+
+1. remotion.config.ts:
+   - width: 1080
+   - height: 1920
+   - fps: 30
+   - codec: "h264"
+   - durationInFrames: 1800 (60 segundos)
+
+2. Colores tema Sintaxis IA (para Tailwind y componentes):
+   cyan-primary: #00f0ff
+   magenta-primary: #ff0099
+   purple-mid: #cc00ff
+   bg-dark: #0a0a0f
+   accent-gold: #ffd700
+   accent-red: #ff3366
+
+3. Scripts en package.json raíz:
+   "fetch": "cd automation && npm run fetch"
+   "generate": "cd automation && npm run generate"
+   "dev": "cd remotion-app && npm run dev"
+   "render": "cd remotion-app && npm run render"
+
+4. config.ts debe exportar:
+   export const config = {
+     newsDataApiKey: process.env.NEWSDATA_API_KEY,
+     geminiApiKey: process.env.GEMINI_API_KEY,
+     elevenLabsApiKey: process.env.ELEVENLABS_API_KEY,
+     elevenLabsVoiceId: process.env.ELEVENLABS_VOICE_ID,
+     targetLanguage: process.env.TARGET_LANGUAGE
+   };
+
+5. data.json estructura de ejemplo:
+   {
+     "videoConfig": {
+       "title": "Sintaxis IA - 27 Ene 2025",
+       "themeColor": "#00f0ff",
+       "duration": 60
+     },
+     "newsItems": [{
+       "id": "news_01",
+       "headline": "OPENAI LANZÓ GPT-5 HOY",
+       "summary": "Script completo aquí...",
+       "imageUrl": "https://placeholder.com/1080x1920",
+       "audioPath": "./public/assets/audio/news_01.mp3",
+       "durationInFrames": 450,
+       "subtitles": [
+         {"word": "OpenAI", "startFrame": 0, "endFrame": 20}
+       ]
+     }]
+   }
+
+6. .gitignore si ya existe no cres otro, modificalo y debe incluir:
+   .env
+   node_modules/
+   output/
+   *.mp4
+   dist/
+   build/
+   .DS_Store
+
+INSTRUCCIONES DE IMPLEMENTACIÓN:
+- Crear TODOS los archivos mencionados
+- Incluir estructura básica funcional en cada archivo
+- Definir TypeScript interfaces completas
+- Agregar comments explicativos en español
+- Poner TODOs donde se necesite lógica compleja
+- Asegurar imports correctos entre archivos
+- No dejar ningún archivo vacío, todos con código base
+
+EMPEZAR AHORA. Crear la estructura completa del proyecto Sintaxis IA.

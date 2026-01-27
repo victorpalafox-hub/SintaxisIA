@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "lib": ["ES2020", "DOM"],
+    "jsx": "react-jsx",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@components/*": ["src/components/*"],
+      "@backgrounds/*": ["src/components/backgrounds/*"],
+      "@effects/*": ["src/components/effects/*"],
+      "@sequences/*": ["src/components/sequences/*"],
+      "@ui/*": ["src/components/ui/*"]
+    }
+  },
+  "include": ["src/**/*", "remotion.config.ts"],
+  "exclude": ["node_modules", "out"]
+}

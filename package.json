@@ -1,0 +1,33 @@
+{
+  "name": "sintaxis-ia",
+  "version": "1.0.0",
+  "description": "Generador automatizado de YouTube Shorts sobre noticias de IA",
+  "private": true,
+  "scripts": {
+    "fetch": "cd automation && npm run fetch",
+    "generate": "cd automation && npm run generate",
+    "dev": "cd remotion-app && npm run dev",
+    "render": "cd remotion-app && npm run render",
+    "render:preview": "cd remotion-app && npm run render:preview",
+    "render:lowres": "cd remotion-app && npm run render:lowres",
+    "install:all": "npm install && cd automation && npm install && cd ../remotion-app && npm install",
+    "clean": "rimraf output/*.mp4 remotion-app/out",
+    "validate": "cd automation && npm run validate",
+    "watch": "cd automation && npm run watch",
+    "check": "cd automation && npm run check && cd ../remotion-app && npx tsc --noEmit",
+    "build:all": "cd automation && npm run build && cd ../remotion-app && npm run build"
+  },
+  "keywords": [
+    "youtube",
+    "shorts",
+    "ai",
+    "automation",
+    "remotion",
+    "video-generation"
+  ],
+  "author": "Sintaxis IA",
+  "license": "MIT",
+  "devDependencies": {
+    "rimraf": "^6.0.1"
+  }
+}
