@@ -1,8 +1,8 @@
 /**
- * @fileoverview Ejemplos completos de uso del TestLogger
+ * @fileoverview Pruebas de validación del TestLogger (Prompt #5)
  *
- * Este archivo demuestra todas las capacidades del sistema de logging
- * para tests de Playwright. Incluye ejemplos de:
+ * Este archivo valida todas las funcionalidades del sistema de logging
+ * estructurado creado en el Prompt #5. Demuestra:
  *
  * - Logging de llamadas API (request/response)
  * - Logging de generación de video con progreso
@@ -13,12 +13,14 @@
  * Los tests usan simulaciones con delays para representar
  * operaciones reales sin hacer llamadas externas.
  *
+ * @file prompt5-testlogger-validation.spec.ts
  * @author Sintaxis IA
  * @version 1.0.0
+ * @see Prompt #5 - TestLogger Infrastructure
  *
  * @example
- * // Ejecutar todos los tests de ejemplo:
- * npx playwright test tests/specs/example.spec.ts
+ * // Ejecutar todos los tests de validación del TestLogger:
+ * npx playwright test tests/specs/prompt5-testlogger-validation.spec.ts
  *
  * // Ejecutar un test específico:
  * npx playwright test -g "debe registrar llamadas API"
@@ -32,12 +34,12 @@ import { TestLogger } from '../utils/TestLogger';
 // ===================================
 
 /**
- * Suite principal de ejemplos del TestLogger
+ * Suite de validación del TestLogger (Prompt #5)
  *
- * Contiene 4 tests que demuestran las diferentes
- * capacidades del sistema de logging.
+ * Contiene 4 tests que validan las diferentes
+ * capacidades del sistema de logging estructurado.
  */
-test.describe('TestLogger - Ejemplos de Uso', () => {
+test.describe('Prompt #5 - TestLogger Validation', () => {
   /** Instancia del logger para cada test */
   let logger: TestLogger;
 

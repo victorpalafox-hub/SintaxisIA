@@ -1,6 +1,6 @@
 # CLAUDE.md - Project Context & Working Memory
 
-**Last Updated:** 2026-01-27 18:22 CST
+**Last Updated:** 2026-01-27 18:37 CST
 
 **Auto-Update Status:** This file is automatically maintained by Claude Code
 
@@ -29,7 +29,8 @@
 **Prompt #5: TestLogger + Playwright Infrastructure**
 - Structured logging with Winston and test framework setup
 - Files: `tests/utils/TestLogger.ts`, `log-formatter.ts`, `tests/config/test-constants.ts`
-- Files: `tests/specs/example.spec.ts`, `playwright.config.ts`
+- Files: `playwright.config.ts`
+- Test File: `tests/specs/prompt5-testlogger-validation.spec.ts` (4 tests)
 - Features: Daily log rotation, API/Video/Validation logging, credential sanitization
 - Test Results: 4/4 passing
 - Scripts Added: test, test:ui, test:example, test:report, test:headed, test:debug
@@ -43,16 +44,18 @@
   - `tests/page-objects/services/VideoServiceObject.ts` - Video service wrapper (mock)
   - `tests/page-objects/index.ts` - Central exports
   - `tests/temp/.gitkeep` - Temp directory for videos
+  - `tests/specs/service-objects-demo.spec.ts` - Demo test suite (4 tests)
 - Features:
   - `BaseServiceObject`: executeWithTiming(), logInfo/Debug/Warn/Error(), formatDuration()
   - `GeminiServiceObject`: generateScript(), generateMultiple(), validateApiKey()
   - `VideoServiceObject`: generateVideo(), getMetadata(), validateTextContent(), validateAudioContent(), validateSync(), cleanup()
 - Mock implementations with realistic delays (1000-2000ms)
 - Comprehensive JSDoc on all public methods
+- Demo test suite validates all Service Objects
 - TypeScript compiles without errors
-- All tests passing (4/4)
+- All tests passing (8/8 total: 4 example + 4 demo)
 - Auto-review passing (8/8)
-- Status: Fully functional, ready for commit
+- Status: Fully functional, committed
 
 ---
 
@@ -122,7 +125,8 @@ sintaxis-ia/
 │   │   └── index.ts                  # Exports
 │   │
 │   ├── specs/
-│   │   ├── example.spec.ts           # Example tests (4 tests)
+│   │   ├── prompt5-testlogger-validation.spec.ts  # TestLogger validation (Prompt #5)
+│   │   ├── service-objects-demo.spec.ts           # Service Objects demo (Prompt #6)
 │   │   ├── api/                      # API tests (Prompt #7)
 │   │   ├── video/                    # Video tests (Prompt #8)
 │   │   ├── content/                  # Validation tests (Prompt #9)
@@ -193,7 +197,8 @@ const result = await gemini.generateScript('prompt');
 # Testing
 npm test                  # Run all tests
 npm run test:ui           # Playwright UI
-npm run test:example      # Run example suite
+npm run test:logger       # TestLogger validation (Prompt #5)
+npm run test:demo         # Service Objects demo (Prompt #6)
 npm run test:report       # View HTML report
 
 # Validation
@@ -296,10 +301,12 @@ After completing ANY significant action, update this file:
 ## GIT STATUS
 
 **Current Branch:** main
-**Last Commit:** `b32b676` - feat: Add Service Objects and CLAUDE.md for project context
+**Last Commit:** `8999e23` - chore: Update CLAUDE.md with current git status
 
 **Pending Changes:**
-- None (all changes committed)
+- `tests/specs/service-objects-demo.spec.ts` - Demo test suite (new)
+- `tests/specs/prompt5-testlogger-validation.spec.ts` - Renamed from example.spec.ts
+- `CLAUDE.md` - Updated references
 
 ---
 

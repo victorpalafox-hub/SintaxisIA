@@ -100,7 +100,7 @@ sintaxis-ia/
 │   │   └── base/
 │   │       └── BaseServiceObject.ts       # Base class for service objects
 │   ├── specs/
-│   │   ├── example.spec.ts                # Example test suite
+│   │   ├── prompt5-testlogger-validation.spec.ts  # TestLogger validation (Prompt #5)
 │   │   ├── api/                           # (Prompt #6 - Pending)
 │   │   ├── video/                         # (Prompt #7 - Pending)
 │   │   ├── content/                       # (Prompt #8 - Pending)
@@ -183,7 +183,8 @@ npm test
 |--------|-------------|
 | `npm test` | Run all Playwright tests |
 | `npm run test:ui` | Open Playwright UI mode (interactive) |
-| `npm run test:example` | Run example test suite only |
+| `npm run test:logger` | Run TestLogger validation tests (Prompt #5) |
+| `npm run test:demo` | Run Service Objects demo tests (Prompt #6) |
 | `npm run test:headed` | Run tests with visible browser |
 | `npm run test:debug` | Run tests in debug mode |
 | `npm run test:report` | Open HTML test report |
@@ -320,8 +321,9 @@ npm test
 # Run with UI (interactive mode)
 npm run test:ui
 
-# Run specific test file
-npm run test:example
+# Run specific test files
+npm run test:logger    # TestLogger validation (Prompt #5)
+npm run test:demo      # Service Objects demo (Prompt #6)
 
 # Run with visible browser
 npm run test:headed
