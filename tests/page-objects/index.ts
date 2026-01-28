@@ -108,6 +108,10 @@ export {
   AudioValidation,
   SyncValidation,
   SyncIssue,
+  ScriptData,
+  RenderOptions,
+  VideoRenderResult,
+  VideoFileValidation,
 } from './services/VideoServiceObject';
 
 // ============================================================================

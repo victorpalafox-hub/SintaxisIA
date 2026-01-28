@@ -23,4 +23,5 @@ export {
   MOCK_DELAYS,
   VALIDATION_THRESHOLDS,
   MOCK_VALIDATION_VALUES,
+  REMOTION_CONFIG,
 } from './service-constants';

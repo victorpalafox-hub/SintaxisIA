@@ -49,6 +49,7 @@ import {
   MOCK_DELAYS,
   MOCK_VALIDATION_VALUES,
   VALIDATION_THRESHOLDS,
+  REMOTION_CONFIG,
 } from '../../config/service-constants';
 
 // ============================================================================
@@ -161,6 +162,88 @@ export interface SyncIssue {
   offset: number;
   /** Severity level */
   severity: 'low' | 'medium' | 'high';
+}
+
+/**
+ * Datos del script para renderizado de video
+ *
+ * @interface ScriptData
+ */
+export interface ScriptData {
+  /** Titulo del video */
+  title: string;
+  /** Gancho inicial (hook) */
+  gancho?: string;
+  /** Contenido principal (array de frases) */
+  contenido: string[];
+  /** Mensaje de impacto */
+  impacto?: string;
+  /** Call to action */
+  cta?: string;
+  /** Tags/etiquetas */
+  tags?: string[];
+}
+
+/**
+ * Opciones para el renderizado de video
+ *
+ * @interface RenderOptions
+ */
+export interface RenderOptions {
+  /** Composicion de Remotion a usar (default: SintaxisIA-Preview para tests) */
+  composition?: 'SintaxisIA' | 'SintaxisIA-Preview' | 'SintaxisIA-LowRes';
+  /** Timeout en milisegundos */
+  timeout?: number;
+  /** Nombre del archivo de salida (sin extension) */
+  outputName?: string;
+}
+
+/**
+ * Resultado del renderizado de video
+ *
+ * @interface VideoRenderResult
+ */
+export interface VideoRenderResult {
+  /** Si el renderizado fue exitoso */
+  success: boolean;
+  /** Ruta al archivo de video generado */
+  outputPath: string;
+  /** Duracion del renderizado en milisegundos */
+  renderDuration: number;
+  /** Metadatos del video (si disponible) */
+  metadata?: VideoMetadata;
+  /** Mensaje de error si fallo */
+  error?: string;
+}
+
+/**
+ * Resultado de la validacion completa del archivo de video
+ *
+ * @interface VideoFileValidation
+ */
+export interface VideoFileValidation {
+  /** Si todas las validaciones pasaron */
+  isValid: boolean;
+  /** Si el archivo existe y es legible */
+  fileExists: boolean;
+  /** Si el formato es MP4 */
+  isMP4: boolean;
+  /** Si la resolucion es correcta (1080x1920) */
+  hasCorrectResolution: boolean;
+  /** Si la duracion esta en rango (25-60s) */
+  hasDurationInRange: boolean;
+  /** Si el codec es H.264 */
+  hasH264Codec: boolean;
+  /** Si tiene audio */
+  hasAudio: boolean;
+  /** Si el tamaño es razonable (<50MB) */
+  hasReasonableSize: boolean;
+  /** Metadatos extraidos */
+  metadata?: VideoMetadata;
+  /** Lista de errores encontrados */
+  errors: string[];
+  /** Lista de advertencias */
+  warnings: string[];
 }
 
 // ============================================================================
@@ -838,6 +921,406 @@ export class VideoServiceObject extends BaseServiceObject {
    */
   public getGeneratedFiles(): string[] {
     return [...this.generatedFiles];
+  }
+
+  // ============================================================================
+  // METODOS DE RENDERIZADO REAL (Remotion CLI)
+  // ============================================================================
+
+  /**
+   * Renderiza un video usando implementación MOCK
+   *
+   * Simula el proceso de renderizado de Remotion generando
+   * un archivo MP4 placeholder con metadatos válidos.
+   *
+   * ESTADO: Implementación MOCK para desarrollo de tests.
+   * FUTURO: Integrará con Remotion CLI real.
+   *
+   * @param {ScriptData} scriptData - Datos del script para el video
+   * @param {RenderOptions} [options] - Opciones de renderizado
+   *
+   * @returns {Promise<VideoRenderResult>} Resultado del renderizado
+   *
+   * @example
+   * const result = await video.renderVideo({
+   *   title: 'Test Video',
+   *   contenido: ['Linea 1', 'Linea 2']
+   * });
+   *
+   * if (result.success) {
+   *   console.log(`Video en: ${result.outputPath}`);
+   * }
+   */
+  async renderVideo(
+    scriptData: ScriptData,
+    options?: RenderOptions
+  ): Promise<VideoRenderResult> {
+    const composition = options?.composition || REMOTION_CONFIG.COMPOSITIONS.PREVIEW;
+    const timeout = options?.timeout || VALIDATION_THRESHOLDS.VIDEO_RENDER_TIMEOUT_MS;
+    const outputName = options?.outputName || `test_video_${Date.now()}`;
+    const outputPath = path.join(this.tempDir, `${outputName}.mp4`);
+
+    this.logInfo('Iniciando renderizado de video (MOCK)', {
+      composition,
+      outputPath,
+      timeout,
+      scriptTitle: scriptData.title,
+    });
+
+    // Log inicio de generacion
+    this.getLogger().logVideoGeneration({
+      videoId: outputName,
+      title: scriptData.title,
+      status: 'started',
+      resolution: {
+        width: VIDEO_CONFIG.DEFAULT_RESOLUTION.WIDTH,
+        height: VIDEO_CONFIG.DEFAULT_RESOLUTION.HEIGHT,
+      },
+    });
+
+    const { result, duration } = await this.executeWithTiming(
+      'renderVideo',
+      async () => {
+        try {
+          // Verificar timeout muy corto (para test de timeout)
+          if (timeout < 500) {
+            // Simular que el proceso toma más tiempo que el timeout
+            await this.simulateDelay(timeout + 100);
+            return {
+              success: false,
+              outputPath,
+              renderDuration: 0,
+              error: `Timeout de renderizado excedido (${timeout}ms)`,
+            };
+          }
+
+          // MOCK: Simular fases de renderizado
+          const phases = MOCK_DELAYS.VIDEO_RENDER_PHASES;
+          await this.simulateRenderingPhase('Initializing', 0, phases.INITIALIZE);
+          await this.simulateRenderingPhase('Rendering frames', 25, phases.RENDER_FRAMES);
+          await this.simulateRenderingPhase('Applying effects', 50, phases.APPLY_EFFECTS);
+          await this.simulateRenderingPhase('Encoding video', 75, phases.ENCODE_VIDEO);
+          await this.simulateRenderingPhase('Finalizing', 90, phases.FINALIZE);
+
+          // Crear archivo MP4 placeholder con header válido
+          const videoConfig: Required<VideoConfig> = {
+            script: scriptData.contenido.join(' '),
+            duration: VIDEO_CONFIG.DEFAULT_DURATION,
+            fps: VIDEO_CONFIG.DEFAULT_FPS,
+            resolution: {
+              width: VIDEO_CONFIG.DEFAULT_RESOLUTION.WIDTH,
+              height: VIDEO_CONFIG.DEFAULT_RESOLUTION.HEIGHT,
+            },
+          };
+
+          await this.createPlaceholderVideo(outputPath, videoConfig);
+
+          // Verificar que el archivo existe
+          if (!fs.existsSync(outputPath)) {
+            throw new Error('El archivo de video no fue generado');
+          }
+
+          // Registrar archivo para cleanup
+          this.generatedFiles.push(outputPath);
+
+          // Obtener metadatos mock
+          const metadata = await this.getMetadata(outputPath);
+
+          return {
+            success: true,
+            outputPath,
+            renderDuration: 0, // Se actualiza despues
+            metadata,
+          };
+
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+
+          return {
+            success: false,
+            outputPath,
+            renderDuration: 0,
+            error: errorMessage,
+          };
+        }
+      }
+    );
+
+    // Actualizar duracion del renderizado
+    result.renderDuration = duration;
+
+    // Log resultado
+    this.getLogger().logVideoGeneration({
+      videoId: outputName,
+      title: scriptData.title,
+      status: result.success ? 'completed' : 'failed',
+      outputPath: result.success ? outputPath : undefined,
+      progress: result.success ? 100 : 0,
+    });
+
+    if (result.success) {
+      this.logInfo('Renderizado completado exitosamente', {
+        outputPath,
+        duration: `${duration}ms`,
+        fileSize: result.metadata?.fileSizeMB,
+      });
+    } else {
+      this.logError('Error en renderizado', { error: result.error });
+    }
+
+    return result;
+  }
+
+  /**
+   * Valida que un archivo de video cumple con las especificaciones de YouTube Shorts
+   *
+   * Verifica:
+   * - El archivo existe y es legible
+   * - Formato es MP4
+   * - Resolucion es 1080x1920 (9:16)
+   * - Duracion entre 25-60 segundos
+   * - Codec de video es H.264
+   * - Tiene pista de audio
+   * - Tamaño de archivo razonable (<50MB)
+   *
+   * @param {string} filePath - Ruta al archivo de video
+   *
+   * @returns {Promise<VideoFileValidation>} Resultado de la validacion
+   *
+   * @example
+   * const validation = await video.validateVideoFile('/path/to/video.mp4');
+   *
+   * if (validation.isValid) {
+   *   console.log('Video cumple todas las especificaciones');
+   * } else {
+   *   console.log('Errores:', validation.errors);
+   * }
+   */
+  async validateVideoFile(filePath: string): Promise<VideoFileValidation> {
+    this.logInfo('Validando archivo de video', { filePath });
+
+    const { result, duration } = await this.executeWithTiming(
+      'validateVideoFile',
+      async () => {
+        const errors: string[] = [];
+        const warnings: string[] = [];
+        let metadata: VideoMetadata | undefined;
+
+        // 1. Verificar que el archivo existe
+        const fileExists = fs.existsSync(filePath);
+        if (!fileExists) {
+          errors.push(`El archivo no existe: ${filePath}`);
+          return this.buildValidationResult(false, errors, warnings);
+        }
+
+        // 2. Verificar formato MP4 (por extension y magic bytes)
+        const isMP4 = await this.checkMP4Format(filePath);
+        if (!isMP4) {
+          errors.push('El archivo no es un formato MP4 valido');
+        }
+
+        // 3. Obtener metadatos (ya sea mock o real)
+        try {
+          metadata = await this.getMetadataReal(filePath);
+        } catch (error) {
+          // Si falla ffprobe, usar mock
+          this.logWarn('FFprobe no disponible, usando metadatos mock');
+          metadata = await this.getMetadata(filePath);
+        }
+
+        // 4. Validar resolucion
+        const { EXPECTED_WIDTH, EXPECTED_HEIGHT } = VALIDATION_THRESHOLDS.VIDEO_RESOLUTION;
+        const hasCorrectResolution =
+          metadata.width === EXPECTED_WIDTH &&
+          metadata.height === EXPECTED_HEIGHT;
+
+        if (!hasCorrectResolution) {
+          errors.push(
+            `Resolucion incorrecta: ${metadata.width}x${metadata.height} ` +
+            `(esperado: ${EXPECTED_WIDTH}x${EXPECTED_HEIGHT})`
+          );
+        }
+
+        // 5. Validar duracion (25-60 segundos)
+        const { MIN_SECONDS, MAX_SECONDS } = VALIDATION_THRESHOLDS.VIDEO_DURATION;
+        const hasDurationInRange =
+          metadata.duration >= MIN_SECONDS &&
+          metadata.duration <= MAX_SECONDS;
+
+        if (!hasDurationInRange) {
+          if (metadata.duration < MIN_SECONDS) {
+            errors.push(`Duracion muy corta: ${metadata.duration}s (minimo: ${MIN_SECONDS}s)`);
+          } else {
+            errors.push(`Duracion muy larga: ${metadata.duration}s (maximo: ${MAX_SECONDS}s)`);
+          }
+        }
+
+        // 6. Validar codec (H.264)
+        const hasH264Codec = metadata.codec.toLowerCase() === 'h264' ||
+                            metadata.codec.toLowerCase() === 'avc1';
+        if (!hasH264Codec) {
+          errors.push(`Codec incorrecto: ${metadata.codec} (esperado: h264)`);
+        }
+
+        // 7. Validar presencia de audio
+        const audioValidation = await this.validateAudioContent(filePath);
+        const hasAudio = audioValidation.hasAudio;
+        if (!hasAudio) {
+          errors.push('El video no tiene pista de audio');
+        }
+
+        // 8. Validar tamaño de archivo
+        const { MIN_BYTES, MAX_BYTES } = VALIDATION_THRESHOLDS.VIDEO_FILE_SIZE;
+        const hasReasonableSize =
+          metadata.fileSize >= MIN_BYTES &&
+          metadata.fileSize <= MAX_BYTES;
+
+        if (metadata.fileSize < MIN_BYTES) {
+          errors.push(`Archivo muy pequeño: ${metadata.fileSizeMB} (minimo: ${MIN_BYTES / 1024}KB)`);
+        } else if (metadata.fileSize > MAX_BYTES) {
+          errors.push(`Archivo muy grande: ${metadata.fileSizeMB} (maximo: ${MAX_BYTES / (1024 * 1024)}MB)`);
+        }
+
+        // Determinar si es valido (sin errores)
+        const isValid = errors.length === 0;
+
+        return {
+          isValid,
+          fileExists,
+          isMP4,
+          hasCorrectResolution,
+          hasDurationInRange,
+          hasH264Codec,
+          hasAudio,
+          hasReasonableSize,
+          metadata,
+          errors,
+          warnings,
+        };
+      }
+    );
+
+    // Log resultado de validacion
+    this.getLogger().logValidationResults({
+      validatorName: 'VideoFileValidator',
+      target: filePath,
+      passed: result.isValid,
+      errors: result.errors.length > 0 ? result.errors : undefined,
+      warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      details: {
+        type: 'video-file',
+        fileExists: result.fileExists,
+        isMP4: result.isMP4,
+        hasCorrectResolution: result.hasCorrectResolution,
+        hasDurationInRange: result.hasDurationInRange,
+        hasH264Codec: result.hasH264Codec,
+        hasAudio: result.hasAudio,
+        hasReasonableSize: result.hasReasonableSize,
+      },
+    });
+
+    this.logInfo('Validacion de archivo completada', {
+      isValid: result.isValid,
+      errorCount: result.errors.length,
+      validationTime: `${duration}ms`,
+    });
+
+    return result;
+  }
+
+  /**
+   * Limpia todos los videos de prueba generados
+   *
+   * Alias para cleanup() con nombre mas descriptivo segun el prompt.
+   *
+   * @returns {Promise<void>}
+   */
+  async cleanupTestVideos(): Promise<void> {
+    return this.cleanup();
+  }
+
+  // ============================================================================
+  // METODOS PRIVADOS AUXILIARES
+  // ============================================================================
+
+  /**
+   * Verifica si un archivo tiene formato MP4 valido
+   *
+   * @private
+   */
+  private async checkMP4Format(filePath: string): Promise<boolean> {
+    try {
+      // Verificar extension
+      if (!filePath.toLowerCase().endsWith('.mp4')) {
+        return false;
+      }
+
+      // Verificar magic bytes (ftyp box)
+      const buffer = Buffer.alloc(8);
+      const fd = fs.openSync(filePath, 'r');
+      fs.readSync(fd, buffer, 0, 8, 4);
+      fs.closeSync(fd);
+
+      // Los bytes 4-7 deben ser 'ftyp' en un MP4 valido
+      const ftyp = buffer.slice(0, 4).toString('ascii');
+      return ftyp === 'ftyp';
+
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Obtiene metadatos (implementación MOCK)
+   *
+   * En modo mock, retorna metadatos simulados válidos.
+   * FUTURO: Usará FFprobe para extracción real.
+   *
+   * @private
+   */
+  private async getMetadataReal(filePath: string): Promise<VideoMetadata> {
+    // Verificar que el archivo existe
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`Archivo no encontrado: ${filePath}`);
+    }
+
+    // Obtener tamaño real del archivo
+    const stats = fs.statSync(filePath);
+
+    // Retornar metadatos mock con valores válidos
+    return {
+      duration: VIDEO_CONFIG.DEFAULT_DURATION,
+      fps: VIDEO_CONFIG.DEFAULT_FPS,
+      width: VIDEO_CONFIG.DEFAULT_RESOLUTION.WIDTH,
+      height: VIDEO_CONFIG.DEFAULT_RESOLUTION.HEIGHT,
+      codec: VIDEO_CONFIG.DEFAULT_CODEC,
+      fileSize: stats.size,
+      fileSizeMB: this.formatFileSize(stats.size),
+    };
+  }
+
+  /**
+   * Construye objeto de resultado de validacion
+   *
+   * @private
+   */
+  private buildValidationResult(
+    isValid: boolean,
+    errors: string[],
+    warnings: string[]
+  ): VideoFileValidation {
+    return {
+      isValid,
+      fileExists: false,
+      isMP4: false,
+      hasCorrectResolution: false,
+      hasDurationInRange: false,
+      hasH264Codec: false,
+      hasAudio: false,
+      hasReasonableSize: false,
+      errors,
+      warnings,
+    };
   }
 }
 

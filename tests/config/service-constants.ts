@@ -101,6 +101,60 @@ export const VALIDATION_THRESHOLDS = {
 
   /** Longitud minima de API key valida */
   MIN_API_KEY_LENGTH: 10,
+
+  /** Validacion de video - duracion */
+  VIDEO_DURATION: {
+    /** Duracion minima para YouTube Shorts (segundos) */
+    MIN_SECONDS: 25,
+    /** Duracion maxima para YouTube Shorts (segundos) */
+    MAX_SECONDS: 60,
+  },
+
+  /** Validacion de video - tamaño de archivo */
+  VIDEO_FILE_SIZE: {
+    /** Tamaño minimo esperado en bytes (100KB) */
+    MIN_BYTES: 100 * 1024,
+    /** Tamaño maximo permitido en bytes (50MB) */
+    MAX_BYTES: 50 * 1024 * 1024,
+  },
+
+  /** Validacion de video - resolucion */
+  VIDEO_RESOLUTION: {
+    /** Ancho esperado para Shorts (9:16) */
+    EXPECTED_WIDTH: 1080,
+    /** Alto esperado para Shorts (9:16) */
+    EXPECTED_HEIGHT: 1920,
+  },
+
+  /** Timeout para renderizado de video en milisegundos (2 minutos) */
+  VIDEO_RENDER_TIMEOUT_MS: 120000,
+} as const;
+
+/**
+ * Configuracion de comandos de Remotion
+ */
+export const REMOTION_CONFIG = {
+  /** Directorio del proyecto Remotion */
+  PROJECT_DIR: 'remotion-app',
+
+  /** Composiciones disponibles */
+  COMPOSITIONS: {
+    /** Video completo de 60 segundos */
+    FULL: 'SintaxisIA',
+    /** Preview de 10 segundos */
+    PREVIEW: 'SintaxisIA-Preview',
+    /** Baja resolucion para tests rapidos */
+    LOW_RES: 'SintaxisIA-LowRes',
+  },
+
+  /** Directorio de salida por defecto */
+  OUTPUT_DIR: 'out',
+
+  /** Codec de video por defecto */
+  DEFAULT_CODEC: 'h264',
+
+  /** Formato de audio por defecto */
+  DEFAULT_AUDIO_CODEC: 'aac',
 } as const;
 
 /**
@@ -124,4 +178,5 @@ export default {
   MOCK_DELAYS,
   VALIDATION_THRESHOLDS,
   MOCK_VALIDATION_VALUES,
+  REMOTION_CONFIG,
 };
