@@ -39,6 +39,11 @@
  */
 
 import { BaseServiceObject } from '../base/BaseServiceObject';
+import {
+  GEMINI_CONFIG,
+  MOCK_DELAYS,
+  VALIDATION_THRESHOLDS,
+} from '../../config/service-constants';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -256,14 +261,14 @@ export class GeminiServiceObject extends BaseServiceObject {
     // Load configuration from environment or use defaults
     // In production, these would come from AppConfig
     this.apiKey = process.env.GEMINI_API_KEY || 'mock-api-key';
-    this.baseUrl = 'https://generativelanguage.googleapis.com/v1';
-    this.modelName = 'gemini-pro';
+    this.baseUrl = GEMINI_CONFIG.BASE_URL;
+    this.modelName = GEMINI_CONFIG.DEFAULT_MODEL;
 
     // Set default generation options
     this.defaultOptions = {
-      maxTokens: 500,
-      temperature: 0.7,
-      topP: 0.9,
+      maxTokens: GEMINI_CONFIG.DEFAULT_OPTIONS.MAX_TOKENS,
+      temperature: GEMINI_CONFIG.DEFAULT_OPTIONS.TEMPERATURE,
+      topP: GEMINI_CONFIG.DEFAULT_OPTIONS.TOP_P,
     };
 
     this.logInfo('GeminiServiceObject initialized', {
@@ -346,8 +351,9 @@ export class GeminiServiceObject extends BaseServiceObject {
       'generateScript',
       async () => {
         // MOCK IMPLEMENTATION
-        // Simulate network latency (1000-2000ms)
-        const simulatedDelay = 1000 + Math.random() * 1000;
+        // Simulate network latency using configured delay range
+        const delayRange = MOCK_DELAYS.GEMINI_API.MAX - MOCK_DELAYS.GEMINI_API.MIN;
+        const simulatedDelay = MOCK_DELAYS.GEMINI_API.MIN + Math.random() * delayRange;
         await this.simulateDelay(simulatedDelay);
 
         // Generate mock response
@@ -462,12 +468,12 @@ export class GeminiServiceObject extends BaseServiceObject {
         async () => {
           // MOCK IMPLEMENTATION
           // Simulate validation delay
-          await this.simulateDelay(500);
+          await this.simulateDelay(MOCK_DELAYS.API_KEY_VALIDATION);
 
           // In mock mode, check if key looks valid (not empty/default)
           const isValid = this.apiKey !== '' &&
                          this.apiKey !== 'mock-api-key' &&
-                         this.apiKey.length > 10;
+                         this.apiKey.length > VALIDATION_THRESHOLDS.MIN_API_KEY_LENGTH;
 
           // For testing purposes, also accept mock key
           return isValid || this.apiKey === 'mock-api-key';
@@ -564,9 +570,9 @@ export class GeminiServiceObject extends BaseServiceObject {
     const script = MOCK_SCRIPTS[scriptIndex];
 
     // Generate realistic token counts
-    // Rough estimate: ~4 chars per token
-    const promptTokens = Math.ceil(prompt.length / 4);
-    const completionTokens = Math.ceil(script.length / 4);
+    // Rough estimate based on configured chars per token
+    const promptTokens = Math.ceil(prompt.length / GEMINI_CONFIG.CHARS_PER_TOKEN_ESTIMATE);
+    const completionTokens = Math.ceil(script.length / GEMINI_CONFIG.CHARS_PER_TOKEN_ESTIMATE);
 
     return {
       candidates: [
@@ -583,17 +589,6 @@ export class GeminiServiceObject extends BaseServiceObject {
         totalTokenCount: promptTokens + completionTokens,
       },
     };
-  }
-
-  /**
-   * Simulates network delay for mock implementation
-   *
-   * @private
-   * @param {number} ms - Delay in milliseconds
-   * @returns {Promise<void>} Resolves after delay
-   */
-  private simulateDelay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   /**

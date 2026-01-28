@@ -1,0 +1,127 @@
+// ===================================
+// SERVICE CONSTANTS
+// Constantes de configuracion para Service Objects
+// Centraliza magic numbers y valores hardcodeados
+// ===================================
+
+/**
+ * Configuracion de la API de Gemini
+ */
+export const GEMINI_CONFIG = {
+  /** URL base de la API de Gemini */
+  BASE_URL: 'https://generativelanguage.googleapis.com/v1',
+
+  /** Modelo por defecto */
+  DEFAULT_MODEL: 'gemini-pro',
+
+  /** Opciones de generacion por defecto */
+  DEFAULT_OPTIONS: {
+    /** Maximo de tokens en la respuesta */
+    MAX_TOKENS: 500,
+    /** Temperatura para creatividad (0.0-1.0) */
+    TEMPERATURE: 0.7,
+    /** Top-p para seleccion de tokens */
+    TOP_P: 0.9,
+  },
+
+  /** Estimacion de caracteres por token para calculos de uso */
+  CHARS_PER_TOKEN_ESTIMATE: 4,
+} as const;
+
+/**
+ * Configuracion de video por defecto
+ */
+export const VIDEO_CONFIG = {
+  /** Resolucion por defecto (formato vertical YouTube Shorts) */
+  DEFAULT_RESOLUTION: {
+    WIDTH: 1080,
+    HEIGHT: 1920,
+  },
+
+  /** FPS por defecto */
+  DEFAULT_FPS: 30,
+
+  /** Duracion por defecto en segundos */
+  DEFAULT_DURATION: 30,
+
+  /** Bitrate estimado en bits por segundo (5 Mbps) */
+  ESTIMATED_BITRATE_BPS: 5 * 1024 * 1024,
+
+  /** Codec por defecto */
+  DEFAULT_CODEC: 'h264',
+} as const;
+
+/**
+ * Delays simulados para mock implementations (en milisegundos)
+ * Usados para simular tiempos de respuesta realistas en tests
+ */
+export const MOCK_DELAYS = {
+  /** Rango de delay para API de Gemini (min-max) */
+  GEMINI_API: {
+    MIN: 1000,
+    MAX: 2000,
+  },
+
+  /** Delay para validacion de API key */
+  API_KEY_VALIDATION: 500,
+
+  /** Delays por fase de renderizado de video */
+  VIDEO_RENDER_PHASES: {
+    INITIALIZE: 500,
+    RENDER_FRAMES: 800,
+    APPLY_EFFECTS: 600,
+    ENCODE_VIDEO: 700,
+    FINALIZE: 400,
+  },
+
+  /** Delay para extraccion de metadata (FFprobe simulado) */
+  METADATA_EXTRACTION: 300,
+
+  /** Delay base para validacion OCR */
+  OCR_VALIDATION_BASE: 500,
+  /** Delay adicional por texto esperado en OCR */
+  OCR_VALIDATION_PER_TEXT: 100,
+
+  /** Delay para validacion de audio (STT) */
+  AUDIO_VALIDATION: 800,
+
+  /** Delay para validacion de sincronizacion */
+  SYNC_VALIDATION: 1000,
+} as const;
+
+/**
+ * Umbrales de validacion
+ */
+export const VALIDATION_THRESHOLDS = {
+  /** Umbral de sincronizacion en milisegundos */
+  SYNC_OFFSET_MS: 100,
+
+  /** Longitud minima de script esperada */
+  MIN_SCRIPT_LENGTH: 50,
+
+  /** Longitud minima de API key valida */
+  MIN_API_KEY_LENGTH: 10,
+} as const;
+
+/**
+ * Valores mock para validaciones
+ */
+export const MOCK_VALIDATION_VALUES = {
+  /** Offset maximo simulado en sync */
+  MAX_SYNC_OFFSET: 45,
+  /** Offset promedio simulado en sync */
+  AVG_SYNC_OFFSET: 18,
+
+  /** Duracion de audio simulada */
+  AUDIO_DURATION: 30,
+  /** Transcripcion mock */
+  AUDIO_TRANSCRIPTION: 'La inteligencia artificial esta transformando el mundo...',
+} as const;
+
+export default {
+  GEMINI_CONFIG,
+  VIDEO_CONFIG,
+  MOCK_DELAYS,
+  VALIDATION_THRESHOLDS,
+  MOCK_VALIDATION_VALUES,
+};

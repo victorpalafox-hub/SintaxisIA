@@ -88,23 +88,25 @@ sintaxis-ia/
 ├── tests/                                 # Test suite (Service Object Pattern)
 │   ├── config/
 │   │   ├── test-constants.ts              # Test configuration constants
+│   │   ├── service-constants.ts           # Centralized magic numbers & config
 │   │   └── index.ts
 │   ├── utils/
 │   │   ├── TestLogger.ts                  # Test logging utility
 │   │   ├── log-formatter.ts               # Winston formatters
 │   │   └── index.ts
-│   ├── page-objects/                      # (Prompt #6 - Pending)
+│   ├── page-objects/
 │   │   ├── services/
 │   │   │   ├── GeminiServiceObject.ts     # Gemini API test wrapper
 │   │   │   └── VideoServiceObject.ts      # Video generation test wrapper
 │   │   └── base/
-│   │       └── BaseServiceObject.ts       # Base class for service objects
+│   │       └── BaseServiceObject.ts       # Base class with logging/timing
 │   ├── specs/
-│   │   ├── prompt5-testlogger-validation.spec.ts  # TestLogger validation (Prompt #5)
-│   │   ├── api/                           # (Prompt #6 - Pending)
-│   │   ├── video/                         # (Prompt #7 - Pending)
-│   │   ├── content/                       # (Prompt #8 - Pending)
-│   │   └── e2e/                           # (Prompt #9 - Pending)
+│   │   ├── prompt5-testlogger-validation.spec.ts  # TestLogger validation
+│   │   ├── service-objects-demo.spec.ts   # Service Objects demo
+│   │   ├── api/                           # API tests (Prompt #7)
+│   │   ├── video/                         # Video tests (Prompt #8)
+│   │   ├── content/                       # Content validation (Prompt #9)
+│   │   └── e2e/                           # E2E tests (Prompt #9)
 │   ├── logs/                              # Test execution logs (gitignored)
 │   └── reports/                           # HTML test reports (gitignored)
 │
@@ -299,9 +301,11 @@ Test architecture following Service Object Pattern (POM adapted for APIs):
 
 ```
 tests/
+├── config/
+│   └── service-constants.ts        # Centralized config (GEMINI_CONFIG, VIDEO_CONFIG, MOCK_DELAYS)
 ├── page-objects/
 │   ├── base/
-│   │   └── BaseServiceObject.ts    # Common functionality
+│   │   └── BaseServiceObject.ts    # Common: executeWithTiming, simulateDelay, logging
 │   └── services/
 │       ├── GeminiServiceObject.ts  # Gemini API wrapper
 │       └── VideoServiceObject.ts   # Video generation wrapper
@@ -310,6 +314,15 @@ tests/
     ├── video/                      # Video generation tests
     ├── content/                    # Content validation tests
     └── e2e/                        # End-to-end tests
+```
+
+**Usage:**
+```typescript
+import { GeminiServiceObject } from './page-objects';
+import { GEMINI_CONFIG, MOCK_DELAYS } from './config';
+
+const gemini = new GeminiServiceObject();
+const result = await gemini.generateScript('prompt');
 ```
 
 ### Running Tests
@@ -339,7 +352,7 @@ npm run test:report
 
 ## Implementation Status
 
-### Completed (Prompts #4-5)
+### Completed (Prompts #4-6)
 
 | Feature | Status | Description |
 |---------|--------|-------------|
@@ -347,12 +360,14 @@ npm run test:report
 | AppConfig | ✅ Done | Type-safe configuration access |
 | TestLogger | ✅ Done | Structured logging with Winston |
 | Playwright Setup | ✅ Done | Test framework configuration |
-| Example Tests | ✅ Done | 4 tests demonstrating all features |
+| Service Objects | ✅ Done | BaseServiceObject, GeminiServiceObject, VideoServiceObject |
+| Service Constants | ✅ Done | Centralized magic numbers and config values |
 
 **EnvironmentManager Features:**
 - Cascading config: `.env` → `.env.local` → `.env.[env]` → `.env.[env].local`
 - Built-in validators: `isNotEmpty`, `isUrl`, `isEmail`, `isPort`, etc.
 - Environment helpers: `isDevelopment()`, `isStaging()`, `isProduction()`
+- `getSummary()` method for testable config output
 
 **TestLogger Features:**
 - Log levels: debug, info, warn, error
@@ -360,13 +375,20 @@ npm run test:report
 - Automatic credential sanitization
 - Duration formatting and tracking
 
-### Pending (Prompts #6-9)
+**Service Objects Features:**
+- `BaseServiceObject`: Parent class with `executeWithTiming()`, `simulateDelay()`, logging methods
+- `GeminiServiceObject`: Gemini API wrapper with `generateScript()`, `generateMultiple()`, `validateApiKey()`
+- `VideoServiceObject`: Video generation with metadata extraction and content validation
+- All magic numbers centralized in `service-constants.ts`
+- Type-safe: `Record<string, unknown>` instead of `any`
+
+### Pending (Prompts #7-9)
 
 | Feature | Status | Description |
 |---------|--------|-------------|
-| Service Objects | ⏳ Prompt #6 | BaseServiceObject, GeminiServiceObject, VideoServiceObject |
-| Video Tests | ⏳ Prompt #7 | Rendering validation, metadata verification |
-| Content Tests | ⏳ Prompt #8 | OCR validation, STT audio checks, sync testing |
+| Real Gemini API | ⏳ Prompt #7 | Replace mocks with actual API calls |
+| Video Tests | ⏳ Prompt #8 | Rendering validation, metadata verification |
+| Content Tests | ⏳ Prompt #9 | OCR validation, STT audio checks, sync testing |
 | E2E Tests | ⏳ Prompt #9 | Complete pipeline: Prompt → Gemini → Video → Validation |
 
 ---

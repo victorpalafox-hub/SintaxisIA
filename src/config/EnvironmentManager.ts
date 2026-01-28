@@ -507,20 +507,40 @@ export class EnvironmentManager {
   }
 
   /**
-   * Imprime un resumen de la configuración (ocultando valores sensibles)
+   * Genera un resumen de la configuracion (ocultando valores sensibles)
+   *
+   * @param sensitiveKeys - Lista de substrings que indican claves sensibles
+   * @returns Resumen formateado como string
    */
-  public printSummary(sensitiveKeys: string[] = ['KEY', 'SECRET', 'PASSWORD', 'TOKEN']): void {
-    console.log(`\n=== Configuración de Entorno ===`);
-    console.log(`Entorno: ${this.environment}`);
-    console.log(`Variables cargadas: ${this.variables.size}`);
-    console.log(`\nVariables:`);
+  public getSummary(sensitiveKeys: string[] = ['KEY', 'SECRET', 'PASSWORD', 'TOKEN']): string {
+    const lines: string[] = [];
+    lines.push('');
+    lines.push('=== Configuracion de Entorno ===');
+    lines.push(`Entorno: ${this.environment}`);
+    lines.push(`Variables cargadas: ${this.variables.size}`);
+    lines.push('');
+    lines.push('Variables:');
 
     for (const [key, value] of this.variables.entries()) {
       const isSensitive = sensitiveKeys.some(s => key.toUpperCase().includes(s));
       const displayValue = isSensitive ? '********' : value;
-      console.log(`  ${key}: ${displayValue}`);
+      lines.push(`  ${key}: ${displayValue}`);
     }
-    console.log(`================================\n`);
+    lines.push('================================');
+    lines.push('');
+
+    return lines.join('\n');
+  }
+
+  /**
+   * Imprime un resumen de la configuracion a la consola
+   *
+   * @deprecated Usar getSummary() y manejar la salida externamente
+   * @param sensitiveKeys - Lista de substrings que indican claves sensibles
+   */
+  public printSummary(sensitiveKeys: string[] = ['KEY', 'SECRET', 'PASSWORD', 'TOKEN']): void {
+    // eslint-disable-next-line no-console
+    console.log(this.getSummary(sensitiveKeys));
   }
 }
 

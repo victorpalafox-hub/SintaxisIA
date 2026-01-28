@@ -236,7 +236,7 @@ export abstract class BaseServiceObject {
    * successful completions, and status updates.
    *
    * @param {string} message - The message to log
-   * @param {any} [context] - Optional context object with additional data
+   * @param {Record<string, unknown>} [context] - Optional context object with additional data
    *   Will be included in structured logs for debugging
    *
    * @example
@@ -248,7 +248,7 @@ export abstract class BaseServiceObject {
    *   itemCount: 50
    * });
    */
-  protected logInfo(message: string, context?: any): void {
+  protected logInfo(message: string, context?: Record<string, unknown>): void {
     this.logger.info(`[${this.serviceName}] ${message}`, context);
   }
 
@@ -260,7 +260,7 @@ export abstract class BaseServiceObject {
    * in production environments.
    *
    * @param {string} message - The debug message to log
-   * @param {any} [context] - Optional context object with additional data
+   * @param {Record<string, unknown>} [context] - Optional context object with additional data
    *
    * @example
    * this.logDebug('Request payload constructed', { payload });
@@ -268,7 +268,7 @@ export abstract class BaseServiceObject {
    * @example
    * this.logDebug(`Cache hit for key: ${cacheKey}`);
    */
-  protected logDebug(message: string, context?: any): void {
+  protected logDebug(message: string, context?: Record<string, unknown>): void {
     this.logger.debug(`[${this.serviceName}] ${message}`, context);
   }
 
@@ -283,7 +283,7 @@ export abstract class BaseServiceObject {
    * - Missing optional configuration
    *
    * @param {string} message - The warning message to log
-   * @param {any} [context] - Optional context object with additional data
+   * @param {Record<string, unknown>} [context] - Optional context object with additional data
    *
    * @example
    * this.logWarn('API response slower than expected', {
@@ -294,7 +294,7 @@ export abstract class BaseServiceObject {
    * @example
    * this.logWarn('Using default configuration - no .env file found');
    */
-  protected logWarn(message: string, context?: any): void {
+  protected logWarn(message: string, context?: Record<string, unknown>): void {
     this.logger.warn(`[${this.serviceName}] ${message}`, context);
   }
 
@@ -305,7 +305,7 @@ export abstract class BaseServiceObject {
    * Errors should be logged before being thrown or handled.
    *
    * @param {string} message - The error message to log
-   * @param {any} [context] - Optional context object with additional data
+   * @param {Record<string, unknown>} [context] - Optional context object with additional data
    *   Should include error details, stack traces, and relevant state
    *
    * @example
@@ -323,7 +323,7 @@ export abstract class BaseServiceObject {
    *   throw error;
    * }
    */
-  protected logError(message: string, context?: any): void {
+  protected logError(message: string, context?: Record<string, unknown>): void {
     this.logger.error(`[${this.serviceName}] ${message}`, context);
   }
 
@@ -384,6 +384,29 @@ export abstract class BaseServiceObject {
    */
   public getLogger(): TestLogger {
     return this.logger;
+  }
+
+  /**
+   * Simulates an async delay for mock implementations
+   *
+   * Useful for simulating network latency, processing time,
+   * or other async operations in mock service implementations.
+   *
+   * @protected
+   * @param {number} ms - Delay duration in milliseconds
+   * @returns {Promise<void>} Resolves after the specified delay
+   *
+   * @example
+   * // Simulate API response time
+   * await this.simulateDelay(1500);
+   *
+   * @example
+   * // Simulate variable delay
+   * const delay = 1000 + Math.random() * 500;
+   * await this.simulateDelay(delay);
+   */
+  protected simulateDelay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 }
 

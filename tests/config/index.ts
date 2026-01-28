@@ -16,3 +16,11 @@ export {
   type LogCategory,
   type TestStatus,
 } from './test-constants';
+
+export {
+  GEMINI_CONFIG,
+  VIDEO_CONFIG,
+  MOCK_DELAYS,
+  VALIDATION_THRESHOLDS,
+  MOCK_VALIDATION_VALUES,
+} from './service-constants';

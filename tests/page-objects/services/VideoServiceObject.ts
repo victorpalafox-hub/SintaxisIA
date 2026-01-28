@@ -44,6 +44,12 @@
 import { BaseServiceObject } from '../base/BaseServiceObject';
 import * as fs from 'fs';
 import * as path from 'path';
+import {
+  VIDEO_CONFIG,
+  MOCK_DELAYS,
+  MOCK_VALIDATION_VALUES,
+  VALIDATION_THRESHOLDS,
+} from '../../config/service-constants';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -157,17 +163,6 @@ export interface SyncIssue {
   severity: 'low' | 'medium' | 'high';
 }
 
-/**
- * Internal progress state for video generation
- *
- * @internal
- */
-interface GenerationProgress {
-  phase: string;
-  progress: number;
-  message: string;
-}
-
 // ============================================================================
 // VIDEO SERVICE OBJECT
 // ============================================================================
@@ -268,11 +263,11 @@ export class VideoServiceObject extends BaseServiceObject {
     // Set default configuration
     this.defaultConfig = {
       script: '',
-      duration: 30,
-      fps: 30,
+      duration: VIDEO_CONFIG.DEFAULT_DURATION,
+      fps: VIDEO_CONFIG.DEFAULT_FPS,
       resolution: {
-        width: 1080,
-        height: 1920,
+        width: VIDEO_CONFIG.DEFAULT_RESOLUTION.WIDTH,
+        height: VIDEO_CONFIG.DEFAULT_RESOLUTION.HEIGHT,
       },
     };
 
@@ -355,12 +350,13 @@ export class VideoServiceObject extends BaseServiceObject {
     const { duration: totalDuration } = await this.executeWithTiming(
       'generateVideo',
       async () => {
-        // Simulate rendering phases
-        await this.simulateRenderingPhase('Initializing', 0, 500);
-        await this.simulateRenderingPhase('Rendering frames', 25, 800);
-        await this.simulateRenderingPhase('Applying effects', 50, 600);
-        await this.simulateRenderingPhase('Encoding video', 75, 700);
-        await this.simulateRenderingPhase('Finalizing', 90, 400);
+        // Simulate rendering phases using configured delays
+        const phases = MOCK_DELAYS.VIDEO_RENDER_PHASES;
+        await this.simulateRenderingPhase('Initializing', 0, phases.INITIALIZE);
+        await this.simulateRenderingPhase('Rendering frames', 25, phases.RENDER_FRAMES);
+        await this.simulateRenderingPhase('Applying effects', 50, phases.APPLY_EFFECTS);
+        await this.simulateRenderingPhase('Encoding video', 75, phases.ENCODE_VIDEO);
+        await this.simulateRenderingPhase('Finalizing', 90, phases.FINALIZE);
 
         // Create placeholder video file
         // In real implementation, this would be the Remotion output
@@ -425,7 +421,7 @@ export class VideoServiceObject extends BaseServiceObject {
       'getMetadata',
       async () => {
         // Simulate FFprobe delay
-        await this.simulateDelay(300);
+        await this.simulateDelay(MOCK_DELAYS.METADATA_EXTRACTION);
 
         // Check if file exists
         if (!fs.existsSync(videoPath)) {
@@ -439,11 +435,11 @@ export class VideoServiceObject extends BaseServiceObject {
         // Return mock metadata
         // In real implementation, would parse FFprobe output
         const metadata: VideoMetadata = {
-          duration: 30,
-          fps: 30,
-          width: 1080,
-          height: 1920,
-          codec: 'h264',
+          duration: VIDEO_CONFIG.DEFAULT_DURATION,
+          fps: VIDEO_CONFIG.DEFAULT_FPS,
+          width: VIDEO_CONFIG.DEFAULT_RESOLUTION.WIDTH,
+          height: VIDEO_CONFIG.DEFAULT_RESOLUTION.HEIGHT,
+          codec: VIDEO_CONFIG.DEFAULT_CODEC,
           fileSize,
           fileSizeMB: this.formatFileSize(fileSize),
         };
@@ -498,7 +494,8 @@ export class VideoServiceObject extends BaseServiceObject {
       'validateTextContent',
       async () => {
         // Simulate OCR processing time (longer for more texts)
-        const processingTime = 500 + expectedTexts.length * 100;
+        const processingTime = MOCK_DELAYS.OCR_VALIDATION_BASE +
+          expectedTexts.length * MOCK_DELAYS.OCR_VALIDATION_PER_TEXT;
         await this.simulateDelay(processingTime);
 
         // MOCK: Assume all texts are found
@@ -565,14 +562,14 @@ export class VideoServiceObject extends BaseServiceObject {
       'validateAudioContent',
       async () => {
         // Simulate audio analysis time
-        await this.simulateDelay(800);
+        await this.simulateDelay(MOCK_DELAYS.AUDIO_VALIDATION);
 
         // MOCK: Return positive audio validation
         // In real implementation, would use FFmpeg + STT
         const validation: AudioValidation = {
           hasAudio: true,
-          duration: 30,
-          transcription: 'La inteligencia artificial está transformando el mundo...',
+          duration: MOCK_VALIDATION_VALUES.AUDIO_DURATION,
+          transcription: MOCK_VALIDATION_VALUES.AUDIO_TRANSCRIPTION,
         };
 
         return validation;
@@ -632,14 +629,14 @@ export class VideoServiceObject extends BaseServiceObject {
       'validateSync',
       async () => {
         // Simulate sync analysis time
-        await this.simulateDelay(1000);
+        await this.simulateDelay(MOCK_DELAYS.SYNC_VALIDATION);
 
         // MOCK: Return positive sync validation with minor offsets
         // In real implementation, would analyze actual timing
         const validation: SyncValidation = {
           passed: true,
-          maxOffset: 45,
-          avgOffset: 18,
+          maxOffset: MOCK_VALIDATION_VALUES.MAX_SYNC_OFFSET,
+          avgOffset: MOCK_VALIDATION_VALUES.AVG_SYNC_OFFSET,
           issues: [], // No issues in mock
         };
 
@@ -665,7 +662,7 @@ export class VideoServiceObject extends BaseServiceObject {
         maxOffset: result.maxOffset,
         avgOffset: result.avgOffset,
         issueCount: result.issues.length,
-        threshold: 100, // 100ms threshold
+        threshold: VALIDATION_THRESHOLDS.SYNC_OFFSET_MS,
       },
     });
 
@@ -788,9 +785,7 @@ export class VideoServiceObject extends BaseServiceObject {
    */
   private estimateFileSize(config: Required<VideoConfig>): number {
     // Rough estimate: bitrate * duration
-    // Assuming ~5 Mbps for 1080x1920 @ 30fps
-    const bitrate = 5 * 1024 * 1024; // 5 Mbps in bits
-    const bytes = (bitrate * config.duration) / 8;
+    const bytes = (VIDEO_CONFIG.ESTIMATED_BITRATE_BPS * config.duration) / 8;
     return Math.round(bytes);
   }
 
@@ -825,15 +820,6 @@ export class VideoServiceObject extends BaseServiceObject {
     });
 
     await this.simulateDelay(delayMs);
-  }
-
-  /**
-   * Simulates processing delay
-   *
-   * @private
-   */
-  private simulateDelay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   /**
