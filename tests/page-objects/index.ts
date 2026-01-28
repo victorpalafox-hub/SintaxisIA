@@ -115,6 +115,35 @@ export {
 } from './services/VideoServiceObject';
 
 // ============================================================================
+// CONTENT VALIDATION SERVICE OBJECT
+// ============================================================================
+
+/**
+ * Service object for content validation
+ *
+ * Validates script structure, length, topics, images, and quality.
+ * Currently uses mock implementation for testing.
+ *
+ * Methods:
+ * - validateScriptStructure(script) - Validate script has all required elements
+ * - validateScriptLength(script) - Validate content length for TTS
+ * - validateTopicDetection(content, topic) - Validate detected topic
+ * - validateImageSearch(topic, imageUrl) - Validate image URL
+ * - validateContentQuality(script) - Validate content quality
+ *
+ * @see {@link ContentValidationServiceObject} for detailed documentation
+ */
+export {
+  ContentValidationServiceObject,
+  VideoScript,
+  ScriptStructureValidation,
+  ScriptLengthValidation,
+  TopicValidation,
+  ImageValidation,
+  ContentQualityValidation,
+} from './services/ContentValidationServiceObject';
+
+// ============================================================================
 // TYPE RE-EXPORTS (for convenience)
 // ============================================================================
 
@@ -147,13 +176,16 @@ export {
  *
  * const gemini = new ServiceObjects.GeminiServiceObject();
  * const video = new ServiceObjects.VideoServiceObject();
+ * const contentValidator = new ServiceObjects.ContentValidationServiceObject();
  */
 import { BaseServiceObject } from './base/BaseServiceObject';
 import { GeminiServiceObject } from './services/GeminiServiceObject';
 import { VideoServiceObject } from './services/VideoServiceObject';
+import { ContentValidationServiceObject } from './services/ContentValidationServiceObject';
 
 export default {
   BaseServiceObject,
   GeminiServiceObject,
   VideoServiceObject,
+  ContentValidationServiceObject,
 };

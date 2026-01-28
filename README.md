@@ -97,16 +97,17 @@ sintaxis-ia/
 │   ├── page-objects/
 │   │   ├── services/
 │   │   │   ├── GeminiServiceObject.ts     # Gemini API test wrapper
-│   │   │   └── VideoServiceObject.ts      # Video generation test wrapper
-│   │   └── base/
-│   │       └── BaseServiceObject.ts       # Base class with logging/timing
+│   │   │   ├── VideoServiceObject.ts      # Video generation & validation
+│   │   │   └── ContentValidationServiceObject.ts  # Content quality validation
+│   │   ├── base/
+│   │   │   └── BaseServiceObject.ts       # Base class with logging/timing
+│   │   └── index.ts                       # Central exports
 │   ├── specs/
-│   │   ├── prompt5-testlogger-validation.spec.ts  # TestLogger validation
-│   │   ├── service-objects-demo.spec.ts   # Service Objects demo
-│   │   ├── api/                           # API tests (Prompt #7)
-│   │   ├── video/                         # Video tests (Prompt #8)
-│   │   ├── content/                       # Content validation (Prompt #9)
-│   │   └── e2e/                           # E2E tests (Prompt #9)
+│   │   ├── prompt5-testlogger-validation.spec.ts  # TestLogger validation (3 tests)
+│   │   ├── service-objects-demo.spec.ts           # Service Objects demo (5 tests)
+│   │   ├── prompt7-video-generation.spec.ts       # Video generation (19 tests)
+│   │   └── prompt8-content-validation.spec.ts     # Content validation (23 tests)
+│   ├── temp/                              # Temporary test files (gitignored)
 │   ├── logs/                              # Test execution logs (gitignored)
 │   └── reports/                           # HTML test reports (gitignored)
 │
@@ -302,27 +303,43 @@ Test architecture following Service Object Pattern (POM adapted for APIs):
 ```
 tests/
 ├── config/
-│   └── service-constants.ts        # Centralized config (GEMINI_CONFIG, VIDEO_CONFIG, MOCK_DELAYS)
+│   └── service-constants.ts        # Centralized config (GEMINI_CONFIG, VIDEO_CONFIG, CONTENT_VALIDATION)
 ├── page-objects/
 │   ├── base/
 │   │   └── BaseServiceObject.ts    # Common: executeWithTiming, simulateDelay, logging
 │   └── services/
 │       ├── GeminiServiceObject.ts  # Gemini API wrapper
-│       └── VideoServiceObject.ts   # Video generation wrapper
+│       ├── VideoServiceObject.ts   # Video generation & validation
+│       └── ContentValidationServiceObject.ts  # Content quality validation
 └── specs/
-    ├── api/                        # API integration tests
-    ├── video/                      # Video generation tests
-    ├── content/                    # Content validation tests
-    └── e2e/                        # End-to-end tests
+    ├── prompt5-testlogger-validation.spec.ts  # 3 tests
+    ├── service-objects-demo.spec.ts           # 5 tests
+    ├── prompt7-video-generation.spec.ts       # 19 tests
+    └── prompt8-content-validation.spec.ts     # 23 tests
 ```
 
 **Usage:**
 ```typescript
-import { GeminiServiceObject } from './page-objects';
-import { GEMINI_CONFIG, MOCK_DELAYS } from './config';
+import {
+  GeminiServiceObject,
+  VideoServiceObject,
+  ContentValidationServiceObject
+} from './page-objects';
+import { GEMINI_CONFIG, VIDEO_CONFIG, CONTENT_VALIDATION } from './config';
 
+// Gemini API
 const gemini = new GeminiServiceObject();
-const result = await gemini.generateScript('prompt');
+const script = await gemini.generateScript('prompt');
+
+// Video generation
+const video = new VideoServiceObject();
+const result = await video.renderVideo({ title: 'Test', contenido: ['...'] });
+const validation = await video.validateVideoFile(result.outputPath);
+
+// Content validation
+const validator = new ContentValidationServiceObject();
+const structure = await validator.validateScriptStructure(script);
+const quality = await validator.validateContentQuality(script);
 ```
 
 ### Running Tests
@@ -352,7 +369,17 @@ npm run test:report
 
 ## Implementation Status
 
-### Completed (Prompts #4-6)
+### Test Summary
+
+| Test Suite | Tests | Status |
+|------------|-------|--------|
+| TestLogger Validation (Prompt #5) | 3 | ✅ Passing |
+| Service Objects Demo (Prompt #6) | 5 | ✅ Passing |
+| Video Generation (Prompt #7) | 19 | ✅ Passing |
+| Content Validation (Prompt #8) | 23 | ✅ Passing |
+| **Total** | **50** | **✅ All Passing** |
+
+### Completed (Prompts #4-8)
 
 | Feature | Status | Description |
 |---------|--------|-------------|
@@ -360,14 +387,24 @@ npm run test:report
 | AppConfig | ✅ Done | Type-safe configuration access |
 | TestLogger | ✅ Done | Structured logging with Winston |
 | Playwright Setup | ✅ Done | Test framework configuration |
-| Service Objects | ✅ Done | BaseServiceObject, GeminiServiceObject, VideoServiceObject |
+| Service Objects | ✅ Done | Base, Gemini, Video, ContentValidation |
 | Service Constants | ✅ Done | Centralized magic numbers and config values |
+| Video Generation Tests | ✅ Done | Rendering, validation, metadata, cleanup (Prompt #7) |
+| Content Validation Tests | ✅ Done | Structure, length, topics, images, quality (Prompt #8) |
+
+**Service Objects Available:**
+
+| Service Object | Methods | Purpose |
+|----------------|---------|---------|
+| `BaseServiceObject` | `executeWithTiming()`, `simulateDelay()`, logging | Base class for all services |
+| `GeminiServiceObject` | `generateScript()`, `generateMultiple()`, `validateApiKey()` | Gemini API wrapper |
+| `VideoServiceObject` | `renderVideo()`, `validateVideoFile()`, `getMetadata()`, `validateAudioContent()` | Video generation & validation |
+| `ContentValidationServiceObject` | `validateScriptStructure()`, `validateScriptLength()`, `validateTopicDetection()`, `validateImageSearch()`, `validateContentQuality()` | Content quality validation |
 
 **EnvironmentManager Features:**
 - Cascading config: `.env` → `.env.local` → `.env.[env]` → `.env.[env].local`
 - Built-in validators: `isNotEmpty`, `isUrl`, `isEmail`, `isPort`, etc.
 - Environment helpers: `isDevelopment()`, `isStaging()`, `isProduction()`
-- `getSummary()` method for testable config output
 
 **TestLogger Features:**
 - Log levels: debug, info, warn, error
@@ -375,21 +412,23 @@ npm run test:report
 - Automatic credential sanitization
 - Duration formatting and tracking
 
-**Service Objects Features:**
-- `BaseServiceObject`: Parent class with `executeWithTiming()`, `simulateDelay()`, logging methods
-- `GeminiServiceObject`: Gemini API wrapper with `generateScript()`, `generateMultiple()`, `validateApiKey()`
-- `VideoServiceObject`: Video generation with metadata extraction and content validation
-- All magic numbers centralized in `service-constants.ts`
-- Type-safe: `Record<string, unknown>` instead of `any`
+**Configuration Constants:**
+- `GEMINI_CONFIG` - API settings
+- `VIDEO_CONFIG` - Video defaults (1080x1920, 30fps, H.264)
+- `VALIDATION_THRESHOLDS` - Video file validation (25-60s, <50MB)
+- `REMOTION_CONFIG` - Remotion CLI compositions
+- `CONTENT_VALIDATION` - Script structure/length/quality rules
+- `MOCK_DELAYS` - Simulated delays for testing
 
-### Pending (Prompts #7-9)
+### Pending (Prompt #9+)
 
 | Feature | Status | Description |
 |---------|--------|-------------|
-| Real Gemini API | ⏳ Prompt #7 | Replace mocks with actual API calls |
-| Video Tests | ⏳ Prompt #8 | Rendering validation, metadata verification |
-| Content Tests | ⏳ Prompt #9 | OCR validation, STT audio checks, sync testing |
-| E2E Tests | ⏳ Prompt #9 | Complete pipeline: Prompt → Gemini → Video → Validation |
+| Real Gemini API | ⏳ Pending | Replace mocks with actual API calls |
+| Real Video Rendering | ⏳ Pending | Integrate Remotion CLI for actual renders |
+| OCR Validation | ⏳ Pending | Tesseract.js for text extraction from frames |
+| STT Validation | ⏳ Pending | Audio transcription and sync checking |
+| E2E Tests | ⏳ Pending | Complete pipeline: Prompt → Gemini → Video → Validation |
 
 ---
 

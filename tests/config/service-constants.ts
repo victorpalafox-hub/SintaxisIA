@@ -172,6 +172,127 @@ export const MOCK_VALIDATION_VALUES = {
   AUDIO_TRANSCRIPTION: 'La inteligencia artificial esta transformando el mundo...',
 } as const;
 
+/**
+ * Configuracion de validacion de contenido para scripts de video
+ *
+ * Define limites y umbrales para validar la calidad del contenido
+ * generado para YouTube Shorts.
+ */
+export const CONTENT_VALIDATION = {
+  /**
+   * Limites de longitud por seccion del script (en palabras)
+   */
+  SCRIPT_LENGTH: {
+    /** Titulo: 5-15 palabras */
+    TITLE: { MIN: 5, MAX: 15 },
+    /** Gancho/Hook: 10-20 palabras */
+    GANCHO: { MIN: 10, MAX: 20 },
+    /** Cada punto de contenido: 15-30 palabras */
+    CONTENIDO_PUNTO: { MIN: 15, MAX: 30 },
+    /** Mensaje de impacto: 10-25 palabras */
+    IMPACTO: { MIN: 10, MAX: 25 },
+    /** Call to Action: 5-15 palabras */
+    CTA: { MIN: 5, MAX: 15 },
+    /** Total del script: 100-200 palabras */
+    TOTAL: { MIN: 100, MAX: 200 },
+  },
+
+  /**
+   * Estructura requerida del script
+   */
+  SCRIPT_STRUCTURE: {
+    /** Minimo de puntos en contenido principal */
+    MIN_CONTENIDO_PUNTOS: 3,
+    /** Maximo de puntos en contenido principal */
+    MAX_CONTENIDO_PUNTOS: 7,
+    /** Minimo de tags requeridos */
+    MIN_TAGS: 3,
+    /** Maximo de tags permitidos */
+    MAX_TAGS: 5,
+  },
+
+  /**
+   * Estimacion de duracion de video basada en palabras
+   */
+  VIDEO_DURATION_ESTIMATE: {
+    /** Velocidad promedio de TTS (palabras por segundo) */
+    WORDS_PER_SECOND: 2.5,
+    /** Duracion minima aceptable (segundos) */
+    MIN_SECONDS: 25,
+    /** Duracion maxima aceptable (segundos) */
+    MAX_SECONDS: 60,
+  },
+
+  /**
+   * Topicos validos para contenido de IA/Tech
+   */
+  VALID_TOPICS: [
+    'anthropic',
+    'openai',
+    'google',
+    'deepmind',
+    'meta',
+    'mistral',
+    'microsoft',
+    'nvidia',
+    'llm',
+    'ai-tools',
+    'machine-learning',
+    'chatgpt',
+    'claude',
+    'gemini',
+    'general-ai',
+  ] as readonly string[],
+
+  /**
+   * Palabras prohibidas/inapropiadas (basico)
+   */
+  INAPPROPRIATE_WORDS: [
+    'mierda',
+    'puta',
+    'joder',
+    'carajo',
+    'idiota',
+    'estupido',
+  ] as readonly string[],
+
+  /**
+   * Palabras clave esperadas en contenido tech/IA
+   */
+  TECH_KEYWORDS: [
+    'inteligencia artificial',
+    'ia',
+    'ai',
+    'modelo',
+    'tecnología',
+    'datos',
+    'algoritmo',
+    'aprendizaje',
+    'neural',
+    'machine learning',
+    'deep learning',
+    'llm',
+    'gpt',
+    'chatbot',
+  ] as readonly string[],
+} as const;
+
+/**
+ * Delays para validacion de contenido (mock)
+ */
+export const CONTENT_VALIDATION_DELAYS = {
+  /** Delay para validacion de estructura */
+  STRUCTURE_VALIDATION: 100,
+  /** Delay para validacion de longitud */
+  LENGTH_VALIDATION: 50,
+  /** Delay para deteccion de topico */
+  TOPIC_DETECTION: 150,
+  /** Delay para validacion de imagen */
+  IMAGE_VALIDATION: 200,
+  /** Delay para validacion de calidad */
+  QUALITY_VALIDATION: 250,
+} as const;
+
 export default {
   GEMINI_CONFIG,
   VIDEO_CONFIG,
@@ -179,4 +300,6 @@ export default {
   VALIDATION_THRESHOLDS,
   MOCK_VALIDATION_VALUES,
   REMOTION_CONFIG,
+  CONTENT_VALIDATION,
+  CONTENT_VALIDATION_DELAYS,
 };

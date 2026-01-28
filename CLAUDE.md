@@ -39,6 +39,7 @@ npm run generate         # Full pipeline: news + script + audio
 npm run dev              # Open Remotion Studio for preview
 npm run render           # Render full HD video (1080x1920)
 npm run render:preview   # Render 10-second preview
+npm run render:lowres    # Render low resolution for testing
 ```
 
 ## Architecture
@@ -61,18 +62,21 @@ tests/
 │   ├── base/BaseServiceObject.ts      # Parent class with logging/timing/simulateDelay
 │   └── services/
 │       ├── GeminiServiceObject.ts     # Gemini API wrapper
-│       └── VideoServiceObject.ts      # Video generation wrapper
+│       ├── VideoServiceObject.ts      # Video generation & validation
+│       └── ContentValidationServiceObject.ts  # Content quality validation
 ├── utils/
 │   └── TestLogger.ts                  # Winston-based structured logging
 ├── specs/
-│   ├── api/                           # API integration tests
-│   ├── video/                         # Video generation tests
-│   ├── content/                       # OCR/STT content validation
-│   └── e2e/                           # End-to-end pipeline tests
+│   ├── prompt5-testlogger-validation.spec.ts  # TestLogger tests (3)
+│   ├── service-objects-demo.spec.ts           # Service Objects demo (5)
+│   ├── prompt7-video-generation.spec.ts       # Video generation tests (19)
+│   └── prompt8-content-validation.spec.ts     # Content validation tests (23)
 └── config/
     ├── test-constants.ts              # Test configuration
     └── service-constants.ts           # Centralized magic numbers & config
 ```
+
+**Current Test Status: 50 tests passing**
 
 ### Configuration System
 
@@ -88,11 +92,20 @@ Environment files: `.env.dev`, `.env.staging`, `.env.prod` (gitignored)
 All external service interactions go through Service Objects that extend `BaseServiceObject`:
 
 ```typescript
-import { GeminiServiceObject } from './page-objects';
+import { GeminiServiceObject, VideoServiceObject, ContentValidationServiceObject } from './page-objects';
 
 const gemini = new GeminiServiceObject();
-const result = await gemini.generateScript('prompt');
+const video = new VideoServiceObject();
+const contentValidator = new ContentValidationServiceObject();
 ```
+
+**Available Service Objects:**
+
+| Service | Methods | Purpose |
+|---------|---------|---------|
+| `GeminiServiceObject` | `generateScript()`, `generateMultiple()`, `validateApiKey()` | Gemini API wrapper |
+| `VideoServiceObject` | `renderVideo()`, `validateVideoFile()`, `getMetadata()`, `validateAudioContent()`, `cleanupTestVideos()` | Video generation & validation |
+| `ContentValidationServiceObject` | `validateScriptStructure()`, `validateScriptLength()`, `validateTopicDetection()`, `validateImageSearch()`, `validateContentQuality()` | Content quality validation |
 
 ### Test Logging
 Use `TestLogger` for all test logging - provides structured JSON logs with automatic credential sanitization:
@@ -108,14 +121,22 @@ logger.logValidationResults({ validator, passed, details });
 All magic numbers and hardcoded values are centralized in `tests/config/service-constants.ts`:
 
 ```typescript
-import { GEMINI_CONFIG, VIDEO_CONFIG, MOCK_DELAYS } from '../config';
+import { GEMINI_CONFIG, VIDEO_CONFIG, MOCK_DELAYS, CONTENT_VALIDATION } from '../config';
 
 // Use constants instead of magic numbers
 const delay = MOCK_DELAYS.GEMINI_API.MIN;
 const maxTokens = GEMINI_CONFIG.DEFAULT_OPTIONS.MAX_TOKENS;
+const minDuration = CONTENT_VALIDATION.VIDEO_DURATION_ESTIMATE.MIN_SECONDS;
 ```
 
-Available constant groups: `GEMINI_CONFIG`, `VIDEO_CONFIG`, `MOCK_DELAYS`, `VALIDATION_THRESHOLDS`, `MOCK_VALIDATION_VALUES`
+Available constant groups:
+- `GEMINI_CONFIG` - API configuration
+- `VIDEO_CONFIG` - Video rendering defaults
+- `MOCK_DELAYS` - Simulated delays for mocks
+- `VALIDATION_THRESHOLDS` - Video file validation limits
+- `REMOTION_CONFIG` - Remotion CLI configuration
+- `CONTENT_VALIDATION` - Script structure/length/quality thresholds
+- `CONTENT_VALIDATION_DELAYS` - Content validation delays
 
 ### Test Organization
 - Follow AAA pattern (Arrange, Act, Assert)
@@ -155,33 +176,40 @@ See `.env.example` for full list.
 
 ## Custom Agents
 
-Este proyecto tiene agentes personalizados configurados. Úsalos proactivamente cuando corresponda:
+Este proyecto tiene agentes personalizados configurados. Úsalos **proactivamente** cuando corresponda:
 
 ### qa-automation-lead
-**Cuándo usar:** Después de modificar código en `/src`, `/services`, `/config` o `package.json`
+**Trigger automático:** Después de modificar código en `/src`, `/services`, `/config` o `package.json`
 
 - Crea, actualiza y ejecuta tests siguiendo el Service Object Pattern
-- Genera reportes de cobertura de tests (Tests.md)
+- Genera reporte `Tests.md` con resumen ejecutivo, cambios detectados y resultados
 - Valida que los tests existentes sigan pasando después de cambios
+- Solo modifica archivos dentro de `/tests` - nunca código de producción
 
 ```
-# Ejemplo de uso
 Task tool → subagent_type: "qa-automation-lead"
 ```
 
 ### clean-code-refactorer
-**Cuándo usar:** Después de escribir código nuevo o cuando se solicite mejorar calidad
+**Trigger automático:** Después de escribir código nuevo en `.ts/.tsx` o al solicitar mejora de calidad
 
-- Detecta y elimina código muerto, imports no usados
-- Elimina `console.log` (excepto TestLogger)
-- Extrae valores hardcodeados a configuración
-- Simplifica condicionales complejos
+- Detecta y elimina código muerto, imports no usados, `console.log` (excepto TestLogger)
+- Extrae valores hardcodeados a `src/config/` o `tests/config/`
+- Simplifica condicionales complejos y funciones >50 líneas
 - Reemplaza magic numbers con constantes nombradas
-- Ejecuta tests después de cada refactoring
+- Genera reporte `Refactorizacion.md` con antes/después
+- **Si los tests fallan después del refactoring → revierte automáticamente**
 
 ```
-# Ejemplo de uso
 Task tool → subagent_type: "clean-code-refactorer"
+```
+
+### Flujo de trabajo entre agentes
+
+```
+Cambio en código → clean-code-refactorer → qa-automation-lead → commit
+                         ↓                        ↓
+              Refactorizacion.md              Tests.md
 ```
 
 **Nota:** Ejecutar `/agents` para ver agentes disponibles y su estado.
