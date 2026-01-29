@@ -203,6 +203,11 @@ npm test
 | `npm run ci:build` | Build all packages |
 | `npm run agents:list` | List available Claude Code agents |
 
+**Latest Security Audit (2026-01-29):**
+- 0 vulnerabilities detected in dependencies
+- Security posture: PASSED
+- See `Security-Review.md` for detailed audit report
+
 ---
 
 ## Environment Variables
@@ -365,6 +370,9 @@ npm run test:ui
 # Run specific test files
 npm run test:logger    # TestLogger validation (Prompt #5)
 npm run test:demo      # Service Objects demo (Prompt #6)
+
+# Run tests by name pattern
+npx playwright test -g "should validate"
 
 # Run with visible browser
 npm run test:headed
@@ -571,6 +579,14 @@ Types: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`
 - **Target User:** QA Manual transitioning to QA Automation
 - **Focus:** Microservices testing with clear explanations
 - **Code Style:** Well-commented, educational, maintainable
+
+### Reports
+
+| Report | Description |
+|--------|-------------|
+| `Security-Review.md` | Full security audit (last run: 2026-01-29) |
+| `tests/reports/` | Playwright HTML test reports |
+| `tests/logs/` | Test execution logs (JSON, daily rotation) |
 
 ---
 

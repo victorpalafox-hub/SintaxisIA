@@ -13,7 +13,7 @@ console.log('══════════════════════�
 console.log('🧪 TEST DE GEMINI API - CUENTA PREMIUM');
 console.log('═══════════════════════════════════════════════════════════');
 console.log('');
-console.log('🔑 API Key detectada:', apiKey.substring(0, 20) + '...' + apiKey.substring(apiKey.length - 4));
+console.log('🔑 API Key detectada:', '***' + apiKey.substring(apiKey.length - 4));
 console.log('');
 
 async function testGemini3Flash() {

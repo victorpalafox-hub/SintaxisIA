@@ -539,6 +539,10 @@ export class EnvironmentManager {
    * @param sensitiveKeys - Lista de substrings que indican claves sensibles
    */
   public printSummary(sensitiveKeys: string[] = ['KEY', 'SECRET', 'PASSWORD', 'TOKEN']): void {
+    // Solo ejecutar en desarrollo para evitar fugas de información en producción
+    if (process.env.NODE_ENV === 'production') {
+      return;
+    }
     // eslint-disable-next-line no-console
     console.log(this.getSummary(sensitiveKeys));
   }

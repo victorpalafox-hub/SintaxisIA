@@ -24,3 +24,18 @@ export {
   formatDuration,
   sanitizeSensitiveData,
 } from './log-formatter';
+
+export {
+  runTests,
+  readTestResults,
+  hasTestResults,
+  generateTestSummary,
+  getFailedTests,
+  printSummary,
+  AVAILABLE_SUITES,
+  type TestRunOptions,
+  type TestResults,
+  type TestSuite,
+  type TestSpec,
+  type TestSummary,
+} from './test-runner';

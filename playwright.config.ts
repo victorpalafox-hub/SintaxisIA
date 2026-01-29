@@ -28,15 +28,17 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0, // Sin reintentos en desarrollo
 
   // Workers (ejecución paralela)
-  workers: process.env.CI ? 1 : 1, // Secuencial para desarrollo
+  // 4 workers en local para velocidad, 1 en CI para estabilidad
+  workers: process.env.CI ? 1 : 4,
 
   // Fallar el build si se dejó test.only en el código
   forbidOnly: !!process.env.CI,
 
-  // Reporter (reportes)
+  // Reporter (reportes múltiples para diferentes propósitos)
   reporter: [
-    ['html', { outputFolder: 'tests/reports/html' }],
+    ['html', { outputFolder: 'tests/reports/html', open: 'never' }],
     ['json', { outputFile: 'tests/reports/results.json' }],
+    ['junit', { outputFile: 'tests/reports/junit.xml' }],
     ['list'], // Output en consola
   ],
 

@@ -1,0 +1,150 @@
+# =============================================================================
+# GitHub Actions Workflow: Tests
+# =============================================================================
+#
+# Este workflow ejecuta los tests de Playwright en cada push y pull request.
+# Genera reportes HTML, JSON y JUnit, y los sube como artefactos.
+#
+# Triggers:
+#   - Push a main o develop
+#   - Pull requests a main o develop
+#
+# =============================================================================
+
+name: Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+# Permisos minimos necesarios
+permissions:
+  contents: read
+  checks: write
+
+jobs:
+  test:
+    name: Run Playwright Tests
+    runs-on: ubuntu-latest
+
+    # Timeout maximo del job (15 minutos)
+    timeout-minutes: 15
+
+    steps:
+      # =========================================
+      # SETUP
+      # =========================================
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # =========================================
+      # INSTALL DEPENDENCIES
+      # =========================================
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install automation dependencies
+        run: cd automation && npm ci
+
+      - name: Install remotion-app dependencies
+        run: cd remotion-app && npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      # =========================================
+      # VALIDATE
+      # =========================================
+
+      - name: TypeScript type check
+        run: npm run check
+
+      # =========================================
+      # RUN TESTS
+      # =========================================
+
+      - name: Run Playwright tests
+        run: npm run test:ci
+        env:
+          CI: true
+          NODE_ENV: test
+
+      # =========================================
+      # UPLOAD ARTIFACTS
+      # =========================================
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            tests/reports/html/
+            tests/reports/results.json
+            tests/reports/junit.xml
+          retention-days: 30
+
+      - name: Upload test artifacts (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-artifacts
+          path: |
+            tests/test-results/
+            tests/logs/
+          retention-days: 7
+
+      # =========================================
+      # PUBLISH RESULTS
+      # =========================================
+
+      - name: Publish Test Results
+        if: always()
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: tests/reports/junit.xml
+          check_name: 'Playwright Test Results'
+          comment_mode: 'off'
+
+  # =========================================
+  # SECURITY AUDIT (opcional, en paralelo)
+  # =========================================
+
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+
+      - name: Run automation audit
+        run: cd automation && npm audit --audit-level=moderate
+        continue-on-error: true
+
+      - name: Run remotion-app audit
+        run: cd remotion-app && npm audit --audit-level=moderate
+        continue-on-error: true
