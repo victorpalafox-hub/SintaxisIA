@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 121 tests passing (ver `npm test`)
+**Test Status**: 143 tests passing (ver `npm test`)
 
 ## Prerequisites
 
@@ -40,7 +40,7 @@ npm test                 # Ejecutar tests
 | Render video | `npm run render` |
 | CI validation | `npm run ci:validate` |
 
-**Test suites**: `test:logger` (3), `test:services` (5), `test:video` (19), `test:content` (23), `test:design` (29), `test:scoring` (19), `test:image-search` (23)
+**Test suites**: `test:logger` (3), `test:services` (5), `test:video` (19), `test:content` (23), `test:design` (29), `test:scoring` (19), `test:image-search` (23), `test:video-optimized` (22)
 
 Ver `README.md` para lista completa de scripts.
 
@@ -95,7 +95,12 @@ import { GEMINI_CONFIG, VIDEO_CONFIG, CONTENT_VALIDATION } from '../config';
 
 ## Video Specs
 
-- 1080x1920 (9:16), 30 FPS, 60s
+- 1080x1920 (9:16), 30 FPS
+- **Composición Original** (`SintaxisIA`): 60s, múltiples noticias
+- **Composición Optimizada** (`AINewsShort`): 55s, 1 noticia con efectos dinámicos
+  - Timing: Hero 8s + Content 37s + Outro 10s
+  - Efectos: zoom, blur-to-focus, parallax, glow pulsante
+  - 3 imágenes: hero (logo), context (screenshot), outro (hardcoded)
 - Tema activo: Cyberpunk Neón (`remotion-app/src/styles/themes.ts`)
 - AudioMixer: ducking automático (voz 100%, música 15% → 9%)
 
@@ -148,6 +153,7 @@ Ver `.env.example` para lista completa.
 | 10.1 | Hashtags removidos de video (solo en título YouTube) | 2 |
 | 11 | News Scoring System (rankeo por importancia) | 19 |
 | 12 | Image Search System (multi-provider con fallback) | 23 |
+| 13 | Video Optimizado (1 noticia, efectos dinámicos) | 22 |
 
 **Prompt 11 - News Scoring (2026-01-29):**
 - Sistema de puntuación para rankear noticias (0-37 pts)
@@ -163,4 +169,14 @@ Ver `.env.example` para lista completa.
 - Archivos: `automation/src/image-searcher-v2.ts`, `automation/src/image-providers/`, `automation/src/utils/image-cache.ts`
 - Tipos: `automation/src/types/image.types.ts` (ImageSearchParams, ImageSearchResult)
 
-**Pendientes**: #13 Gemini real, #14 Remotion CLI real, #15 OCR, #16 STT, #17 E2E completo
+**Prompt 13 - Video Optimizado (2026-01-29):**
+- Video optimizado para 1 noticia completa con efectos dinámicos
+- Timing: Hero 8s (hook) + Content 37s (explicación) + Outro 10s (branding) = 55s
+- Efectos: zoom dramático (0.8→1.2), blur-to-focus, parallax (-20px), glow pulsante
+- 3 imágenes: hero (logo empresa), context (screenshot/demo), outro (logo Sintaxis IA hardcoded)
+- Composición: `AINewsShort` en `remotion-app/src/compositions/`
+- Escenas: `HeroScene`, `ContentScene`, `OutroScene` en `remotion-app/src/components/scenes/`
+- Tipos: `VideoProps`, `NewsType` en `remotion-app/src/types/video.types.ts`
+- Hashtags: NO se renderizan (solo metadata para YouTube)
+
+**Pendientes**: #14 Orchestrator + Calendario publicación, #15 Gemini real, #16 Remotion CLI real, #17 OCR, #18 STT, #19 E2E completo
