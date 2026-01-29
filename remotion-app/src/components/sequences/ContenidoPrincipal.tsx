@@ -13,7 +13,9 @@ import {
 } from 'remotion';
 import { NeonBorder } from '../effects/NeonBorder';
 import { KaraokeSubtitles } from '../ui/KaraokeSubtitles';
-import { FloatingTags } from '../ui/FloatingTags';
+// HASHTAGS REMOVIDOS DEL VIDEO (Prompt 10.1)
+// Los hashtags solo deben aparecer en el título de YouTube, NO visibles en el video
+// import { FloatingTags } from '../ui/FloatingTags';
 
 interface WordTiming {
   word: string;
@@ -199,10 +201,15 @@ export const ContenidoPrincipal: React.FC<ContenidoPrincipalProps> = ({
         </NeonBorder>
       </div>
 
-      {/* Tags flotantes */}
-      <Sequence from={30}>
-        <FloatingTags tags={tags} color={themeColor} />
-      </Sequence>
+      {/*
+        HASHTAGS REMOVIDOS DEL VIDEO (Prompt 10.1)
+        Los hashtags solo deben aparecer en el título de YouTube,
+        NO dentro del video visible para el espectador.
+
+        <Sequence from={30}>
+          <FloatingTags tags={tags} color={themeColor} />
+        </Sequence>
+      */}
 
       {/* Subtítulos karaoke */}
       <div

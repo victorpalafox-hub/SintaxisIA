@@ -704,3 +704,139 @@ test.describe('Suite 6: Scripts and Documentation', () => {
     expect(exists).toBe(true);
   });
 });
+
+// ============================================================================
+// SUITE 7: HASHTAGS NO VISIBLES EN VIDEO (Prompt 10.1)
+// ============================================================================
+
+test.describe('Suite 7: Hashtags NOT Rendered in Video (Prompt 10.1)', () => {
+  let logger: TestLogger;
+
+  test.beforeEach(() => {
+    logger = new TestLogger({ testName: 'HashtagsNotRenderedTests' });
+  });
+
+  /**
+   * Función auxiliar para buscar archivos TSX/TS recursivamente
+   * @param dir - Directorio a buscar
+   * @returns Array de rutas de archivos
+   */
+  const findTsxFiles = (dir: string): string[] => {
+    const files: string[] = [];
+
+    if (!fs.existsSync(dir)) {
+      return files;
+    }
+
+    const items = fs.readdirSync(dir);
+
+    for (const item of items) {
+      const fullPath = path.join(dir, item);
+      const stat = fs.statSync(fullPath);
+
+      if (stat.isDirectory() && item !== 'node_modules') {
+        files.push(...findTsxFiles(fullPath));
+      } else if (item.endsWith('.tsx') || item.endsWith('.ts')) {
+        files.push(fullPath);
+      }
+    }
+
+    return files;
+  };
+
+  /**
+   * Verifica que los hashtags NO se renderizan visualmente en el video
+   * Los hashtags deben estar SOLO en el título de YouTube (metadata),
+   * NO visibles dentro del video renderizado.
+   *
+   * PROMPT 10.1: Remover hashtags visibles del video
+   */
+  test('hashtags should NOT be rendered visually in video', async () => {
+    logger.info('Validando que hashtags NO aparezcan en video');
+
+    const remotionSrcPath = PATHS.src;
+    const allFiles = findTsxFiles(remotionSrcPath);
+
+    let hashtagsFoundInVideo = false;
+    const filesWithHashtags: string[] = [];
+
+    for (const file of allFiles) {
+      const content = fs.readFileSync(file, 'utf-8');
+
+      // Remover comentarios para analizar solo código activo
+      // Comentarios multilínea /* */ y de línea //
+      const uncommentedContent = content
+        .replace(/\/\*[\s\S]*?\*\//g, '')  // Comentarios /* */
+        .replace(/\/\/.*/g, '');           // Comentarios //
+
+      // Buscar renderizado de hashtags (sin estar comentado)
+      // Patrones: .map con tag/tags, <FloatingTags>, #{tag}
+      const hasHashtagRendering = (
+        (uncommentedContent.includes('FloatingTags') &&
+         uncommentedContent.includes('<FloatingTags')) ||
+        (uncommentedContent.includes('hashtag') &&
+         (uncommentedContent.includes('.map(') || uncommentedContent.includes('map((')))
+      );
+
+      // Excluir archivos de tipos y el propio componente FloatingTags
+      const isTypeFile = file.includes('types') || file.includes('.types.');
+      const isFloatingTagsComponent = file.includes('FloatingTags.tsx');
+
+      if (hasHashtagRendering && !isTypeFile && !isFloatingTagsComponent) {
+        hashtagsFoundInVideo = true;
+        filesWithHashtags.push(file);
+        logger.warn(`⚠️ Hashtags encontrados renderizándose en: ${path.basename(file)}`);
+      }
+    }
+
+    if (filesWithHashtags.length > 0) {
+      logger.error(`❌ Archivos con hashtags visibles: ${filesWithHashtags.map(f => path.basename(f)).join(', ')}`, undefined, { filesWithHashtags });
+    }
+
+    logger.logValidationResults({
+      validator: 'HashtagsNotRendered',
+      passed: !hashtagsFoundInVideo,
+      details: {
+        filesAnalyzed: allFiles.length,
+        filesWithHashtags: filesWithHashtags.map(f => path.basename(f)),
+        hashtagsFoundInVideo
+      }
+    });
+
+    expect(hashtagsFoundInVideo).toBeFalsy();
+    logger.info('✅ Hashtags NO aparecen en video (solo en metadata para título YouTube)');
+  });
+
+  /**
+   * Verifica que la interfaz VideoProps aún tiene la propiedad hashtags
+   * para uso en título de YouTube (metadata)
+   */
+  test('should keep hashtags property in interfaces for YouTube title metadata', async () => {
+    logger.info('Verificando que hashtags se mantienen en interfaces para metadata');
+
+    // Buscar archivos que definen interfaces de video
+    const videoFile = EXPECTED_FILES.video;
+    const contenidoPrincipal = path.join(PATHS.components, 'sequences', 'ContenidoPrincipal.tsx');
+
+    let hashtagsInInterface = false;
+
+    // Verificar en ContenidoPrincipal.tsx que tags sigue en la interfaz
+    if (fs.existsSync(contenidoPrincipal)) {
+      const content = fs.readFileSync(contenidoPrincipal, 'utf-8');
+      hashtagsInInterface = content.includes('tags: string[]') ||
+                            content.includes('tags:string[]');
+    }
+
+    logger.logValidationResults({
+      validator: 'HashtagsInInterface',
+      passed: hashtagsInInterface,
+      details: {
+        hashtagsInInterface,
+        purpose: 'YouTube title metadata (not visual rendering)'
+      }
+    });
+
+    expect(hashtagsInInterface).toBe(true);
+    logger.info('✅ Hashtags disponibles en interfaz para título de YouTube');
+  });
+});

@@ -1,0 +1,149 @@
+/**
+ * @fileoverview Types para Sistema de Búsqueda de Imágenes
+ *
+ * Define interfaces para búsqueda inteligente de imágenes
+ * relacionadas a noticias de IA.
+ *
+ * Sistema de 3 imágenes por video:
+ * - HERO (0-8s): Logo empresa/producto
+ * - CONTEXT (8-45s): Screenshot/demo del producto
+ * - OUTRO (45-55s): Logo "Sintaxis IA" (hardcoded en componente)
+ *
+ * @author Sintaxis IA
+ * @version 1.0.0
+ * @since Prompt 12
+ */
+
+/**
+ * Parámetros para búsqueda de imágenes
+ */
+export interface ImageSearchParams {
+  /** Topics principales de la noticia ["Google", "Genie", "AI Gaming"] */
+  topics: string[];
+
+  /** Empresa principal mencionada (ej: "Google") */
+  company?: string;
+
+  /** Nombre del producto si aplica (ej: "Project Genie") */
+  productName?: string;
+
+  /** URL oficial del anuncio (para scraping OpenGraph) */
+  officialUrl?: string;
+}
+
+/**
+ * Fuentes de imágenes disponibles para HERO
+ */
+export type HeroImageSource =
+  | 'clearbit'
+  | 'logodev'
+  | 'google'
+  | 'unsplash'
+  | 'ui-avatars';
+
+/**
+ * Fuentes de imágenes disponibles para CONTEXT
+ */
+export type ContextImageSource =
+  | 'google'
+  | 'unsplash'
+  | 'opengraph'
+  | 'hero-duplicate';
+
+/**
+ * Resultado de búsqueda de imagen HERO
+ */
+export interface HeroImageResult {
+  /** URL de la imagen */
+  url: string;
+
+  /** Proveedor que encontró la imagen */
+  source: HeroImageSource;
+
+  /** Si la imagen está cacheada localmente */
+  cached: boolean;
+}
+
+/**
+ * Resultado de búsqueda de imagen CONTEXT
+ */
+export interface ContextImageResult {
+  /** URL de la imagen */
+  url: string;
+
+  /** Proveedor que encontró la imagen */
+  source: ContextImageSource;
+
+  /** Si la imagen está cacheada localmente */
+  cached: boolean;
+}
+
+/**
+ * Resultado completo de búsqueda de imágenes
+ *
+ * Incluye HERO y CONTEXT.
+ * OUTRO no se incluye porque está hardcoded en el componente.
+ */
+export interface ImageSearchResult {
+  /**
+   * Imagen HERO (0-8s): Logo empresa/producto
+   * SIEMPRE presente (fallback garantizado con UI Avatars)
+   */
+  hero: HeroImageResult;
+
+  /**
+   * Imagen CONTEXT (8-45s): Screenshot/demo del producto
+   * OPCIONAL - puede ser undefined si no se encuentra
+   */
+  context?: ContextImageResult;
+}
+
+/**
+ * Interfaz para proveedores de imágenes
+ */
+export interface ImageProvider {
+  /** Nombre del proveedor */
+  name: string;
+
+  /** Prioridad (menor = más prioritario) */
+  priority: number;
+
+  /**
+   * Busca imagen
+   * @param query - Término de búsqueda
+   * @param type - Tipo de imagen a buscar
+   * @returns URL de imagen o null si no encontrada
+   */
+  search(query: string, type: 'logo' | 'screenshot'): Promise<string | null>;
+}
+
+/**
+ * Entrada de caché de imagen
+ */
+export interface ImageCacheEntry {
+  /** URL original de la imagen */
+  url: string;
+
+  /** Path local donde está cacheada */
+  localPath: string;
+
+  /** Timestamp de cuando se cacheó */
+  cachedAt: Date;
+
+  /** Timestamp de expiración */
+  expiresAt: Date;
+}
+
+/**
+ * Estadísticas de caché
+ */
+export interface CacheStats {
+  /** Número de archivos en caché */
+  fileCount: number;
+
+  /** Tamaño total en MB */
+  sizeInMB: number;
+
+  /** Archivos más antiguos que maxAge */
+  expiredCount: number;
+}

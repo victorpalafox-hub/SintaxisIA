@@ -60,6 +60,12 @@ tests/temp/*
 !tests/temp/.gitkeep
 
 # ===================================
+# IMAGE CACHE
+# ===================================
+automation/cache/images/*
+!automation/cache/images/.gitkeep
+
+# ===================================
 # CLAUDE CODE
 # ===================================
 .claude/*
