@@ -20,7 +20,6 @@
 import React from 'react';
 import {
   AbsoluteFill,
-  Img,
   interpolate,
   useCurrentFrame,
   spring,
@@ -28,6 +27,7 @@ import {
   Easing,
 } from 'remotion';
 import { colors, spacing } from '../../styles/themes';
+import { SafeImage } from '../elements/SafeImage';
 import type { HeroSceneProps } from '../../types/video.types';
 
 /**
@@ -167,8 +167,10 @@ export const HeroScene: React.FC<HeroSceneProps> = ({
             `,
           }}
         >
-          <Img
+          <SafeImage
             src={image}
+            width={400}
+            height={400}
             style={{
               width: 400,
               height: 400,

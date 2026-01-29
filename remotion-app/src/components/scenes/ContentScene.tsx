@@ -21,13 +21,13 @@
 import React from 'react';
 import {
   AbsoluteFill,
-  Img,
   interpolate,
   useCurrentFrame,
   Easing,
 } from 'remotion';
 import { colors, spacing } from '../../styles/themes';
 import { ProgressBar } from '../ui/ProgressBar';
+import { SafeImage } from '../elements/SafeImage';
 import type { ContentSceneProps } from '../../types/video.types';
 
 /**
@@ -171,8 +171,10 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
               boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
             }}
           >
-            <Img
+            <SafeImage
               src={contextImage}
+              width={600}
+              height={400}
               style={{
                 width: 600,
                 height: 400,

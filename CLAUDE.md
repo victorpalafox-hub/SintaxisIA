@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 143 tests passing (ver `npm test`)
+**Test Status**: 150 tests passing (ver `npm test`)
 
 ## Prerequisites
 
@@ -154,6 +154,7 @@ Ver `.env.example` para lista completa.
 | 11 | News Scoring System (rankeo por importancia) | 19 |
 | 12 | Image Search System (multi-provider con fallback) | 23 |
 | 13 | Video Optimizado (1 noticia, efectos dinámicos) | 22 |
+| 13.1 | SafeImage (fix CORS en preview) | 7 |
 
 **Prompt 11 - News Scoring (2026-01-29):**
 - Sistema de puntuación para rankear noticias (0-37 pts)
@@ -178,5 +179,13 @@ Ver `.env.example` para lista completa.
 - Escenas: `HeroScene`, `ContentScene`, `OutroScene` en `remotion-app/src/components/scenes/`
 - Tipos: `VideoProps`, `NewsType` en `remotion-app/src/types/video.types.ts`
 - Hashtags: NO se renderizan (solo metadata para YouTube)
+
+**Fix CORS - Prompt 13.1 (2026-01-29):**
+- Componente `SafeImage` con fallback automatico para errores de CORS
+- Genera placeholder dinamico (UI Avatars) si imagen falla
+- Extrae inicial del dominio de Clearbit/Logo.dev para placeholder
+- Usado en HeroScene y ContentScene (reemplaza <Img> directo)
+- Preview funciona sin errores de carga de imagenes externas
+- Archivo: `remotion-app/src/components/elements/SafeImage.tsx`
 
 **Pendientes**: #14 Orchestrator + Calendario publicación, #15 Gemini real, #16 Remotion CLI real, #17 OCR, #18 STT, #19 E2E completo
