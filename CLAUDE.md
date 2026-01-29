@@ -204,12 +204,63 @@ Task tool → subagent_type: "qa-automation-lead"
 Task tool → subagent_type: "clean-code-refactorer"
 ```
 
+### security-reviewer
+**Trigger automático:** Cambios en `.env`, `config/`, credenciales, o nuevas dependencias
+
+- Audita dependencias con `npm audit`
+- Revisa manejo de secretos y API keys
+- Valida que `.gitignore` proteja archivos sensibles
+- Ejecuta antes de merges a producción
+
+```
+Task tool → subagent_type: "security-reviewer"
+```
+
+### devops-pipeline-architect
+**Trigger automático:** Cambios en `.github/workflows/`, `package.json` scripts, o setup de CI/CD
+
+- Crea/modifica GitHub Actions workflows
+- Configura jobs programados (cron) para generación automática
+- Optimiza pipelines con caching y paralelización
+- Gestiona secretos en CI/CD
+
+```
+Task tool → subagent_type: "devops-pipeline-architect"
+```
+
+### documentation-specialist
+**Trigger automático:** Después de cambios exitosos en código y tests pasando
+
+- Actualiza README.md y CLAUDE.md
+- Sincroniza documentación con cambios de código
+- Ejecuta DESPUÉS de qa-automation-lead
+
+```
+Task tool → subagent_type: "documentation-specialist"
+```
+
 ### Flujo de trabajo entre agentes
 
 ```
-Cambio en código → clean-code-refactorer → qa-automation-lead → commit
-                         ↓                        ↓
-              Refactorizacion.md              Tests.md
+Cambio en código → clean-code-refactorer → qa-automation-lead → documentation-specialist → commit
+                         ↓                        ↓                       ↓
+              Refactorizacion.md              Tests.md            README/CLAUDE.md
+```
+
+### Scripts de Agentes
+
+```bash
+# Security
+npm run security:audit    # Auditoría completa de dependencias
+npm run security:check    # Check rápido de vulnerabilidades
+
+# CI/CD
+npm run ci:validate       # Lint + Tests (pipeline completo)
+npm run ci:test          # Tests con reporter para CI
+npm run ci:build         # Build de todos los paquetes
+
+# Utilidades
+npm run agents:list      # Lista agentes disponibles
 ```
 
 **Nota:** Ejecutar `/agents` para ver agentes disponibles y su estado.

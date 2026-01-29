@@ -22,7 +22,17 @@
     "test:demo": "playwright test tests/specs/service-objects-demo.spec.ts",
     "test:headed": "playwright test --headed",
     "test:debug": "playwright test --debug",
-    "test:report": "playwright show-report tests/reports"
+    "test:report": "playwright show-report tests/reports",
+    "test:qa-automation": "playwright test",
+    "refactor:apply": "echo 'Ejecutar agente refactoring'",
+    "security:audit": "npm audit && cd automation && npm audit && cd ../remotion-app && npm audit",
+    "security:check": "npm audit --audit-level=moderate",
+    "ci:lint": "npm run check",
+    "ci:test": "playwright test --reporter=list",
+    "ci:build": "npm run build:all",
+    "ci:validate": "npm run ci:lint && npm run ci:test",
+    "docs:update": "echo 'Ejecutar documentation-specialist agent'",
+    "agents:list": "echo 'Agentes disponibles: qa-automation-lead, clean-code-refactorer, security-reviewer, devops-pipeline-architect, documentation-specialist'"
   },
   "keywords": [
     "youtube",

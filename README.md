@@ -192,6 +192,17 @@ npm test
 | `npm run test:debug` | Run tests in debug mode |
 | `npm run test:report` | Open HTML test report |
 
+### Security & CI/CD
+
+| Script | Description |
+|--------|-------------|
+| `npm run security:audit` | Run npm audit on all packages |
+| `npm run security:check` | Quick vulnerability check (moderate+) |
+| `npm run ci:validate` | Full CI validation (lint + tests) |
+| `npm run ci:test` | Run tests with CI-friendly reporter |
+| `npm run ci:build` | Build all packages |
+| `npm run agents:list` | List available Claude Code agents |
+
 ---
 
 ## Environment Variables
