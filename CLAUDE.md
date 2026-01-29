@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 150 tests passing (ver `npm test`)
+**Test Status**: 158 tests passing (ver `npm test`)
 
 ## Prerequisites
 
@@ -96,11 +96,11 @@ import { GEMINI_CONFIG, VIDEO_CONFIG, CONTENT_VALIDATION } from '../config';
 ## Video Specs
 
 - 1080x1920 (9:16), 30 FPS
-- **Composición Original** (`SintaxisIA`): 60s, múltiples noticias
-- **Composición Optimizada** (`AINewsShort`): 55s, 1 noticia con efectos dinámicos
+- **Composición Producción** (`AINewsShort`): 55s, 1 noticia con efectos dinámicos
   - Timing: Hero 8s + Content 37s + Outro 10s
   - Efectos: zoom, blur-to-focus, parallax, glow pulsante
   - 3 imágenes: hero (logo), context (screenshot), outro (hardcoded)
+- **Composición Preview** (`AINewsShort-Preview`): 10s para desarrollo rápido
 - Tema activo: Cyberpunk Neón (`remotion-app/src/styles/themes.ts`)
 - AudioMixer: ducking automático (voz 100%, música 15% → 9%)
 
@@ -155,6 +155,7 @@ Ver `.env.example` para lista completa.
 | 12 | Image Search System (multi-provider con fallback) | 23 |
 | 13 | Video Optimizado (1 noticia, efectos dinámicos) | 22 |
 | 13.1 | SafeImage (fix CORS en preview) | 7 |
+| 13.2 | Limpieza de composiciones obsoletas | 8 |
 
 **Prompt 11 - News Scoring (2026-01-29):**
 - Sistema de puntuación para rankear noticias (0-37 pts)
@@ -187,5 +188,13 @@ Ver `.env.example` para lista completa.
 - Usado en HeroScene y ContentScene (reemplaza <Img> directo)
 - Preview funciona sin errores de carga de imagenes externas
 - Archivo: `remotion-app/src/components/elements/SafeImage.tsx`
+
+**Limpieza de Composiciones - Prompt 13.2 (2026-01-29):**
+- Eliminadas composiciones obsoletas: SintaxisIA, SintaxisIA-Preview, SintaxisIA-LowRes
+- Mantenidas solo 2 composiciones productivas:
+  - `AINewsShort` (55s) - Producción final
+  - `AINewsShort-Preview` (10s) - Desarrollo rápido
+- Eliminado import de Video.tsx (ya no se usa)
+- Preview muestra solo composiciones activas
 
 **Pendientes**: #14 Orchestrator + Calendario publicación, #15 Gemini real, #16 Remotion CLI real, #17 OCR, #18 STT, #19 E2E completo
