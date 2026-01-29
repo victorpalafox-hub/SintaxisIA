@@ -1,0 +1,201 @@
+// ===================================
+// THEMES - Sistema de temas flexible
+// ===================================
+
+/**
+ * Sistema de Temas - Sintaxis IA
+ *
+ * Permite cambiar fácilmente entre estilos visuales.
+ * Actualmente activo: Cyberpunk Neón
+ *
+ * Para cambiar de tema:
+ * 1. Cambiar la línea: export const activeTheme = themes.cyberpunk;
+ * 2. Guardar archivo
+ * 3. El video se regenera automáticamente con nuevo estilo
+ */
+
+// ==========================================
+// INTERFACE DE TEMA
+// ==========================================
+
+export interface Theme {
+  name: string;
+  colors: {
+    primary: string;
+    secondary: string;
+    accent: string;
+    background: {
+      dark: string;
+      darker: string;
+      gradient: {
+        start: string;
+        middle: string;
+        end: string;
+      };
+    };
+    text: {
+      primary: string;
+      secondary: string;
+      muted: string;
+    };
+    overlay: {
+      light: string;
+      medium: string;
+      strong: string;
+    };
+  };
+  spacing: {
+    unit: number;
+    padding: {
+      xs: number;
+      sm: number;
+      md: number;
+      lg: number;
+      xl: number;
+    };
+    safe: {
+      top: number;
+      bottom: number;
+      horizontal: number;
+    };
+  };
+}
+
+// ==========================================
+// TEMA 1: CYBERPUNK NEÓN (ACTUAL)
+// ==========================================
+
+/**
+ * Tema Cyberpunk Neón
+ *
+ * Estilo futurista con colores neón vibrantes.
+ * Perfecto para contenido tech, gaming, y viral.
+ *
+ * Paleta:
+ * - Cyan (#00F0FF): Color principal, energético
+ * - Magenta (#FF0099): Color secundario, impacto
+ * - Verde neón (#00FF88): Acento opcional
+ */
+export const cyberpunkTheme: Theme = {
+  name: 'Cyberpunk Neón',
+  colors: {
+    primary: '#00F0FF',      // Cyan neón brillante
+    secondary: '#FF0099',    // Magenta vibrante
+    accent: '#00FF88',       // Verde neón (opcional)
+    background: {
+      dark: '#0a0a0a',       // Negro profundo
+      darker: '#000000',     // Negro puro
+      gradient: {
+        start: '#0a0a0a',
+        middle: '#1a0a1a',   // Tono magenta oscuro
+        end: '#0a1a1a',      // Tono cyan oscuro
+      },
+    },
+    text: {
+      primary: '#FFFFFF',    // Blanco puro
+      secondary: '#00F0FF',  // Cyan (texto secundario)
+      muted: '#888888',      // Gris
+    },
+    overlay: {
+      light: '#00F0FF10',    // Cyan 10%
+      medium: '#00F0FF20',   // Cyan 20%
+      strong: '#00F0FF40',   // Cyan 40%
+    },
+  },
+  spacing: {
+    unit: 8,
+    padding: { xs: 16, sm: 24, md: 32, lg: 48, xl: 64 },
+    safe: { top: 80, bottom: 120, horizontal: 40 },
+  },
+};
+
+// ==========================================
+// TEMA 2: MINIMALISTA PROFESIONAL (BACKUP)
+// ==========================================
+
+/**
+ * Tema Minimalista Profesional
+ *
+ * Estilo limpio y profesional con colores suaves.
+ * Ideal para contenido corporativo o educativo.
+ *
+ * Paleta:
+ * - Azul (#0EA5E9): Color principal, confianza
+ * - Morado (#8B5CF6): Color secundario, creatividad
+ * - Verde (#10B981): Acento, éxito
+ */
+export const minimalistTheme: Theme = {
+  name: 'Minimalista Profesional',
+  colors: {
+    primary: '#0EA5E9',      // Azul profesional
+    secondary: '#8B5CF6',    // Morado
+    accent: '#10B981',       // Verde
+    background: {
+      dark: '#0F172A',       // Azul oscuro
+      darker: '#020617',     // Casi negro
+      gradient: {
+        start: '#0F172A',
+        middle: '#1E293B',
+        end: '#334155',
+      },
+    },
+    text: {
+      primary: '#F8FAFC',    // Blanco
+      secondary: '#CBD5E1',  // Gris claro
+      muted: '#64748B',      // Gris medio
+    },
+    overlay: {
+      light: '#FFFFFF10',
+      medium: '#FFFFFF20',
+      strong: '#FFFFFF40',
+    },
+  },
+  spacing: {
+    unit: 8,
+    padding: { xs: 16, sm: 24, md: 32, lg: 48, xl: 64 },
+    safe: { top: 80, bottom: 120, horizontal: 40 },
+  },
+};
+
+// ==========================================
+// TEMA ACTIVO (CAMBIAR AQUÍ)
+// ==========================================
+
+/**
+ * TEMA ACTIVO
+ *
+ * Para cambiar de tema, modifica esta línea:
+ * - Cyberpunk: export const activeTheme = cyberpunkTheme;
+ * - Minimalista: export const activeTheme = minimalistTheme;
+ */
+export const activeTheme = cyberpunkTheme;
+
+// ==========================================
+// EXPORTS PARA COMPATIBILIDAD
+// ==========================================
+
+// Exports para uso directo en componentes
+export const colors = activeTheme.colors;
+export const spacing = activeTheme.spacing;
+
+// Layout estándar YouTube Shorts (9:16)
+export const layout = {
+  width: 1080,
+  height: 1920,
+  fps: 30,
+  durationSeconds: 60,
+  safeZone: {
+    x: 40,
+    y: 80,
+    width: 1000,
+    height: 1760,
+  },
+};
+
+// Colección de todos los temas disponibles
+export const themes = {
+  cyberpunk: cyberpunkTheme,
+  minimalist: minimalistTheme,
+};
+
+export default activeTheme;

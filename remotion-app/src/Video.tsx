@@ -5,9 +5,7 @@
 import React from 'react';
 import {
   AbsoluteFill,
-  Audio,
   Sequence,
-  staticFile
 } from 'remotion';
 
 // Theme
@@ -26,6 +24,10 @@ import { OutroBranding } from './components/sequences/OutroBranding';
 
 // UI Components
 import { Watermark } from './components/ui/Watermark';
+import { ProgressBar } from './components/ui/ProgressBar';
+
+// Audio Components
+import { AudioMixer } from './components/audio/AudioMixer';
 
 // Importar datos
 import videoData from './data.json';
@@ -91,11 +93,21 @@ export const Video: React.FC = () => {
         />
       </AbsoluteFill>
 
-      {/* Audio de narración */}
+      {/* Audio con mixer inteligente (ducking automático) */}
       {newsItem.audioPath && (
-        <Audio
-          src={staticFile(newsItem.audioPath.replace('./public/', ''))}
-          volume={1}
+        <AudioMixer
+          voice={{
+            src: newsItem.audioPath,
+            volume: theme.audio.voiceVolume
+          }}
+          // Música de fondo opcional - descomentar para habilitar
+          // music={{
+          //   src: 'audio/background-music.mp3',
+          //   volume: theme.audio.musicVolume,
+          //   ducking: true,
+          //   fadeIn: 30,
+          //   fadeOut: 60
+          // }}
         />
       )}
 
@@ -160,6 +172,9 @@ export const Video: React.FC = () => {
           themeColor={themeColor}
         />
       </Sequence>
+
+      {/* Barra de progreso - siempre visible */}
+      <ProgressBar color={themeColor} />
 
       {/* Marca de agua - siempre visible */}
       <Watermark />

@@ -99,6 +99,30 @@ export const theme = {
     },
   },
 
+  // Configuración de audio
+  audio: {
+    /** Volumen de voz TTS (protagonista). 1.0 = 100% */
+    voiceVolume: 1.0,
+    /** Volumen base de música de fondo. 0.15 = 15% */
+    musicVolume: 0.15,
+    /** Factor de reducción durante ducking. 0.6 = música al 60% cuando hay voz */
+    duckingReduction: 0.6,
+    /** Duración del fade in en segundos */
+    fadeInSeconds: 1,
+    /** Duración del fade out en segundos */
+    fadeOutSeconds: 2,
+  },
+
+  // Configuración de barra de progreso
+  progressBar: {
+    /** Altura de la barra en pixels */
+    height: 4,
+    /** Margen desde los bordes */
+    margin: 20,
+    /** Opacidad del track (fondo) */
+    trackOpacity: 0.1,
+  },
+
   // Sombras y efectos
   shadows: {
     text: '0 2px 10px rgba(0,0,0,0.8)',

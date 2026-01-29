@@ -28,7 +28,7 @@ npm run test:debug
 
 ---
 
-## Comandos por Suite
+## Comandos por Suite (77 tests total)
 
 | Suite | Tests | Comando |
 |-------|-------|---------|
@@ -36,6 +36,7 @@ npm run test:debug
 | Service Objects | 5 | `npm run test:services` |
 | Video Generation | 19 | `npm run test:video` |
 | Content Validation | 23 | `npm run test:content` |
+| Video Design | 27 | `npm run test:design` |
 
 ### TestLogger (3 tests)
 ```bash
@@ -77,7 +78,13 @@ npm run test:integration
 ```
 Ejecuta Video Generation + Content Validation.
 
-### Todos los tests (50 tests)
+### Tests de diseño (27 tests)
+```bash
+npm run test:design
+```
+Ejecuta Themes + AudioMixer + ProgressBar + Config.
+
+### Todos los tests (77 tests)
 ```bash
 npm run test:all
 ```
@@ -212,7 +219,8 @@ tests/
 │   ├── prompt5-testlogger-validation.spec.ts
 │   ├── service-objects-demo.spec.ts
 │   ├── prompt7-video-generation.spec.ts
-│   └── prompt8-content-validation.spec.ts
+│   ├── prompt8-content-validation.spec.ts
+│   └── prompt10-video-design.spec.ts
 ├── reports/                        # Reportes generados
 │   ├── html/                       # Reporte HTML interactivo
 │   ├── results.json                # Resultados en JSON
@@ -273,4 +281,4 @@ tests/
 ---
 
 *Documentacion generada para Sintaxis IA - Videos Short*
-*50 tests | 4 suites | Service Object Pattern*
+*77 tests | 5 suites | Service Object Pattern*
