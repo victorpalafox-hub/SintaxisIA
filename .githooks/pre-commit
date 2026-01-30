@@ -37,6 +37,37 @@ for file in $(git diff --cached --name-only); do
     fi
 done
 
+# ═══════════════════════════════════════════════════════════════
+# 5. Verificar rutas críticas del proyecto
+# ═══════════════════════════════════════════════════════════════
+
+CRITICAL_PATHS=(
+    "remotion-app/package.json"
+    "automation/package.json"
+    "automation/src/config/video.config.ts"
+    "tests/specs"
+)
+
+for p in "${CRITICAL_PATHS[@]}"; do
+    if [ ! -e "$p" ]; then
+        echo "❌ ERROR: Ruta crítica no existe: $p"
+        echo "   Verifica que estés en el directorio raíz del proyecto"
+        ERRORS=$((ERRORS + 1))
+    fi
+done
+
+# ═══════════════════════════════════════════════════════════════
+# 6. Verificar VIDEO_PATHS no usa rutas relativas con '..'
+# ═══════════════════════════════════════════════════════════════
+
+if [ -f "automation/src/config/video.config.ts" ]; then
+    if grep -q "path\.resolve.*'\.\.'.*remotion-app" automation/src/config/video.config.ts; then
+        echo "❌ ERROR: video.config.ts usa rutas relativas con '..' para remotion-app"
+        echo "   Usa getProjectRoot() en lugar de process.cwd() + '..'"
+        ERRORS=$((ERRORS + 1))
+    fi
+fi
+
 # Resultado
 if [ $ERRORS -gt 0 ]; then
     echo ""
