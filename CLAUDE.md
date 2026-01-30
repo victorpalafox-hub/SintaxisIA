@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 264 tests passing, 4 skipped (ver `npm test`)
+**Test Status**: 278 tests passing, 4 skipped (ver `npm test`)
 
-**Last Updated**: 2026-01-30 (Prompt 16 - ElevenLabs TTS Integration)
+**Last Updated**: 2026-01-30 (Prompt 17-A - Carnita Score + Eliminar Twitter/X)
 
 ## Prerequisites
 
@@ -48,12 +48,13 @@ npm test                 # Ejecutar tests
 
 **Test suites**:
 - `test:logger` (3), `test:services` (5), `test:video` (19), `test:content` (23), `test:design` (29)
-- `test:scoring` (19), `test:image-search` (23), `test:video-optimized` (22)
+- `test:scoring` (33), `test:image-search` (23), `test:video-optimized` (22)
 - `test:safeimage` (7), `test:cleanup` (8)
 - `test:orchestrator` (16), `test:notifications` (12), `test:notification-fix` (12)
 - `test:gemini` (27), `test:compliance` (18), `test:prompt15` (45 total)
 - `test:tts` (27), `test:prompt16` (27 total)
-- **Total**: 264 tests
+- `test:carnita` (14 nuevos en test:scoring)
+- **Total**: 278 tests
 
 Ver `README.md` para lista completa de scripts.
 
@@ -318,6 +319,37 @@ Ver `.env.example` y `SETUP-NOTIFICATIONS.md` para configuración completa.
 - Scripts: `test:tts`, `test:prompt16`
 - Requisitos: `ELEVENLABS_API_KEY` en .env, ffprobe para duración exacta
 
+**Prompt 17-A - Carnita Score + Eliminar Twitter/X (2026-01-30):**
+- Refactorización del sistema de scoring para eliminar dependencias de Twitter/X
+- **Eliminadas** métricas específicas: `twitterViews`, `twitterLikes`, `twitterRetweets`
+- **Agregadas** métricas genéricas: `views`, `likes`, `shares`, `comments`
+- Nuevo umbral de publicación: **75 pts** (antes 60)
+- Nuevos criterios "Carnita Score":
+  - `analyticalDepth` (0-25 pts): Profundidad analítica potencial
+  - `controversyPotential` (0-20 pts): Potencial de debate
+  - `substantiveContent` (0-15 pts): Penaliza clickbait
+- Score máximo teórico: 97 pts (antes 37)
+- Nuevas keywords en scoring-rules.ts:
+  - `ANALYTICAL_KEYWORDS` - Palabras de profundidad analítica
+  - `CONTROVERSY_KEYWORDS` - Palabras de controversia
+  - `CLICKBAIT_INDICATORS` - Indicadores de clickbait (penalización)
+  - `HIGH_IMPACT_ENTITIES` - Empresas/productos de alto impacto
+- Nuevos exports en news-scorer.ts:
+  - `selectPublishableNews()` - Selecciona noticia que supere umbral
+  - `PUBLISH_THRESHOLD` - Constante de umbral (75)
+- Campos nuevos en NewsScore:
+  - `isPublishable: boolean` - Si supera umbral
+  - `suggestedAngles: string[]` - Ángulos de análisis sugeridos
+  - `reasons: string[]` - Razones de la puntuación
+- Archivos modificados:
+  - `automation/src/types/scoring.types.ts` - Tipos refactorizados
+  - `automation/src/config/scoring-rules.ts` - Nuevas keywords
+  - `automation/src/news-scorer.ts` - Lógica de carnita
+  - `automation/src/orchestrator.ts` - metrics.views
+- **MANTENIDO**: `twitter:image` en OpenGraph (es estándar web, no scraping)
+- Scripts: `test:scoring`, `test:carnita`, `test:scoring-full`
+- 14 tests nuevos (33 total en prompt11-news-scoring.spec.ts)
+
 ## Pipeline de Publicación
 
 ### Orchestrator (9 pasos)
@@ -356,7 +388,7 @@ npm run automation:prod       # Producción (con notificaciones)
 
 ### Funcional (Real API)
 - News Collection (NewsData.io)
-- News Scoring (0-37 puntos)
+- **News Scoring "Carnita" (0-97 puntos, umbral 75)** ✅ Prompt 17-A
 - Image Search (multi-provider con caché)
 - Publication Calendar
 - Notification System (Email + Telegram)
@@ -369,7 +401,8 @@ npm run automation:prod       # Producción (con notificaciones)
 **Pendientes**:
 - ✅ **#15 Gemini + Persona "Alex Torres"** - COMPLETADO
 - ✅ **#16 ElevenLabs** - Josh voice + cache + fallback Edge-TTS - COMPLETADO
+- ✅ **#17-A Carnita Score** - Refactorizado scoring, eliminado Twitter/X - COMPLETADO
 - 🔜 **#17 Remotion CLI** - Integración real + primer video E2E
-- 📅 **#18 Content Scoring Avanzado** - Criterios analíticos
+- 📅 **#18 OCR + Thumbnails** - Extracción de texto de imágenes
 - 📅 **#19 Visual Identity** - Branding humanizado
 - 📅 **#20 YouTube Auto-Publishing** - API de publicación
