@@ -10,6 +10,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Test Status**: 198 tests passing (ver `npm test`)
 
+**Last Updated**: 2026-01-29 (Prompts 14, 14.1, 14.2, 14.2.1)
+
 ## Prerequisites
 
 - Node.js 18+
@@ -36,11 +38,20 @@ npm test                 # Ejecutar tests
 | View report | `npm run test:report` |
 | TypeScript check | `npm run check` |
 | Generate content | `npm run generate` |
+| Run orchestrator | `npm run automation:run` |
+| Dry run (no publish) | `npm run automation:dry` |
+| Force run (ignore schedule) | `npm run automation:force` |
+| Production mode | `npm run automation:prod` |
 | Preview in Remotion | `npm run dev` |
 | Render video | `npm run render` |
 | CI validation | `npm run ci:validate` |
 
-**Test suites**: `test:logger` (3), `test:services` (5), `test:video` (19), `test:content` (23), `test:design` (29), `test:scoring` (19), `test:image-search` (23), `test:video-optimized` (22), `test:orchestrator` (16), `test:notifications` (12), `test:notification-fix` (12)
+**Test suites**:
+- `test:logger` (3), `test:services` (5), `test:video` (19), `test:content` (23), `test:design` (29)
+- `test:scoring` (19), `test:image-search` (23), `test:video-optimized` (22)
+- `test:safeimage` (7), `test:cleanup` (8)
+- `test:orchestrator` (16), `test:notifications` (12), `test:notification-fix` (12)
+- **Total**: 198 tests
 
 Ver `README.md` para lista completa de scripts.
 
@@ -130,14 +141,26 @@ GitHub Actions (`.github/workflows/test.yml`):
 ## Environment Variables
 
 ```env
+# APIs
 GEMINI_API_KEY=...
 NEWSDATA_API_KEY=...
 ELEVENLABS_API_KEY=...
 ELEVENLABS_VOICE_ID=adam
+
+# Notificaciones (opcional)
+NOTIFICATION_EMAIL=your_email@gmail.com
+RESEND_API_KEY=re_xxxxxxxxxxxxx
+TELEGRAM_BOT_TOKEN=123456789:ABC-DEF
+TELEGRAM_CHAT_ID=123456789
+DASHBOARD_URL=http://localhost:3000
+DASHBOARD_SECRET=your_secret_key
+
+# Entorno
 NODE_ENV=development
+TEMP_STORAGE_PATH=./automation/temp/videos
 ```
 
-Ver `.env.example` para lista completa.
+Ver `.env.example` y `SETUP-NOTIFICATIONS.md` para configuración completa.
 
 ## Prompt History
 
@@ -241,11 +264,59 @@ Ver `.env.example` para lista completa.
   5. Usuario recibe confirmación
   6. Ctrl+C para salir
 
-**Fix Storage (Prompt 14.2.1):**
+**Prompt 14.2.1 - Fix Storage Temporal:**
 - Directorio temporal creado automáticamente (`automation/temp/videos/`)
 - Logging mejorado en callback handler para diagnóstico
 - Validaciones de existencia de archivos
 - Mensajes de error más descriptivos en Telegram
 - .gitkeep en directorio temporal
 
-**Pendientes**: #15 Gemini real, #16 Remotion CLI real, #17 OCR, #18 STT, #19 E2E completo
+## Pipeline de Publicación
+
+### Orchestrator (9 pasos)
+1. **check_schedule**: Validar si toca publicar según calendario
+2. **collect_news**: Obtener noticias de NewsData.io API
+3. **select_top**: Rankear y seleccionar mejor noticia (scoring)
+4. **generate_script**: Generar guion con Gemini API
+5. **search_images**: Buscar 3 imágenes (hero, context, outro)
+6. **generate_audio**: TTS con ElevenLabs
+7. **render_video**: Renderizar con Remotion
+8. **manual_approval**: Enviar notificaciones y esperar aprobación
+9. **publish**: Publicar en YouTube (pendiente)
+
+### Calendario de Publicación
+- Frecuencia: Cada 2 días
+- Días: Lunes, Miércoles, Viernes, Domingo
+- Hora: 14:00 (timezone del servidor)
+- Configuración: `automation/src/config/publication-calendar.ts`
+
+### Sistema de Notificaciones
+- **Email**: HTML profesional con preview y botones (Resend API)
+- **Telegram**: Mensaje con botones inline para aprobar/rechazar desde celular
+- **Callbacks**: Handler que escucha respuestas de Telegram en tiempo real
+- **Desarrollo**: Usa `onboarding@resend.dev` (dominio pre-verificado)
+- **Storage**: Metadata de videos en `automation/temp/videos/{videoId}.json`
+
+### CLI Options
+```bash
+npm run automation:run        # Modo normal (respeta calendario)
+npm run automation:dry        # Dry run (sin publicar)
+npm run automation:force      # Forzar ejecución (ignora calendario)
+npm run automation:prod       # Producción (con notificaciones)
+```
+
+## Estado de Implementación
+
+### Funcional (Real API)
+- News Collection (NewsData.io)
+- News Scoring (0-37 puntos)
+- Image Search (multi-provider con caché)
+- Publication Calendar
+- Notification System (Email + Telegram)
+
+### Mock (Tests pasando)
+- Script Generation (Gemini)
+- Audio Generation (ElevenLabs)
+- Video Rendering (Remotion CLI)
+
+**Pendientes**: #15 Gemini real, #16 ElevenLabs real, #17 Remotion CLI real, #18 OCR, #19 STT, #20 YouTube API

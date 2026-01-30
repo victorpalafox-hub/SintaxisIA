@@ -52,18 +52,31 @@ Sistema automatizado para generar videos cortos (YouTube Shorts) a partir de pro
 sintaxis-ia/
 ├── automation/                             # Content generation pipeline
 │   ├── src/
-│   │   ├── index.ts                       # Main orchestrator
-│   │   ├── config.ts                      # API configuration
-│   │   ├── codeValidator.ts               # Auto-review system
-│   │   ├── watcher.ts                     # File change monitor
+│   │   ├── orchestrator.ts                # Main pipeline coordinator
+│   │   ├── cli.ts                         # CLI with --dry, --force, --prod
+│   │   ├── index.ts                       # Legacy orchestrator
+│   │   ├── config/
+│   │   │   ├── publication-calendar.ts    # Publication schedule (every 2 days)
+│   │   │   ├── env.config.ts              # Environment configuration
+│   │   │   └── scoring-rules.ts           # News scoring rules
+│   │   ├── notifiers/
+│   │   │   ├── email-notifier.ts          # Resend email integration
+│   │   │   ├── telegram-notifier.ts       # Telegram bot integration
+│   │   │   ├── telegram-callback-handler.ts  # Approval callbacks
+│   │   │   └── notification-orchestrator.ts  # Notification coordinator
 │   │   ├── newsAPI.ts                     # NewsData.io integration
+│   │   ├── news-scorer.ts                 # News scoring system
 │   │   ├── scriptGen.ts                   # Gemini script generation
 │   │   ├── audioGen.ts                    # ElevenLabs audio generation
-│   │   ├── imageSearcher.ts               # Image search with fallback
+│   │   ├── image-searcher-v2.ts           # Multi-provider image search
+│   │   ├── image-providers/               # Clearbit, Logo.dev, Google, etc.
 │   │   ├── entityMapping.ts               # AI entity recognition
 │   │   └── dataContract.ts                # Remotion data structure
+│   ├── temp/videos/                       # Temporary video storage
+│   └── cache/images/                      # Image cache (7 days)
 │   └── utils/
 │       ├── logger.ts                      # Production logger
+│       ├── image-cache.ts                 # Image caching utility
 │       └── validators.ts                  # Input validation
 │
 ├── remotion-app/                          # Video rendering application
@@ -165,6 +178,10 @@ npm test
 |--------|-------------|
 | `npm run fetch` | Fetch news from NewsData.io |
 | `npm run generate` | Complete pipeline: news + script + audio |
+| `npm run automation:run` | Execute full orchestrator pipeline |
+| `npm run automation:dry` | Dry run without publishing |
+| `npm run automation:force` | Force run ignoring schedule |
+| `npm run automation:prod` | Production mode with notifications |
 | `npm run dev` | Open Remotion Studio for preview |
 | `npm run render` | Render full HD video (1080x1920) |
 | `npm run render:preview` | Render 10-second preview |
@@ -184,10 +201,19 @@ npm test
 
 | Script | Description |
 |--------|-------------|
-| `npm test` | Run all Playwright tests |
+| `npm test` | Run all Playwright tests (198 tests) |
 | `npm run test:ui` | Open Playwright UI mode (interactive) |
 | `npm run test:logger` | Run TestLogger validation tests (Prompt #5) |
 | `npm run test:demo` | Run Service Objects demo tests (Prompt #6) |
+| `npm run test:video` | Run Video Generation tests (Prompt #7) |
+| `npm run test:content` | Run Content Validation tests (Prompt #8) |
+| `npm run test:design` | Run Video Design tests (Prompt #10) |
+| `npm run test:scoring` | Run News Scoring tests (Prompt #11) |
+| `npm run test:image-search` | Run Image Search tests (Prompt #12) |
+| `npm run test:video-optimized` | Run Video Optimized tests (Prompt #13) |
+| `npm run test:orchestrator` | Run Orchestrator tests (Prompt #14) |
+| `npm run test:notifications` | Run Notifications tests (Prompt #14.1) |
+| `npm run test:notification-fix` | Run Notification Fix tests (Prompt #14.2) |
 | `npm run test:headed` | Run tests with visible browser |
 | `npm run test:debug` | Run tests in debug mode |
 | `npm run test:report` | Open HTML test report |
@@ -232,12 +258,24 @@ ELEVENLABS_API_KEY=your_elevenlabs_api_key
 ELEVENLABS_VOICE_ID=adam
 
 # ============================
+# Notifications (Optional)
+# ============================
+NOTIFICATION_EMAIL=your_email@gmail.com
+RESEND_API_KEY=re_xxxxxxxxxxxxx
+TELEGRAM_BOT_TOKEN=123456789:ABC-DEF
+TELEGRAM_CHAT_ID=123456789
+DASHBOARD_URL=http://localhost:3000
+DASHBOARD_SECRET=your_secret_key_here
+
+# ============================
 # Environment
 # ============================
 NODE_ENV=development          # development | staging | production
 LOG_LEVEL=debug               # debug | info | warn | error
 API_TIMEOUT=30000             # API timeout in milliseconds
 ```
+
+See `SETUP-NOTIFICATIONS.md` for detailed notification setup guide.
 
 ### Optional Variables
 
@@ -396,8 +434,16 @@ npm run test:report
 | Service Objects Demo (Prompt #6) | 5 | ✅ Passing |
 | Video Generation (Prompt #7) | 19 | ✅ Passing |
 | Content Validation (Prompt #8) | 23 | ✅ Passing |
-| Video Design (Prompt #10) | 27 | ✅ Passing |
-| **Total** | **77** | **✅ All Passing** |
+| Video Design (Prompt #10) | 29 | ✅ Passing |
+| News Scoring (Prompt #11) | 19 | ✅ Passing |
+| Image Search (Prompt #12) | 23 | ✅ Passing |
+| Video Optimized (Prompt #13) | 22 | ✅ Passing |
+| SafeImage Fix (Prompt #13.1) | 7 | ✅ Passing |
+| Cleanup Compositions (Prompt #13.2) | 8 | ✅ Passing |
+| Orchestrator (Prompt #14) | 16 | ✅ Passing |
+| Notifications (Prompt #14.1) | 12 | ✅ Passing |
+| Notification Fix (Prompt #14.2) | 12 | ✅ Passing |
+| **Total** | **198** | **✅ All Passing** |
 
 ### Completed (Prompts #4-10)
 
@@ -442,7 +488,21 @@ npm run test:report
 - `CONTENT_VALIDATION` - Script structure/length/quality rules
 - `MOCK_DELAYS` - Simulated delays for testing
 
-### Pending (Prompt #11+)
+### Completed (Prompts #11-14.2.1)
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| News Scoring System | ✅ Done | Rank news by importance (0-37 points) (Prompt #11) |
+| Image Search System | ✅ Done | Multi-provider fallback (Clearbit → Logo.dev → Google → Unsplash) (Prompt #12) |
+| Video Optimized | ✅ Done | 1 news per video, dynamic effects (zoom, blur, parallax) (Prompt #13) |
+| SafeImage Component | ✅ Done | CORS fallback with UI Avatars placeholders (Prompt #13.1) |
+| Compositions Cleanup | ✅ Done | Removed obsolete compositions (Prompt #13.2) |
+| Orchestrator Pipeline | ✅ Done | 9-step pipeline with publication calendar (Prompt #14) |
+| Notification System | ✅ Done | Email (Resend) + Telegram with approval buttons (Prompt #14.1) |
+| Notification Fix | ✅ Done | Callback handlers for local development (Prompt #14.2) |
+| Storage Fix | ✅ Done | Auto-create temp directories (Prompt #14.2.1) |
+
+### Pending (Prompt #15+)
 
 | Feature | Status | Description |
 |---------|--------|-------------|
