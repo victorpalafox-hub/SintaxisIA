@@ -13,6 +13,8 @@
     "preview:video": "cd remotion-app && npm run dev",
     "render:sample": "cd remotion-app && npm run render",
     "install:all": "npm install && cd automation && npm install && cd ../remotion-app && npm install",
+    "setup:hooks": "bash scripts/setup-hooks.sh",
+    "precommit:validate": "bash .githooks/pre-commit",
     "clean": "rimraf output/*.mp4 remotion-app/out",
     "validate": "cd automation && npm run validate",
     "watch": "cd automation && npm run watch",

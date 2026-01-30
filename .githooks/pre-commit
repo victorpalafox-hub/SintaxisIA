@@ -1,0 +1,48 @@
+#!/bin/bash
+# Pre-commit hook para SintaxisIA
+# Valida requisitos críticos antes de permitir commit
+
+echo "🔍 Ejecutando validaciones pre-commit..."
+
+ERRORS=0
+
+# 1. Verificar package-lock.json existe
+for lockfile in "package-lock.json" "automation/package-lock.json" "remotion-app/package-lock.json"; do
+    if [ ! -f "$lockfile" ]; then
+        echo "❌ ERROR: $lockfile no existe"
+        ERRORS=$((ERRORS + 1))
+    fi
+done
+
+# 2. Verificar package-lock.json NO está en .gitignore
+if grep -q "^package-lock.json$" .gitignore 2>/dev/null; then
+    echo "❌ ERROR: package-lock.json está en .gitignore"
+    ERRORS=$((ERRORS + 1))
+fi
+
+# 3. Verificar .env NO está siendo commiteado
+if git diff --cached --name-only | grep -qE "^\.env$"; then
+    echo "❌ ERROR: Intentando commitear .env"
+    ERRORS=$((ERRORS + 1))
+fi
+
+# 4. Verificar no hay archivos grandes (>5MB)
+for file in $(git diff --cached --name-only); do
+    if [ -f "$file" ]; then
+        size=$(wc -c < "$file" 2>/dev/null || echo 0)
+        if [ "$size" -gt 5242880 ]; then
+            echo "❌ ERROR: Archivo muy grande: $file ($(($size / 1048576))MB)"
+            ERRORS=$((ERRORS + 1))
+        fi
+    fi
+done
+
+# Resultado
+if [ $ERRORS -gt 0 ]; then
+    echo ""
+    echo "🚫 Commit bloqueado: $ERRORS error(es)"
+    exit 1
+fi
+
+echo "✅ Validaciones OK"
+exit 0
