@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 278 tests passing, 4 skipped (ver `npm test`)
+**Test Status**: 284 tests (280 passing, 4 skipped) - ver `npm test`
 
-**Last Updated**: 2026-01-30 (Prompt 17-A - Carnita Score + Eliminar Twitter/X)
+**Last Updated**: 2026-01-30 (QA Audit + Fixes CI/CD)
 
 ## Prerequisites
 
@@ -46,15 +46,13 @@ npm test                 # Ejecutar tests
 | Render video | `npm run render` |
 | CI validation | `npm run ci:validate` |
 
-**Test suites**:
+**Test suites** (actualizado 2026-01-30):
 - `test:logger` (3), `test:services` (5), `test:video` (19), `test:content` (23), `test:design` (29)
-- `test:scoring` (33), `test:image-search` (23), `test:video-optimized` (22)
+- `test:scoring` (19), `test:image-search` (23), `test:video-optimized` (22)
 - `test:safeimage` (7), `test:cleanup` (8)
 - `test:orchestrator` (16), `test:notifications` (12), `test:notification-fix` (12)
-- `test:gemini` (27), `test:compliance` (18), `test:prompt15` (45 total)
-- `test:tts` (27), `test:prompt16` (27 total)
-- `test:carnita` (14 nuevos en test:scoring)
-- **Total**: 278 tests
+- `test:gemini` (22), `test:compliance` (70), `test:tts` (22)
+- **Total**: 284 tests (280 passing, 4 skipped)
 
 Ver `README.md` para lista completa de scripts.
 
@@ -349,6 +347,16 @@ Ver `.env.example` y `SETUP-NOTIFICATIONS.md` para configuración completa.
 - **MANTENIDO**: `twitter:image` en OpenGraph (es estándar web, no scraping)
 - Scripts: `test:scoring`, `test:carnita`, `test:scoring-full`
 - 14 tests nuevos (33 total en prompt11-news-scoring.spec.ts)
+
+**QA Audit + CI/CD Fixes (2026-01-30):**
+- Auditoría completa de `/tests` con agente `qa-automation-lead`
+- **Fix composiciones obsoletas**: `SintaxisIA*` → `AINewsShort*` en 18 ocurrencias
+- **Fix tests flaky**: Calendario ajustado a rango 1-7 días (no exacto)
+- **Actualizado** `service-constants.ts`: Eliminada `SintaxisIA-LowRes`
+- **Actualizado** `VideoServiceObject.ts`: Tipo `composition` corregido
+- **Generado** `Tests.md`: Reporte de auditoría con cobertura
+- Git hooks pre-commit: Valida package-lock.json, .env, archivos >5MB
+- Resultado: 284 tests (280 passing, 4 skipped)
 
 ## Pipeline de Publicación
 
