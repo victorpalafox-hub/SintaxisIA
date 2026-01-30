@@ -44,6 +44,7 @@ import {
 import { selectTopNews } from './news-scorer';
 import { searchImagesV2 } from './image-searcher-v2';
 import { ScriptGenerator } from './scriptGen';
+import { ttsService } from './services/tts.service';
 import { notifyVideoReady, notifyPipelineError } from './notifiers';
 import {
   OrchestratorConfig,
@@ -258,22 +259,39 @@ export async function runPipeline(
     });
 
     // ==========================================
-    // PASO 6: GENERAR AUDIO
+    // PASO 6: GENERAR AUDIO (ElevenLabs TTS - Prompt 16)
     // ==========================================
     const audioStep = await executeStep('generate_audio', steps, async () => {
       console.log('🎵 PASO 6: Generando audio TTS...');
 
-      const { fullScript } = scriptStep.data as { generatedScript: GeneratedScript; fullScript: string };
+      const { fullScript, generatedScript } = scriptStep.data as { generatedScript: GeneratedScript; fullScript: string };
 
-      // TODO: Implementar en Prompt 16 con ElevenLabs
-      // const audioUrl = await generateAudio(fullScript);
+      // Verificar cuota antes de generar
+      const quotaStatus = await ttsService.getQuotaStatus();
+      console.log(`   📊 Cuota TTS: ${quotaStatus.used}/${quotaStatus.limit} chars (${quotaStatus.percentageUsed.toFixed(1)}%)`);
 
-      // Mock por ahora
-      const mockAudioUrl = 'file://output/audio/narration_mock.mp3';
+      if (quotaStatus.nearLimit) {
+        console.log('   ⚠️  Cerca del límite de cuota mensual');
+      }
 
-      console.log(`   ✅ Audio generado (mock): ${mockAudioUrl}`);
-      console.log(`   📊 Script length: ${fullScript.length} chars`);
-      return mockAudioUrl;
+      // Generar audio con TTS Service
+      const ttsResult = await ttsService.generateAudio({
+        text: fullScript,
+        outputFileName: `narration_${Date.now()}.mp3`,
+      });
+
+      console.log(`   ✅ Audio generado: ${ttsResult.audioPath}`);
+      console.log(`   🎙️  Proveedor: ${ttsResult.provider}`);
+      console.log(`   ⏱️  Duración: ${ttsResult.durationSeconds.toFixed(1)}s`);
+      console.log(`   📦 Cache: ${ttsResult.fromCache ? 'Sí' : 'No'}`);
+      console.log(`   📊 Caracteres: ${ttsResult.charactersUsed}`);
+
+      return {
+        audioPath: ttsResult.audioPath,
+        durationSeconds: ttsResult.durationSeconds,
+        provider: ttsResult.provider,
+        fromCache: ttsResult.fromCache,
+      };
     });
 
     // ==========================================
@@ -285,7 +303,8 @@ export async function runPipeline(
       const { news, score } = topNewsStep.data as { news: NewsItem; score: NewsScore };
       const { generatedScript, fullScript } = scriptStep.data as { generatedScript: GeneratedScript; fullScript: string };
       const images = imagesStep.data as ImageSearchResult;
-      const audioUrl = audioStep.data as string;
+      const audioData = audioStep.data as { audioPath: string; durationSeconds: number; provider: string; fromCache: boolean };
+      const audioUrl = audioData.audioPath;
 
       // TODO: Implementar en Prompt 16 con Remotion CLI
       // const videoPath = await renderVideo({ news, script: generatedScript, images, audioUrl });
@@ -305,7 +324,9 @@ export async function runPipeline(
         script: fullScript,
         generatedScript, // Script estructurado con compliance report
         audioUrl,
-        duration: generatedScript.duration || 55,
+        audioDuration: audioData.durationSeconds,
+        audioProvider: audioData.provider,
+        duration: audioData.durationSeconds || generatedScript.duration || 55,
         generatedAt: new Date(),
         youtubeTitle: generateYouTubeTitle(news),
         youtubeDescription: generateYouTubeDescription(news, fullScript),

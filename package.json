@@ -73,7 +73,10 @@
 
     "test:gemini": "playwright test tests/specs/prompt15-gemini-real.spec.ts",
     "test:compliance": "playwright test tests/specs/prompt15-compliance.spec.ts",
-    "test:prompt15": "playwright test tests/specs/prompt15-*.spec.ts"
+    "test:prompt15": "playwright test tests/specs/prompt15-*.spec.ts",
+
+    "test:tts": "playwright test tests/specs/prompt16-tts.spec.ts",
+    "test:prompt16": "playwright test tests/specs/prompt16-*.spec.ts"
   },
   "keywords": [
     "youtube",

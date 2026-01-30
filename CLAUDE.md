@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 239 tests passing, 2 skipped (ver `npm test`)
+**Test Status**: 264 tests passing, 4 skipped (ver `npm test`)
 
-**Last Updated**: 2026-01-30 (Prompt 15 - Gemini Script Generation)
+**Last Updated**: 2026-01-30 (Prompt 16 - ElevenLabs TTS Integration)
 
 ## Prerequisites
 
@@ -52,7 +52,8 @@ npm test                 # Ejecutar tests
 - `test:safeimage` (7), `test:cleanup` (8)
 - `test:orchestrator` (16), `test:notifications` (12), `test:notification-fix` (12)
 - `test:gemini` (27), `test:compliance` (18), `test:prompt15` (45 total)
-- **Total**: 239 tests
+- `test:tts` (27), `test:prompt16` (27 total)
+- **Total**: 264 tests
 
 Ver `README.md` para lista completa de scripts.
 
@@ -183,7 +184,8 @@ Ver `.env.example` y `SETUP-NOTIFICATIONS.md` para configuración completa.
 | 14 | Orchestrator + Calendario de Publicación | 16 |
 | 14.1 | Sistema de Notificaciones (Email + Telegram) | 12 |
 | 14.2 | Fix Notificaciones (callbacks + dominio Resend) | 12 |
-| 15 | Gemini Script Generation + Alex Torres Persona + Compliance | 36 |
+| 15 | Gemini Script Generation + Alex Torres Persona + Compliance | 45 |
+| 16 | ElevenLabs TTS + Cache + Fallback Edge-TTS | 27 |
 
 **Prompt 11 - News Scoring (2026-01-29):**
 - Sistema de puntuación para rankear noticias (0-37 pts)
@@ -297,6 +299,25 @@ Ver `.env.example` y `SETUP-NOTIFICATIONS.md` para configuración completa.
 - Scripts: `test:gemini`, `test:compliance`, `test:prompt15`
 - Test manual de API: `cd automation && node test-gemini.js`
 
+**Prompt 16 - ElevenLabs TTS Integration (2026-01-30):**
+- Integración REAL con ElevenLabs API (modelo: `eleven_multilingual_v2`)
+- Voz Josh (TxGEqnHWrfWFTfGW9XjX) - slow, natural, calm
+- Gestión de cuota free tier (10,000 chars/mes)
+- Sistema de cache para evitar regenerar audios idénticos
+- Fallback automático a Edge-TTS (es-MX-JorgeNeural) si:
+  - API key no configurada
+  - Cuota excedida
+  - Error de API
+- Auto-reset de cuota al cambiar de mes
+- Archivos:
+  - `automation/src/config/tts.config.ts` - Configuración centralizada
+  - `automation/src/types/tts.types.ts` - Tipos TypeScript
+  - `automation/src/services/tts.service.ts` - TTSService class
+  - `tests/specs/prompt16-tts.spec.ts` - 27 tests
+- Integración con orchestrator (paso 6 actualizado)
+- Scripts: `test:tts`, `test:prompt16`
+- Requisitos: `ELEVENLABS_API_KEY` en .env, ffprobe para duración exacta
+
 ## Pipeline de Publicación
 
 ### Orchestrator (9 pasos)
@@ -340,14 +361,14 @@ npm run automation:prod       # Producción (con notificaciones)
 - Publication Calendar
 - Notification System (Email + Telegram)
 - **Script Generation (Gemini 2.5 Flash)** ✅ Prompt 15
+- **Audio Generation (ElevenLabs + Edge-TTS fallback)** ✅ Prompt 16
 
 ### Mock (Tests pasando)
-- Audio Generation (ElevenLabs)
 - Video Rendering (Remotion CLI)
 
 **Pendientes**:
 - ✅ **#15 Gemini + Persona "Alex Torres"** - COMPLETADO
-- 🔜 **#16 ElevenLabs** - Josh voice "Slow, Natural, Calm"
+- ✅ **#16 ElevenLabs** - Josh voice + cache + fallback Edge-TTS - COMPLETADO
 - 🔜 **#17 Remotion CLI** - Integración real + primer video E2E
 - 📅 **#18 Content Scoring Avanzado** - Criterios analíticos
 - 📅 **#19 Visual Identity** - Branding humanizado

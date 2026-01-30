@@ -25,6 +25,7 @@ build/
 output/
 out/
 remotion-app/out/
+cache/
 *.mp4
 *.mp3
 *.wav

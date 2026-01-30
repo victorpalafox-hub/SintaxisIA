@@ -189,6 +189,18 @@ export interface VideoMetadata {
   /** URL del audio generado */
   audioUrl?: string;
 
+  /**
+   * Duración del audio en segundos
+   * @since Prompt 16
+   */
+  audioDuration?: number;
+
+  /**
+   * Proveedor de TTS usado (elevenlabs | edge-tts)
+   * @since Prompt 16
+   */
+  audioProvider?: string;
+
   /** Duración del video en segundos */
   duration: number;
 
