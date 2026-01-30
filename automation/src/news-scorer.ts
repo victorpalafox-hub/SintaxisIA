@@ -1,15 +1,22 @@
 /**
- * @fileoverview News Scorer - Sistema de Puntuación de Noticias
+ * @fileoverview News Scorer - Sistema de Puntuación "Carnita Score"
  *
  * Evalúa y rankea noticias de IA por importancia usando múltiples criterios.
  * Solo las noticias con mayor score se publican (1 cada 2 días).
  *
- * Sistema de puntuación:
+ * Sistema de puntuación original (Prompt 11):
  * - Empresa (0-10 pts): OpenAI/Google = 10, Startups desconocidas = 3
  * - Tipo (0-9 pts): Lanzamientos = 9, Partnerships = 4
  * - Engagement (0-8 pts): Viral >500K = 8, Bajo <1K = 0
  * - Frescura (-5 a +3 pts): <6h = +3, >3días = -5
  * - Impacto (0-7 pts): Keywords "revolutionary", "AGI", etc.
+ *
+ * Criterios "Carnita" agregados (Prompt 17-A):
+ * - Profundidad Analítica (0-25 pts): Potencial para análisis humano
+ * - Controversia (0-20 pts): Potencial de debate
+ * - Contenido Sustantivo (0-15 pts): Penaliza clickbait
+ *
+ * Umbral mínimo para publicar: 75 pts (antes 60)
  *
  * @example
  * ```typescript
@@ -21,12 +28,13 @@
  * ```
  *
  * @author Sintaxis IA
- * @version 1.0.0
+ * @version 2.0.0
  * @since Prompt 11
+ * @updated Prompt 17-A - Refactorización "Carnita Score"
  */
 
 import { NewsItem } from './types/news.types';
-import { NewsScore, NewsType } from './types/scoring.types';
+import { NewsScore, NewsType, PUBLISH_THRESHOLD } from './types/scoring.types';
 import {
   COMPANY_SCORES,
   NEWS_TYPE_SCORES,
@@ -34,6 +42,11 @@ import {
   HIGH_IMPACT_KEYWORDS,
   FRESHNESS_THRESHOLDS,
   FRESHNESS_SCORES,
+  // Nuevos imports Prompt 17-A
+  ANALYTICAL_KEYWORDS,
+  CONTROVERSY_KEYWORDS,
+  CLICKBAIT_INDICATORS,
+  HIGH_IMPACT_ENTITIES,
 } from './config/scoring-rules';
 
 // =============================================================================
@@ -41,39 +54,70 @@ import {
 // =============================================================================
 
 /**
- * Calcula el score total de una noticia
+ * Calcula el score total de una noticia ("Carnita Score")
  *
- * Evalúa la noticia en 5 categorías y devuelve el score total
+ * Evalúa la noticia en 8 categorías y devuelve el score total
  * junto con el desglose por categoría.
  *
  * @param news - Noticia a evaluar
- * @returns Score total y desglose por categoría
+ * @returns Score total, desglose, isPublishable, ángulos sugeridos
  *
  * @example
  * ```typescript
  * const score = scoreNews({
  *   id: '1',
- *   title: 'OpenAI launches GPT-5',
+ *   title: 'OpenAI launches GPT-5 with implications for the future',
  *   company: 'OpenAI',
  *   type: 'product-launch',
  *   publishedAt: new Date(),
  *   ...
  * });
- * console.log(score.totalScore); // 22 (10+9+0+3+0)
+ * console.log(score.totalScore); // 85
+ * console.log(score.isPublishable); // true (>= 75)
  * ```
  */
 export function scoreNews(news: NewsItem): NewsScore {
-  // Calcular score de cada categoría
+  // Arrays para acumular razones y ángulos
+  const reasons: string[] = [];
+  const suggestedAngles: string[] = [];
+
+  // Combinar texto para análisis
+  const fullText = `${news.title} ${news.description || ''}`.toLowerCase();
+
+  // Calcular score de cada categoría (original Prompt 11)
+  const companyRelevance = calculateCompanyScore(news.company);
+  const newsType = calculateTypeScore(news.type);
+  const engagement = calculateEngagementScore(news.metrics);
+  const freshness = calculateFreshnessScore(news.publishedAt);
+  const impact = estimateImpact(news);
+
+  // Calcular nuevos criterios "Carnita" (Prompt 17-A)
+  const analyticalDepth = calculateAnalyticalDepth(fullText, news, reasons, suggestedAngles);
+  const controversyPotential = calculateControversyPotential(fullText, reasons, suggestedAngles);
+  const substantiveContent = calculateSubstantiveContent(fullText, news, reasons);
+
+  // Agregar razones de los criterios originales
+  if (companyRelevance >= 10) reasons.push(`Empresa Tier 1: ${news.company}`);
+  else if (companyRelevance >= 8) reasons.push(`Empresa Tier 2: ${news.company}`);
+  if (newsType >= 8) reasons.push(`Tipo de noticia alto valor: ${news.type}`);
+  if (engagement >= 5) reasons.push(`Alto engagement: ${news.metrics?.views || 0} views`);
+  if (freshness >= 2) reasons.push('Noticia reciente');
+  if (impact >= 4) reasons.push('Keywords de alto impacto detectadas');
+
   const breakdown = {
-    companyRelevance: calculateCompanyScore(news.company),
-    newsType: calculateTypeScore(news.type),
-    engagement: calculateEngagementScore(news.metrics),
-    freshness: calculateFreshnessScore(news.publishedAt),
-    impact: estimateImpact(news),
+    companyRelevance,
+    newsType,
+    engagement,
+    freshness,
+    impact,
+    analyticalDepth,
+    controversyPotential,
+    substantiveContent,
   };
 
   // Sumar todos los scores
   const totalScore = Object.values(breakdown).reduce((sum, val) => sum + val, 0);
+  const isPublishable = totalScore >= PUBLISH_THRESHOLD;
 
   return {
     newsId: news.id,
@@ -81,11 +125,14 @@ export function scoreNews(news: NewsItem): NewsScore {
     totalScore,
     breakdown,
     rankedAt: new Date(),
+    isPublishable,
+    suggestedAngles: [...new Set(suggestedAngles)], // Eliminar duplicados
+    reasons,
   };
 }
 
 // =============================================================================
-// FUNCIONES DE CÁLCULO POR CATEGORÍA
+// FUNCIONES DE CÁLCULO - CRITERIOS ORIGINALES (Prompt 11)
 // =============================================================================
 
 /**
@@ -143,7 +190,7 @@ function calculateTypeScore(type?: NewsType): number {
 }
 
 /**
- * Calcula score por engagement en redes sociales
+ * Calcula score por engagement (views genéricos)
  *
  * >500K views = 8 pts (viral)
  * >100K views = 7 pts (alto)
@@ -154,17 +201,21 @@ function calculateTypeScore(type?: NewsType): number {
  *
  * @param metrics - Métricas de engagement
  * @returns Score de 0-8
+ *
+ * @updated Prompt 17-A - Usa metrics.views en lugar de twitterViews
  */
 function calculateEngagementScore(metrics?: {
-  twitterViews?: number;
-  twitterLikes?: number;
+  views?: number;
+  likes?: number;
+  shares?: number;
+  comments?: number;
   redditUpvotes?: number;
 }): number {
   // Sin métricas = 0 puntos
   if (!metrics) return 0;
 
-  // Usar views como métrica principal
-  const views = metrics.twitterViews || 0;
+  // Usar views como métrica principal (genérico, no específico de Twitter)
+  const views = metrics.views || 0;
 
   // Asignar score según umbrales
   if (views >= ENGAGEMENT_THRESHOLDS.viral) return 8;
@@ -238,6 +289,147 @@ function estimateImpact(news: NewsItem): number {
 }
 
 // =============================================================================
+// FUNCIONES DE CÁLCULO - CRITERIOS "CARNITA" (Prompt 17-A)
+// =============================================================================
+
+/**
+ * Calcula profundidad analítica potencial (0-25 pts)
+ *
+ * Evalúa si la noticia tiene sustancia para análisis humano profundo.
+ * - +3 pts por keyword analítica (máx 15)
+ * - +5 pts bonus por comparaciones/competencia
+ * - +5 pts bonus por implicaciones futuras
+ *
+ * @param text - Texto combinado de la noticia (lowercase)
+ * @param news - Noticia original
+ * @param reasons - Array para agregar razones
+ * @param angles - Array para agregar ángulos sugeridos
+ * @returns Score de 0-25
+ *
+ * @since Prompt 17-A
+ */
+function calculateAnalyticalDepth(
+  text: string,
+  news: NewsItem,
+  reasons: string[],
+  angles: string[]
+): number {
+  let score = 0;
+
+  // Contar keywords analíticas
+  const matches = ANALYTICAL_KEYWORDS.filter(kw => text.includes(kw.toLowerCase()));
+  score += Math.min(matches.length * 3, 15);
+
+  if (matches.length > 0) {
+    reasons.push(`${matches.length} términos de profundidad analítica`);
+  }
+
+  // Bonus si menciona comparaciones o competencia
+  if (text.includes('vs') || text.includes('versus') || text.includes('comparado') || text.includes('compared')) {
+    score += 5;
+    angles.push('Análisis comparativo con competidores');
+  }
+
+  // Bonus si tiene implicaciones futuras
+  if (text.includes('futuro') || text.includes('future') || text.includes('próximo') || text.includes('implications')) {
+    score += 5;
+    angles.push('Implicaciones para el futuro de la industria');
+  }
+
+  // Bonus por entidades de alto impacto mencionadas
+  const entityMatches = HIGH_IMPACT_ENTITIES.filter(entity =>
+    text.includes(entity.toLowerCase())
+  );
+  if (entityMatches.length >= 2) {
+    score += 3;
+    reasons.push(`Múltiples entidades de impacto: ${entityMatches.slice(0, 3).join(', ')}`);
+  }
+
+  return Math.min(score, 25);
+}
+
+/**
+ * Calcula potencial de controversia/debate (0-20 pts)
+ *
+ * Evalúa si la noticia genera discusión interesante.
+ * - +4 pts por keyword de controversia (máx 15)
+ * - +5 pts bonus por críticas/problemas
+ *
+ * @param text - Texto combinado de la noticia (lowercase)
+ * @param reasons - Array para agregar razones
+ * @param angles - Array para agregar ángulos sugeridos
+ * @returns Score de 0-20
+ *
+ * @since Prompt 17-A
+ */
+function calculateControversyPotential(
+  text: string,
+  reasons: string[],
+  angles: string[]
+): number {
+  let score = 0;
+
+  const matches = CONTROVERSY_KEYWORDS.filter(kw => text.includes(kw.toLowerCase()));
+  score += Math.min(matches.length * 4, 15);
+
+  if (matches.length > 0) {
+    reasons.push(`Potencial de debate: ${matches.slice(0, 3).join(', ')}`);
+    angles.push('Perspectivas encontradas sobre el tema');
+  }
+
+  // Bonus si menciona críticas o problemas
+  if (text.includes('crítica') || text.includes('criticism') || text.includes('problema') || text.includes('problem')) {
+    score += 5;
+    angles.push('Análisis crítico de las limitaciones');
+  }
+
+  return Math.min(score, 20);
+}
+
+/**
+ * Calcula contenido sustantivo vs clickbait (0-15 pts)
+ *
+ * Empieza con 15 pts y resta por indicadores de clickbait.
+ * Bonus por contenido largo y sustancial.
+ *
+ * @param text - Texto combinado de la noticia (lowercase)
+ * @param news - Noticia original
+ * @param reasons - Array para agregar razones
+ * @returns Score de 0-15
+ *
+ * @since Prompt 17-A
+ */
+function calculateSubstantiveContent(
+  text: string,
+  news: NewsItem,
+  reasons: string[]
+): number {
+  let score = 15; // Empezar con máximo y restar por clickbait
+
+  // Penalizar indicadores de clickbait
+  const clickbaitMatches = CLICKBAIT_INDICATORS.filter(ind =>
+    text.includes(ind.toLowerCase())
+  );
+  score -= clickbaitMatches.length * 3;
+
+  if (clickbaitMatches.length > 0) {
+    reasons.push(`Clickbait detectado: -${clickbaitMatches.length * 3} pts`);
+  }
+
+  // Bonus por contenido largo (más sustancia)
+  const contentLength = (news.description || '').length;
+  if (contentLength > 500) {
+    score += 3;
+    reasons.push('Contenido sustancial (> 500 caracteres)');
+  } else if (contentLength < 100) {
+    score -= 3;
+    reasons.push('Contenido muy corto (< 100 caracteres)');
+  }
+
+  return Math.max(0, Math.min(score, 15));
+}
+
+// =============================================================================
 // FUNCIONES DE RANKING Y SELECCIÓN
 // =============================================================================
 
@@ -299,12 +491,12 @@ export function selectTopNews(
  * Filtra noticias que superen un umbral de score
  *
  * @param newsItems - Array de noticias
- * @param minScore - Score mínimo requerido
+ * @param minScore - Score mínimo requerido (default: PUBLISH_THRESHOLD)
  * @returns Noticias que superan el umbral, ordenadas por score
  */
 export function filterByScore(
   newsItems: NewsItem[],
-  minScore: number
+  minScore: number = PUBLISH_THRESHOLD
 ): { news: NewsItem; score: NewsScore }[] {
   const ranked = rankNews(newsItems);
 
@@ -317,10 +509,30 @@ export function filterByScore(
     .filter(item => item.news !== undefined);
 }
 
+/**
+ * Selecciona la mejor noticia que sea publicable (score >= 75)
+ *
+ * @param newsItems - Array de noticias
+ * @returns Noticia publicable con mayor score, o null
+ *
+ * @since Prompt 17-A
+ */
+export function selectPublishableNews(
+  newsItems: NewsItem[]
+): { news: NewsItem; score: NewsScore } | null {
+  const publishable = filterByScore(newsItems, PUBLISH_THRESHOLD);
+
+  if (publishable.length === 0) return null;
+
+  return publishable[0];
+}
+
 // Exports por defecto para facilitar imports
 export default {
   scoreNews,
   rankNews,
   selectTopNews,
   filterByScore,
+  selectPublishableNews,
+  PUBLISH_THRESHOLD,
 };

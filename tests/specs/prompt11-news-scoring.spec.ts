@@ -506,3 +506,351 @@ test.describe('Suite 5: Documentation', () => {
     expect(hasPointsComments).toBe(true);
   });
 });
+
+// =============================================================================
+// SUITE 6: CRITERIOS "CARNITA" - Prompt 17-A
+// =============================================================================
+
+test.describe('Suite 6: Carnita Score Criteria (Prompt 17-A)', () => {
+  let logger: TestLogger;
+
+  test.beforeEach(() => {
+    logger = new TestLogger({ testName: 'CarnitaScoreTests' });
+  });
+
+  /**
+   * Verifica que scoring-rules tiene keywords analíticas
+   */
+  test('should define ANALYTICAL_KEYWORDS', async () => {
+    logger.info('Verificando keywords analíticas');
+
+    const filePath = path.join(AUTOMATION_SRC, 'config', 'scoring-rules.ts');
+    const content = fs.readFileSync(filePath, 'utf-8');
+
+    const hasExport = content.includes('export const ANALYTICAL_KEYWORDS');
+    const hasFuturo = content.includes("'futuro'");
+    const hasImplications = content.includes("'implications'");
+
+    logger.logValidationResults({
+      validator: 'AnalyticalKeywords',
+      passed: hasExport && hasFuturo && hasImplications,
+      details: { hasExport, hasFuturo, hasImplications },
+    });
+
+    expect(hasExport).toBe(true);
+    expect(hasFuturo).toBe(true);
+    expect(hasImplications).toBe(true);
+  });
+
+  /**
+   * Verifica que scoring-rules tiene keywords de controversia
+   */
+  test('should define CONTROVERSY_KEYWORDS', async () => {
+    logger.info('Verificando keywords de controversia');
+
+    const filePath = path.join(AUTOMATION_SRC, 'config', 'scoring-rules.ts');
+    const content = fs.readFileSync(filePath, 'utf-8');
+
+    const hasExport = content.includes('export const CONTROVERSY_KEYWORDS');
+    const hasDebate = content.includes("'debate'");
+    const hasLayoff = content.includes("'layoff'");
+
+    logger.logValidationResults({
+      validator: 'ControversyKeywords',
+      passed: hasExport && hasDebate && hasLayoff,
+      details: { hasExport, hasDebate, hasLayoff },
+    });
+
+    expect(hasExport).toBe(true);
+    expect(hasDebate).toBe(true);
+    expect(hasLayoff).toBe(true);
+  });
+
+  /**
+   * Verifica que scoring-rules tiene indicadores de clickbait
+   */
+  test('should define CLICKBAIT_INDICATORS', async () => {
+    logger.info('Verificando indicadores de clickbait');
+
+    const filePath = path.join(AUTOMATION_SRC, 'config', 'scoring-rules.ts');
+    const content = fs.readFileSync(filePath, 'utf-8');
+
+    const hasExport = content.includes('export const CLICKBAIT_INDICATORS');
+    const hasIncreible = content.includes("'increíble'");
+    const hasBreaking = content.includes("'BREAKING'");
+
+    logger.logValidationResults({
+      validator: 'ClickbaitIndicators',
+      passed: hasExport && hasIncreible && hasBreaking,
+      details: { hasExport, hasIncreible, hasBreaking },
+    });
+
+    expect(hasExport).toBe(true);
+    expect(hasIncreible).toBe(true);
+    expect(hasBreaking).toBe(true);
+  });
+
+  /**
+   * Verifica que scoring-rules tiene entidades de alto impacto
+   */
+  test('should define HIGH_IMPACT_ENTITIES', async () => {
+    logger.info('Verificando entidades de alto impacto');
+
+    const filePath = path.join(AUTOMATION_SRC, 'config', 'scoring-rules.ts');
+    const content = fs.readFileSync(filePath, 'utf-8');
+
+    const hasExport = content.includes('export const HIGH_IMPACT_ENTITIES');
+    const hasOpenAI = content.includes("'OpenAI'");
+    const hasSamAltman = content.includes("'Sam Altman'");
+
+    logger.logValidationResults({
+      validator: 'HighImpactEntities',
+      passed: hasExport && hasOpenAI && hasSamAltman,
+      details: { hasExport, hasOpenAI, hasSamAltman },
+    });
+
+    expect(hasExport).toBe(true);
+    expect(hasOpenAI).toBe(true);
+    expect(hasSamAltman).toBe(true);
+  });
+});
+
+// =============================================================================
+// SUITE 7: NEWS SCORER CARNITA FUNCTIONS - Prompt 17-A
+// =============================================================================
+
+test.describe('Suite 7: News Scorer Carnita Functions (Prompt 17-A)', () => {
+  let logger: TestLogger;
+
+  test.beforeEach(() => {
+    logger = new TestLogger({ testName: 'NewsScorerCarnitaTests' });
+  });
+
+  /**
+   * Verifica que news-scorer calcula analyticalDepth
+   */
+  test('should calculate analyticalDepth in breakdown', async () => {
+    logger.info('Verificando cálculo de analyticalDepth');
+
+    const filePath = path.join(AUTOMATION_SRC, 'news-scorer.ts');
+    const content = fs.readFileSync(filePath, 'utf-8');
+
+    const hasFunction = content.includes('calculateAnalyticalDepth');
+    const hasInBreakdown = content.includes('analyticalDepth');
+
+    logger.logValidationResults({
+      validator: 'AnalyticalDepthCalc',
+      passed: hasFunction && hasInBreakdown,
+      details: { hasFunction, hasInBreakdown },
+    });
+
+    expect(hasFunction).toBe(true);
+    expect(hasInBreakdown).toBe(true);
+  });
+
+  /**
+   * Verifica que news-scorer calcula controversyPotential
+   */
+  test('should calculate controversyPotential in breakdown', async () => {
+    logger.info('Verificando cálculo de controversyPotential');
+
+    const filePath = path.join(AUTOMATION_SRC, 'news-scorer.ts');
+    const content = fs.readFileSync(filePath, 'utf-8');
+
+    const hasFunction = content.includes('calculateControversyPotential');
+    const hasInBreakdown = content.includes('controversyPotential');
+
+    logger.logValidationResults({
+      validator: 'ControversyPotentialCalc',
+      passed: hasFunction && hasInBreakdown,
+      details: { hasFunction, hasInBreakdown },
+    });
+
+    expect(hasFunction).toBe(true);
+    expect(hasInBreakdown).toBe(true);
+  });
+
+  /**
+   * Verifica que news-scorer calcula substantiveContent
+   */
+  test('should calculate substantiveContent in breakdown', async () => {
+    logger.info('Verificando cálculo de substantiveContent');
+
+    const filePath = path.join(AUTOMATION_SRC, 'news-scorer.ts');
+    const content = fs.readFileSync(filePath, 'utf-8');
+
+    const hasFunction = content.includes('calculateSubstantiveContent');
+    const hasInBreakdown = content.includes('substantiveContent');
+
+    logger.logValidationResults({
+      validator: 'SubstantiveContentCalc',
+      passed: hasFunction && hasInBreakdown,
+      details: { hasFunction, hasInBreakdown },
+    });
+
+    expect(hasFunction).toBe(true);
+    expect(hasInBreakdown).toBe(true);
+  });
+
+  /**
+   * Verifica que news-scorer exporta selectPublishableNews
+   */
+  test('should export selectPublishableNews function', async () => {
+    logger.info('Verificando export de selectPublishableNews');
+
+    const filePath = path.join(AUTOMATION_SRC, 'news-scorer.ts');
+    const content = fs.readFileSync(filePath, 'utf-8');
+
+    const hasExport = content.includes('export function selectPublishableNews');
+
+    logger.logValidationResults({
+      validator: 'SelectPublishableNewsExport',
+      passed: hasExport,
+      details: { hasExport },
+    });
+
+    expect(hasExport).toBe(true);
+  });
+
+  /**
+   * Verifica que news-scorer usa PUBLISH_THRESHOLD
+   */
+  test('should use PUBLISH_THRESHOLD constant', async () => {
+    logger.info('Verificando uso de PUBLISH_THRESHOLD');
+
+    const filePath = path.join(AUTOMATION_SRC, 'news-scorer.ts');
+    const content = fs.readFileSync(filePath, 'utf-8');
+
+    const importsThreshold = content.includes('PUBLISH_THRESHOLD');
+    const usesInCode = content.includes('>= PUBLISH_THRESHOLD');
+
+    logger.logValidationResults({
+      validator: 'PublishThreshold',
+      passed: importsThreshold && usesInCode,
+      details: { importsThreshold, usesInCode },
+    });
+
+    expect(importsThreshold).toBe(true);
+    expect(usesInCode).toBe(true);
+  });
+});
+
+// =============================================================================
+// SUITE 8: SCORING TYPES CARNITA - Prompt 17-A
+// =============================================================================
+
+test.describe('Suite 8: Scoring Types Carnita (Prompt 17-A)', () => {
+  let logger: TestLogger;
+
+  test.beforeEach(() => {
+    logger = new TestLogger({ testName: 'ScoringTypesCarnitaTests' });
+  });
+
+  /**
+   * Verifica que NewsScore tiene isPublishable
+   */
+  test('should have isPublishable field in NewsScore', async () => {
+    logger.info('Verificando campo isPublishable');
+
+    const filePath = path.join(AUTOMATION_SRC, 'types', 'scoring.types.ts');
+    const content = fs.readFileSync(filePath, 'utf-8');
+
+    const hasField = content.includes('isPublishable: boolean');
+
+    logger.logValidationResults({
+      validator: 'IsPublishableField',
+      passed: hasField,
+      details: { hasField },
+    });
+
+    expect(hasField).toBe(true);
+  });
+
+  /**
+   * Verifica que NewsScore tiene suggestedAngles
+   */
+  test('should have suggestedAngles field in NewsScore', async () => {
+    logger.info('Verificando campo suggestedAngles');
+
+    const filePath = path.join(AUTOMATION_SRC, 'types', 'scoring.types.ts');
+    const content = fs.readFileSync(filePath, 'utf-8');
+
+    const hasField = content.includes('suggestedAngles?:');
+
+    logger.logValidationResults({
+      validator: 'SuggestedAnglesField',
+      passed: hasField,
+      details: { hasField },
+    });
+
+    expect(hasField).toBe(true);
+  });
+
+  /**
+   * Verifica que NewsMetrics usa views genérico (no twitterViews)
+   */
+  test('should use generic views instead of twitterViews', async () => {
+    logger.info('Verificando métricas genéricas');
+
+    const filePath = path.join(AUTOMATION_SRC, 'types', 'scoring.types.ts');
+    const content = fs.readFileSync(filePath, 'utf-8');
+
+    const hasGenericViews = content.includes('views?: number');
+    const noTwitterViews = !content.includes('twitterViews');
+
+    logger.logValidationResults({
+      validator: 'GenericMetrics',
+      passed: hasGenericViews && noTwitterViews,
+      details: { hasGenericViews, noTwitterViews },
+    });
+
+    expect(hasGenericViews).toBe(true);
+    expect(noTwitterViews).toBe(true);
+  });
+
+  /**
+   * Verifica que PUBLISH_THRESHOLD está definido
+   */
+  test('should export PUBLISH_THRESHOLD constant', async () => {
+    logger.info('Verificando constante PUBLISH_THRESHOLD');
+
+    const filePath = path.join(AUTOMATION_SRC, 'types', 'scoring.types.ts');
+    const content = fs.readFileSync(filePath, 'utf-8');
+
+    const hasExport = content.includes('export const PUBLISH_THRESHOLD');
+    const isCorrectValue = content.includes('PUBLISH_THRESHOLD = 75');
+
+    logger.logValidationResults({
+      validator: 'PublishThresholdConstant',
+      passed: hasExport && isCorrectValue,
+      details: { hasExport, isCorrectValue },
+    });
+
+    expect(hasExport).toBe(true);
+    expect(isCorrectValue).toBe(true);
+  });
+
+  /**
+   * Verifica que breakdown tiene nuevos campos carnita
+   */
+  test('should have carnita fields in breakdown', async () => {
+    logger.info('Verificando campos carnita en breakdown');
+
+    const filePath = path.join(AUTOMATION_SRC, 'types', 'scoring.types.ts');
+    const content = fs.readFileSync(filePath, 'utf-8');
+
+    const hasAnalyticalDepth = content.includes('analyticalDepth: number');
+    const hasControversyPotential = content.includes('controversyPotential: number');
+    const hasSubstantiveContent = content.includes('substantiveContent: number');
+
+    logger.logValidationResults({
+      validator: 'CarnitaBreakdownFields',
+      passed: hasAnalyticalDepth && hasControversyPotential && hasSubstantiveContent,
+      details: { hasAnalyticalDepth, hasControversyPotential, hasSubstantiveContent },
+    });
+
+    expect(hasAnalyticalDepth).toBe(true);
+    expect(hasControversyPotential).toBe(true);
+    expect(hasSubstantiveContent).toBe(true);
+  });
+});

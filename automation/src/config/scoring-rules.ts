@@ -96,10 +96,12 @@ export const NEWS_TYPE_SCORES: Record<NewsType, number> = {
 // =============================================================================
 
 /**
- * Umbrales de Engagement para Twitter/X y otras redes
+ * Umbrales de Engagement genéricos
  *
  * Define los views necesarios para cada nivel de puntuación.
  * Views se consideran como métrica principal.
+ *
+ * @updated Prompt 17-A - Eliminadas referencias a Twitter/X
  */
 export const ENGAGEMENT_THRESHOLDS = {
   /** 8 pts - Contenido viral masivo (>500K views) */
@@ -204,3 +206,109 @@ export const FRESHNESS_SCORES = {
   old: -2,         // <72h
   veryOld: -5,     // >72h
 };
+
+// =============================================================================
+// KEYWORDS DE PROFUNDIDAD ANALÍTICA (0-25 pts) - Prompt 17-A
+// =============================================================================
+
+/**
+ * Keywords que indican potencial para análisis profundo
+ *
+ * Noticias con estas palabras tienen más "carnita" para
+ * generar contenido de valor con análisis humano.
+ *
+ * +3 pts por cada keyword (máximo 15 pts base)
+ * +5 pts bonus por comparaciones/competencia
+ * +5 pts bonus por implicaciones futuras
+ *
+ * @since Prompt 17-A
+ */
+export const ANALYTICAL_KEYWORDS: string[] = [
+  // Implicaciones futuras
+  'futuro', 'implicaciones', 'cambio', 'transformar', 'revolucionar',
+  'future', 'implications', 'transform', 'disrupt', 'paradigm',
+  // Competencia
+  'competencia', 'rival', 'versus', 'supera', 'competition', 'beats', 'outperforms',
+  // Regulación/Ética
+  'regulación', 'ética', 'privacidad', 'seguridad', 'regulation', 'ethics', 'privacy', 'safety',
+  // Técnico profundo
+  'arquitectura', 'benchmark', 'parámetros', 'entrenamiento', 'architecture', 'training',
+  'tokens', 'parameters', 'multimodal', 'reasoning',
+];
+
+// =============================================================================
+// KEYWORDS DE CONTROVERSIA (0-20 pts) - Prompt 17-A
+// =============================================================================
+
+/**
+ * Keywords que indican potencial de controversia/debate
+ *
+ * Noticias controversiales generan más engagement y discusión.
+ * +4 pts por cada keyword (máximo 15 pts)
+ * +5 pts bonus por críticas/problemas
+ *
+ * @since Prompt 17-A
+ */
+export const CONTROVERSY_KEYWORDS: string[] = [
+  // Debate y controversia
+  'debate', 'controversia', 'crítica', 'polémica', 'preocupación',
+  'controversy', 'criticism', 'concern', 'backlash', 'outrage',
+  // Problemas corporativos
+  'despido', 'renuncia', 'demanda', 'layoff', 'lawsuit', 'fired', 'resigned',
+  // Fallas técnicas
+  'error', 'fallo', 'problema', 'bug', 'failure', 'issue', 'vulnerability',
+  'hacked', 'breach', 'leak', 'exposed',
+];
+
+// =============================================================================
+// INDICADORES DE CLICKBAIT (penalización) - Prompt 17-A
+// =============================================================================
+
+/**
+ * Indicadores de clickbait que restan puntos
+ *
+ * Noticias con títulos sensacionalistas sin sustancia
+ * reciben penalización en el score.
+ *
+ * -3 pts por cada indicador
+ *
+ * @since Prompt 17-A
+ */
+export const CLICKBAIT_INDICATORS: string[] = [
+  // Exageraciones en español
+  'increíble', 'no creerás', 'impactante', 'te sorprenderá',
+  // Exageraciones en inglés
+  'shocking', 'unbelievable', 'mind-blowing', 'you won\'t believe',
+  // Misterio falso
+  'secreto', 'revelado', 'secret', 'revealed', 'exposed',
+  // Emojis excesivos (se detectan por patrón)
+  '🔥', '😱', '💥', '🚀', '❗', '‼️',
+  // Urgencia falsa
+  'BREAKING', 'URGENT', 'JUST IN', 'ÚLTIMA HORA',
+];
+
+// =============================================================================
+// ENTIDADES DE ALTO IMPACTO (para impacto multi-dimensional) - Prompt 17-A
+// =============================================================================
+
+/**
+ * Empresas, productos y personas que generan alto impacto
+ *
+ * Noticias que mencionan estas entidades tienen mayor
+ * impacto multi-dimensional (afectan a más stakeholders).
+ *
+ * +4 pts por entidad (máximo 12 pts)
+ *
+ * @since Prompt 17-A
+ */
+export const HIGH_IMPACT_ENTITIES: string[] = [
+  // Empresas principales
+  'OpenAI', 'Anthropic', 'Google', 'Microsoft', 'Meta', 'NVIDIA', 'Apple', 'Amazon',
+  'DeepMind', 'xAI', 'Mistral',
+  // Productos clave
+  'GPT', 'Claude', 'Gemini', 'Llama', 'DALL-E', 'Midjourney', 'Stable Diffusion',
+  'ChatGPT', 'Copilot', 'Grok',
+  // Personas influyentes
+  'Sam Altman', 'Elon Musk', 'Satya Nadella', 'Sundar Pichai', 'Dario Amodei',
+  'Yann LeCun', 'Demis Hassabis', 'Jensen Huang',
+];

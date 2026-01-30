@@ -539,7 +539,7 @@ function getMockNews(): NewsItem[] {
       source: 'Google Blog',
       url: 'https://deepmind.google/discover/blog/genie-2-a-large-scale-foundation-world-model/',
       metrics: {
-        twitterViews: 189800,
+        views: 189800,  // Refactored Prompt 17-A: genérico en lugar de twitterViews
       },
     },
     {

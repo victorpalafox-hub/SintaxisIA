@@ -76,7 +76,10 @@
     "test:prompt15": "playwright test tests/specs/prompt15-*.spec.ts",
 
     "test:tts": "playwright test tests/specs/prompt16-tts.spec.ts",
-    "test:prompt16": "playwright test tests/specs/prompt16-*.spec.ts"
+    "test:prompt16": "playwright test tests/specs/prompt16-*.spec.ts",
+
+    "test:carnita": "playwright test tests/specs/prompt11-news-scoring.spec.ts -g 'Carnita'",
+    "test:scoring-full": "playwright test tests/specs/prompt11-news-scoring.spec.ts"
   },
   "keywords": [
     "youtube",
