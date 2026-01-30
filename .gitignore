@@ -66,6 +66,12 @@ automation/cache/images/*
 !automation/cache/images/.gitkeep
 
 # ===================================
+# VIDEO STORAGE TEMPORAL
+# ===================================
+automation/temp/videos/*
+!automation/temp/videos/.gitkeep
+
+# ===================================
 # CLAUDE CODE
 # ===================================
 .claude/*

@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 158 tests passing (ver `npm test`)
+**Test Status**: 198 tests passing (ver `npm test`)
 
 ## Prerequisites
 
@@ -40,7 +40,7 @@ npm test                 # Ejecutar tests
 | Render video | `npm run render` |
 | CI validation | `npm run ci:validate` |
 
-**Test suites**: `test:logger` (3), `test:services` (5), `test:video` (19), `test:content` (23), `test:design` (29), `test:scoring` (19), `test:image-search` (23), `test:video-optimized` (22)
+**Test suites**: `test:logger` (3), `test:services` (5), `test:video` (19), `test:content` (23), `test:design` (29), `test:scoring` (19), `test:image-search` (23), `test:video-optimized` (22), `test:orchestrator` (16), `test:notifications` (12), `test:notification-fix` (12)
 
 Ver `README.md` para lista completa de scripts.
 
@@ -156,6 +156,9 @@ Ver `.env.example` para lista completa.
 | 13 | Video Optimizado (1 noticia, efectos dinámicos) | 22 |
 | 13.1 | SafeImage (fix CORS en preview) | 7 |
 | 13.2 | Limpieza de composiciones obsoletas | 8 |
+| 14 | Orchestrator + Calendario de Publicación | 16 |
+| 14.1 | Sistema de Notificaciones (Email + Telegram) | 12 |
+| 14.2 | Fix Notificaciones (callbacks + dominio Resend) | 12 |
 
 **Prompt 11 - News Scoring (2026-01-29):**
 - Sistema de puntuación para rankear noticias (0-37 pts)
@@ -197,4 +200,52 @@ Ver `.env.example` para lista completa.
 - Eliminado import de Video.tsx (ya no se usa)
 - Preview muestra solo composiciones activas
 
-**Pendientes**: #14 Orchestrator + Calendario publicación, #15 Gemini real, #16 Remotion CLI real, #17 OCR, #18 STT, #19 E2E completo
+**Prompt 14 - Orchestrator + Calendario (2026-01-29):**
+- Coordinador maestro que orquesta todo el pipeline de generación
+- Calendario de publicación: cada 2 días (Lun/Mié/Vie/Dom a las 14:00)
+- Pipeline de 9 pasos: check_schedule → collect_news → select_top → generate_script → search_images → generate_audio → render_video → manual_approval → publish
+- CLI con opciones: `--dry` (sin publicar), `--force` (forzar), `--prod` (producción)
+- Archivos: `automation/src/orchestrator.ts`, `automation/src/cli.ts`, `automation/src/config/publication-calendar.ts`, `automation/src/types/orchestrator.types.ts`
+- Scripts: `npm run automation:run`, `automation:dry`, `automation:force`, `automation:prod`
+- Mocks implementados para: news collection, script generation, audio generation, video rendering
+- Funcional: calendario, scoring, image search
+
+**Prompt 14.1 - Sistema de Notificaciones (2026-01-29):**
+- Notificaciones duales: Email (Resend API) + Telegram Bot
+- Email HTML profesional con botones de acción
+- Telegram con botones inline para aprobar/rechazar desde celular
+- Variables de entorno encriptadas (.env)
+- Datos sensibles enmascarados en logs (getSafeConfig)
+- Storage temporal para videos pendientes de aprobación
+- Archivos: `automation/src/notifiers/`, `automation/src/config/env.config.ts`
+- Configurar: copiar `.env.example` a `.env` y completar credenciales
+- Obtener: API key en resend.com, bot token de @BotFather
+
+**Prompt 14.2 - Fix Notificaciones para Desarrollo (2026-01-29):**
+- Email: Usa `onboarding@resend.dev` (dominio pre-verificado, sin DNS)
+- Telegram: Botones callback (`callback_data`) en lugar de URLs
+- Callback handler: Escucha aprobaciones/rechazos directamente desde Telegram
+- Aprobación sin dashboard: 100% funcional en desarrollo local
+- CLI actualizado: Inicializa callback handler y espera Ctrl+C
+- Archivos modificados:
+  - `automation/src/notifiers/telegram-notifier.ts` (callbacks)
+  - `automation/src/notifiers/telegram-callback-handler.ts` (nuevo)
+  - `automation/src/notifiers/notification-orchestrator.ts` (videoId)
+  - `automation/src/cli.ts` (callback handler + SIGINT)
+  - `automation/src/notifiers/email-notifier.ts` (onboarding@resend.dev)
+- Flujo de aprobación:
+  1. Pipeline genera video → envía notificaciones
+  2. Usuario recibe mensaje en Telegram con 3 botones
+  3. Toca "Aprobar" / "Rechazar" / "Ver Detalles"
+  4. Bot ejecuta acción inmediatamente
+  5. Usuario recibe confirmación
+  6. Ctrl+C para salir
+
+**Fix Storage (Prompt 14.2.1):**
+- Directorio temporal creado automáticamente (`automation/temp/videos/`)
+- Logging mejorado en callback handler para diagnóstico
+- Validaciones de existencia de archivos
+- Mensajes de error más descriptivos en Telegram
+- .gitkeep en directorio temporal
+
+**Pendientes**: #15 Gemini real, #16 Remotion CLI real, #17 OCR, #18 STT, #19 E2E completo

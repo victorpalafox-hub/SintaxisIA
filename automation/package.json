@@ -11,7 +11,12 @@
     "generate": "ts-node src/index.ts",
     "validate": "ts-node src/codeValidator.ts",
     "watch": "ts-node src/watcher.ts",
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit",
+    "pipeline": "ts-node src/cli.ts",
+    "pipeline:dry": "ts-node src/cli.ts --dry",
+    "pipeline:force": "ts-node src/cli.ts --force",
+    "pipeline:prod": "ts-node src/cli.ts --prod",
+    "pipeline:help": "ts-node src/cli.ts --help"
   },
   "keywords": [
     "youtube",
@@ -25,10 +30,13 @@
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
     "axios": "^1.7.9",
-    "dotenv": "^16.4.7"
+    "dotenv": "^16.4.7",
+    "node-telegram-bot-api": "^0.67.0",
+    "resend": "^6.9.1"
   },
   "devDependencies": {
     "@types/node": "^22.10.7",
+    "@types/node-telegram-bot-api": "^0.64.13",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3"
   }

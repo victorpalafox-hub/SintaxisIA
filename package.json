@@ -29,6 +29,11 @@
     "test:video": "playwright test tests/specs/prompt7-video-generation.spec.ts",
     "test:content": "playwright test tests/specs/prompt8-content-validation.spec.ts",
     "test:design": "playwright test tests/specs/prompt10-video-design.spec.ts",
+    "test:scoring": "playwright test tests/specs/prompt11-news-scoring.spec.ts",
+    "test:image-search": "playwright test tests/specs/prompt12-image-search.spec.ts",
+    "test:video-optimized": "playwright test tests/specs/prompt13-video-optimized.spec.ts",
+    "test:safeimage": "playwright test tests/specs/prompt13-1-safeimage.spec.ts",
+    "test:cleanup": "playwright test tests/specs/prompt13-2-cleanup.spec.ts",
 
     "test:unit": "playwright test tests/specs/prompt5-testlogger-validation.spec.ts tests/specs/service-objects-demo.spec.ts",
     "test:integration": "playwright test tests/specs/prompt7-video-generation.spec.ts tests/specs/prompt8-content-validation.spec.ts",
@@ -54,7 +59,17 @@
     "ci:build": "npm run build:all",
     "ci:validate": "npm run ci:lint && npm run ci:test",
 
-    "validate:all": "npm run check && npm run test:all && npm run test:report"
+    "validate:all": "npm run check && npm run test:all && npm run test:report",
+
+    "automation:run": "cd automation && npm run pipeline",
+    "automation:dry": "cd automation && npm run pipeline:dry",
+    "automation:force": "cd automation && npm run pipeline:force",
+    "automation:prod": "cd automation && npm run pipeline:prod",
+    "automation:help": "cd automation && npm run pipeline:help",
+
+    "test:orchestrator": "playwright test tests/specs/prompt14-orchestrator.spec.ts",
+    "test:notifications": "playwright test tests/specs/prompt14-1-notifications.spec.ts",
+    "test:notification-fix": "playwright test tests/specs/prompt14-2-notification-fix.spec.ts"
   },
   "keywords": [
     "youtube",
