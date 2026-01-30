@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 311 tests (307 passing, 4 skipped)
+**Test Status**: 329 tests (325 passing, 4 skipped)
 
-**Last Updated**: 2026-01-30 (Prompt 17 - Video Rendering Service)
+**Last Updated**: 2026-01-30 (Prompt 17 - Video Rendering Service + Smoke Tests)
 
 ## Prerequisites
 
@@ -47,6 +47,7 @@ npm test                 # Ejecutar tests
 | CI validation | `npm run ci:validate` |
 
 **Test suites**:
+- Smoke: `00-smoke-paths` (18) - Validación de rutas críticas (corre primero)
 - Core: `test:logger` (3) | `test:services` (5)
 - Video: `test:video` (19) | `test:content` (23) | `test:design` (29)
 - Scoring: `test:scoring` (33) | `test:image-search` (23)
@@ -54,7 +55,7 @@ npm test                 # Ejecutar tests
 - Pipeline: `test:orchestrator` (16) | `test:notifications` (12) | `test:notification-fix` (12)
 - APIs: `test:gemini` (22) | `test:compliance` (70) | `test:tts` (22)
 - Rendering: `test:video-rendering` (27)
-- **Total**: 311 tests (307 passing, 4 skipped)
+- **Total**: 329 tests (325 passing, 4 skipped)
 
 Ver `README.md` para lista completa de scripts.
 
