@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 198 tests passing (ver `npm test`)
+**Test Status**: 239 tests passing, 2 skipped (ver `npm test`)
 
-**Last Updated**: 2026-01-29 (Prompts 14, 14.1, 14.2, 14.2.1)
+**Last Updated**: 2026-01-30 (Prompt 15 - Gemini Script Generation)
 
 ## Prerequisites
 
@@ -51,7 +51,8 @@ npm test                 # Ejecutar tests
 - `test:scoring` (19), `test:image-search` (23), `test:video-optimized` (22)
 - `test:safeimage` (7), `test:cleanup` (8)
 - `test:orchestrator` (16), `test:notifications` (12), `test:notification-fix` (12)
-- **Total**: 198 tests
+- `test:gemini` (27), `test:compliance` (18), `test:prompt15` (45 total)
+- **Total**: 239 tests
 
 Ver `README.md` para lista completa de scripts.
 
@@ -182,6 +183,7 @@ Ver `.env.example` y `SETUP-NOTIFICATIONS.md` para configuración completa.
 | 14 | Orchestrator + Calendario de Publicación | 16 |
 | 14.1 | Sistema de Notificaciones (Email + Telegram) | 12 |
 | 14.2 | Fix Notificaciones (callbacks + dominio Resend) | 12 |
+| 15 | Gemini Script Generation + Alex Torres Persona + Compliance | 36 |
 
 **Prompt 11 - News Scoring (2026-01-29):**
 - Sistema de puntuación para rankear noticias (0-37 pts)
@@ -271,6 +273,30 @@ Ver `.env.example` y `SETUP-NOTIFICATIONS.md` para configuración completa.
 - Mensajes de error más descriptivos en Telegram
 - .gitkeep en directorio temporal
 
+**Prompt 15 - Gemini Script Generation (2026-01-30):**
+- Integración REAL con Gemini API (modelo: `gemini-2.5-flash`)
+- Persona virtual "Alex Torres" (Tech Analyst & AI Curator)
+- Scripts con "toque humano" para cumplir políticas YouTube
+- Sistema de compliance con 6 marcadores humanos:
+  1. Primera persona ("yo creo", "me parece", "noto que")
+  2. Opinión subjetiva ("lo interesante es", "considero")
+  3. Admisión de incertidumbre ("probablemente", "quizá", "aún no está claro")
+  4. Pregunta reflexiva ("¿crees que...?", "¿qué opinas?")
+  5. Evita lenguaje corporativo (no: "revolucionario", "disruptivo", "game-changer")
+  6. Uso de analogías ("como si...", "similar a", "es como")
+- Mínimo 4/6 marcadores para aprobar compliance
+- Retry automático con feedback si no pasa compliance
+- **Cadena de fallback escalonada**: 2.5-flash → 2.0-flash → 1.5-flash
+- Metadata con `modelUsed` y `fallbackReason` para tracking
+- Archivos:
+  - `automation/src/config/persona.ts` - ALEX_TORRES_PERSONA
+  - `automation/src/prompts/script-generation-templates.ts` - Prompts y templates
+  - `automation/src/services/compliance-validator.ts` - ComplianceValidator
+  - `automation/src/types/script.types.ts` - GeneratedScript, ComplianceReport
+  - `automation/src/scriptGen.ts` - ScriptGenerator class
+- Scripts: `test:gemini`, `test:compliance`, `test:prompt15`
+- Test manual de API: `cd automation && node test-gemini.js`
+
 ## Pipeline de Publicación
 
 ### Orchestrator (9 pasos)
@@ -313,10 +339,16 @@ npm run automation:prod       # Producción (con notificaciones)
 - Image Search (multi-provider con caché)
 - Publication Calendar
 - Notification System (Email + Telegram)
+- **Script Generation (Gemini 2.5 Flash)** ✅ Prompt 15
 
 ### Mock (Tests pasando)
-- Script Generation (Gemini)
 - Audio Generation (ElevenLabs)
 - Video Rendering (Remotion CLI)
 
-**Pendientes**: #15 Gemini real, #16 ElevenLabs real, #17 Remotion CLI real, #18 OCR, #19 STT, #20 YouTube API
+**Pendientes**:
+- ✅ **#15 Gemini + Persona "Alex Torres"** - COMPLETADO
+- 🔜 **#16 ElevenLabs** - Josh voice "Slow, Natural, Calm"
+- 🔜 **#17 Remotion CLI** - Integración real + primer video E2E
+- 📅 **#18 Content Scoring Avanzado** - Criterios analíticos
+- 📅 **#19 Visual Identity** - Branding humanizado
+- 📅 **#20 YouTube Auto-Publishing** - API de publicación

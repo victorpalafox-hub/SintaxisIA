@@ -43,6 +43,7 @@ import {
 } from './config/env.config';
 import { selectTopNews } from './news-scorer';
 import { searchImagesV2 } from './image-searcher-v2';
+import { ScriptGenerator } from './scriptGen';
 import { notifyVideoReady, notifyPipelineError } from './notifiers';
 import {
   OrchestratorConfig,
@@ -54,6 +55,7 @@ import {
 import { NewsItem } from './types/news.types';
 import { ImageSearchResult } from './types/image.types';
 import { NewsScore } from './types/scoring.types';
+import { GeneratedScript } from './types/script.types';
 
 // =============================================================================
 // CONFIGURACIÓN POR DEFECTO
@@ -199,21 +201,35 @@ export async function runPipeline(
     });
 
     // ==========================================
-    // PASO 4: GENERAR SCRIPT
+    // PASO 4: GENERAR SCRIPT (Gemini API Real - Prompt 15)
     // ==========================================
     const scriptStep = await executeStep('generate_script', steps, async () => {
-      console.log('📝 PASO 4: Generando script...');
+      console.log('📝 PASO 4: Generando script con Gemini API...');
 
       const { news } = topNewsStep.data as { news: NewsItem; score: NewsScore };
 
-      // TODO: Implementar en Prompt 15 con Gemini API
-      // const script = await generateScript(news);
+      // Usar ScriptGenerator real con validacion de compliance
+      const scriptGenerator = new ScriptGenerator();
+      const generatedScript = await scriptGenerator.generateScript(news);
 
-      // Mock por ahora - usar descripción como script base
-      const mockScript = generateMockScript(news);
+      // Log de compliance info
+      if (generatedScript.complianceReport) {
+        console.log(`   📊 Compliance Score: ${generatedScript.complianceReport.humanScore}/6`);
+        console.log(`   ${generatedScript.complianceReport.passed ? '✅' : '⚠️ '} Compliance: ${generatedScript.complianceReport.passed ? 'PASSED' : 'NEEDS IMPROVEMENT'}`);
 
-      console.log(`   ✅ Script generado (${mockScript.length} caracteres)`);
-      return mockScript;
+        if (!generatedScript.complianceReport.passed) {
+          console.log('   ⚠️  Script tiene warnings de compliance pero continua...');
+          console.log(`   Issues: ${generatedScript.complianceReport.issues.slice(0, 2).join(', ')}`);
+        }
+      }
+
+      // Construir script completo para TTS
+      const fullScript = `${generatedScript.hook} ${generatedScript.body} ${generatedScript.opinion} ${generatedScript.cta}`;
+
+      console.log(`   ✅ Script generado (${fullScript.length} caracteres)`);
+      console.log(`   📝 Hook: "${generatedScript.hook.substring(0, 50)}..."`);
+
+      return { generatedScript, fullScript };
     });
 
     // ==========================================
@@ -247,16 +263,16 @@ export async function runPipeline(
     const audioStep = await executeStep('generate_audio', steps, async () => {
       console.log('🎵 PASO 6: Generando audio TTS...');
 
-      const script = scriptStep.data as string;
+      const { fullScript } = scriptStep.data as { generatedScript: GeneratedScript; fullScript: string };
 
       // TODO: Implementar en Prompt 16 con ElevenLabs
-      // const audioUrl = await generateAudio(script);
+      // const audioUrl = await generateAudio(fullScript);
 
       // Mock por ahora
       const mockAudioUrl = 'file://output/audio/narration_mock.mp3';
 
       console.log(`   ✅ Audio generado (mock): ${mockAudioUrl}`);
-      console.log(`   📊 Script length: ${script.length} chars`);
+      console.log(`   📊 Script length: ${fullScript.length} chars`);
       return mockAudioUrl;
     });
 
@@ -267,31 +283,32 @@ export async function runPipeline(
       console.log('🎬 PASO 7: Renderizando video...');
 
       const { news, score } = topNewsStep.data as { news: NewsItem; score: NewsScore };
-      const script = scriptStep.data as string;
+      const { generatedScript, fullScript } = scriptStep.data as { generatedScript: GeneratedScript; fullScript: string };
       const images = imagesStep.data as ImageSearchResult;
       const audioUrl = audioStep.data as string;
 
       // TODO: Implementar en Prompt 16 con Remotion CLI
-      // const videoPath = await renderVideo({ news, script, images, audioUrl });
+      // const videoPath = await renderVideo({ news, script: generatedScript, images, audioUrl });
 
       // Mock por ahora
       const mockVideoPath = 'output/videos/video_mock.mp4';
 
       console.log(`   ✅ Video renderizado (mock): ${mockVideoPath}`);
       console.log(`   📐 Resolución: 1080x1920 (9:16)`);
-      console.log(`   ⏱️  Duración: 55s`);
+      console.log(`   ⏱️  Duración: ${generatedScript.duration}s`);
 
-      // Construir metadata completa
+      // Construir metadata completa (incluyendo script estructurado)
       const metadata: VideoMetadata = {
         newsItem: news,
         score,
         images,
-        script,
+        script: fullScript,
+        generatedScript, // Script estructurado con compliance report
         audioUrl,
-        duration: 55,
+        duration: generatedScript.duration || 55,
         generatedAt: new Date(),
         youtubeTitle: generateYouTubeTitle(news),
-        youtubeDescription: generateYouTubeDescription(news, script),
+        youtubeDescription: generateYouTubeDescription(news, fullScript),
         youtubeTags: generateYouTubeTags(news),
       };
 
@@ -483,6 +500,8 @@ async function executeStep<T>(
 
 /**
  * Genera noticias mock para testing
+ *
+ * TODO: Reemplazar con NewsData.io API real en Prompt 16+
  */
 function getMockNews(): NewsItem[] {
   return [
@@ -523,18 +542,7 @@ function getMockNews(): NewsItem[] {
   ];
 }
 
-/**
- * Genera script mock basado en la noticia
- */
-function generateMockScript(news: NewsItem): string {
-  return (
-    `¡Atención! ${news.company || 'Una empresa de IA'} acaba de hacer un anuncio que cambiará todo.\n\n` +
-    `${news.title}.\n\n` +
-    `${news.description}\n\n` +
-    `Esto es solo el comienzo de lo que viene en inteligencia artificial. ` +
-    `Síguenos para más noticias de IA.`
-  );
-}
+// NOTE: generateMockScript eliminado en Prompt 15 - ahora usa ScriptGenerator real
 
 /**
  * Extrae topics de una noticia

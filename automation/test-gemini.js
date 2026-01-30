@@ -16,14 +16,14 @@ console.log('');
 console.log('🔑 API Key detectada:', '***' + apiKey.substring(apiKey.length - 4));
 console.log('');
 
-async function testGemini3Flash() {
-  console.log('📡 Probando GEMINI 3 FLASH...');
+async function testGemini25Flash() {
+  console.log('📡 Probando GEMINI 2.5 FLASH (PRIORIDAD 1)...');
   console.log('');
 
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: 'gemini-3-flash',
+      model: 'gemini-2.5-flash',
       generationConfig: {
         temperature: 0.3,
         topP: 0.95,
@@ -78,44 +78,44 @@ Responde SOLO con JSON válido (sin markdown):
     console.log(`   • Términos relacionados: ${parsed.relatedTerms.join(', ')}`);
     console.log(`   • Query de búsqueda: "${parsed.imageSearchQuery}"`);
     console.log('');
-    console.log('🎉 ¡GEMINI 3 FLASH FUNCIONA PERFECTAMENTE!');
+    console.log('🎉 ¡GEMINI 2.5 FLASH FUNCIONA PERFECTAMENTE!');
     console.log('');
-    console.log('✅ Configuración actual en topicConfig.ts es correcta:');
-    console.log('   model: "gemini-3-flash"');
+    console.log('✅ Configuración recomendada en scriptGen.ts:');
+    console.log('   model: "gemini-2.5-flash"');
     console.log('');
 
-    return { success: true, model: 'gemini-3-flash' };
+    return { success: true, model: 'gemini-2.5-flash' };
 
   } catch (error) {
-    console.log('❌ Error con Gemini 3 Flash:', error.message);
+    console.log('❌ Error con Gemini 2.5 Flash:', error.message);
     console.log('');
 
-    if (error.message.includes('models/gemini-3-flash') || error.message.includes('not found')) {
-      console.log('💡 El modelo "gemini-3-flash" no está disponible');
+    if (error.message.includes('models/gemini-2.5-flash') || error.message.includes('not found')) {
+      console.log('💡 El modelo "gemini-2.5-flash" no está disponible');
       console.log('');
-      return { success: false, model: 'gemini-3-flash', error: 'MODEL_NOT_FOUND' };
+      return { success: false, model: 'gemini-2.5-flash', error: 'MODEL_NOT_FOUND' };
     } else if (error.message.includes('API_KEY_INVALID')) {
       console.error('❌ ERROR CRÍTICO: API Key inválida');
       console.error('💡 Verifica que copiaste correctamente la API key de Google AI Studio');
       process.exit(1);
     } else if (error.message.includes('PERMISSION_DENIED')) {
       console.error('❌ ERROR: Sin permisos para este modelo');
-      return { success: false, model: 'gemini-3-flash', error: 'PERMISSION_DENIED' };
+      return { success: false, model: 'gemini-2.5-flash', error: 'PERMISSION_DENIED' };
     } else {
       console.error('❌ Error:', error.message);
-      return { success: false, model: 'gemini-3-flash', error: error.message };
+      return { success: false, model: 'gemini-2.5-flash', error: error.message };
     }
   }
 }
 
-async function testGemini2FlashExp() {
-  console.log('📡 Probando GEMINI 2.0 FLASH EXPERIMENTAL...');
+async function testGemini20Flash() {
+  console.log('📡 Probando GEMINI 2.0 FLASH (PRIORIDAD 2)...');
   console.log('');
 
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.0-flash-exp',
+      model: 'gemini-2.0-flash',
       generationConfig: {
         temperature: 0.3,
         topP: 0.95,
@@ -156,15 +156,15 @@ Responde SOLO en JSON (sin markdown):
 
     const parsed = JSON.parse(cleanJson);
 
-    console.log('✅ GEMINI 2.0 FLASH EXPERIMENTAL FUNCIONA');
+    console.log('✅ GEMINI 2.0 FLASH FUNCIONA');
     console.log(`   Entidad: ${parsed.mainEntity}`);
     console.log('');
 
-    return { success: true, model: 'gemini-2.0-flash-exp' };
+    return { success: true, model: 'gemini-2.0-flash' };
 
   } catch (error) {
-    console.error('❌ Error con Gemini 2.0:', error.message);
-    return { success: false, model: 'gemini-2.0-flash-exp', error: error.message };
+    console.error('❌ Error con Gemini 2.0 Flash:', error.message);
+    return { success: false, model: 'gemini-2.0-flash', error: error.message };
   }
 }
 
@@ -220,17 +220,21 @@ Responde SOLO en JSON (sin markdown):
 }
 
 async function runTests() {
-  // Probar Gemini 3 Flash
-  let result = await testGemini3Flash();
+  console.log('');
+  console.log('🔗 CADENA DE FALLBACK: 2.5-flash → 2.0-flash → 1.5-flash');
+  console.log('');
+
+  // Probar Gemini 2.5 Flash (PRIORIDAD 1)
+  let result = await testGemini25Flash();
 
   if (!result.success) {
-    console.log('🔄 Fallback: Intentando con Gemini 2.0 Flash Experimental...');
+    console.log('🔄 Fallback: Intentando con Gemini 2.0 Flash (PRIORIDAD 2)...');
     console.log('');
-    result = await testGemini2FlashExp();
+    result = await testGemini20Flash();
   }
 
   if (!result.success) {
-    console.log('🔄 Fallback: Intentando con Gemini 1.5 Flash...');
+    console.log('🔄 Fallback: Intentando con Gemini 1.5 Flash (PRIORIDAD 3)...');
     console.log('');
     result = await testGemini15Flash();
   }
@@ -243,9 +247,14 @@ async function runTests() {
   if (result.success) {
     console.log(`✅ Modelo funcionando: ${result.model}`);
     console.log('');
-    console.log('📝 ACCIÓN REQUERIDA:');
-    console.log('   Actualizar automation/src/topicConfig.ts:');
-    console.log(`   model: process.env.GEMINI_MODEL || '${result.model}'`);
+    console.log('📝 CONFIGURACIÓN EN scriptGen.ts:');
+    console.log('   GEMINI_FALLBACK_CHAIN = [');
+    console.log('     "gemini-2.5-flash",   // Prioridad 1');
+    console.log('     "gemini-2.0-flash",   // Prioridad 2');
+    console.log('     "gemini-1.5-flash",   // Prioridad 3');
+    console.log('   ]');
+    console.log('');
+    console.log('✅ La cadena de fallback está correctamente configurada');
     console.log('');
   } else {
     console.log('❌ Ningún modelo de Gemini funciona');

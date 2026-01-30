@@ -69,7 +69,11 @@
 
     "test:orchestrator": "playwright test tests/specs/prompt14-orchestrator.spec.ts",
     "test:notifications": "playwright test tests/specs/prompt14-1-notifications.spec.ts",
-    "test:notification-fix": "playwright test tests/specs/prompt14-2-notification-fix.spec.ts"
+    "test:notification-fix": "playwright test tests/specs/prompt14-2-notification-fix.spec.ts",
+
+    "test:gemini": "playwright test tests/specs/prompt15-gemini-real.spec.ts",
+    "test:compliance": "playwright test tests/specs/prompt15-compliance.spec.ts",
+    "test:prompt15": "playwright test tests/specs/prompt15-*.spec.ts"
   },
   "keywords": [
     "youtube",

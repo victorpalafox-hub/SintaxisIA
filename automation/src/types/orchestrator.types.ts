@@ -12,6 +12,7 @@
 import { NewsItem } from './news.types';
 import { NewsScore } from './scoring.types';
 import { ImageSearchResult } from './image.types';
+import { GeneratedScript } from './script.types';
 
 // =============================================================================
 // CONFIGURACIÓN DEL ORCHESTRATOR
@@ -175,8 +176,15 @@ export interface VideoMetadata {
   /** Imágenes encontradas */
   images: ImageSearchResult;
 
-  /** Guión generado */
+  /** Guión generado (texto completo para TTS) */
   script: string;
+
+  /**
+   * Script estructurado con metadata y compliance
+   * Incluye hook, body, opinion, cta y reporte de compliance
+   * @since Prompt 15
+   */
+  generatedScript?: GeneratedScript;
 
   /** URL del audio generado */
   audioUrl?: string;
