@@ -137,14 +137,12 @@ export const REMOTION_CONFIG = {
   /** Directorio del proyecto Remotion */
   PROJECT_DIR: 'remotion-app',
 
-  /** Composiciones disponibles */
+  /** Composiciones disponibles (actualizadas en Prompt 13.2) */
   COMPOSITIONS: {
-    /** Video completo de 60 segundos */
-    FULL: 'SintaxisIA',
-    /** Preview de 10 segundos */
-    PREVIEW: 'SintaxisIA-Preview',
-    /** Baja resolucion para tests rapidos */
-    LOW_RES: 'SintaxisIA-LowRes',
+    /** Video completo de 55 segundos (1 noticia con efectos dinámicos) */
+    FULL: 'AINewsShort',
+    /** Preview de 10 segundos para desarrollo rápido */
+    PREVIEW: 'AINewsShort-Preview',
   },
 
   /** Directorio de salida por defecto */

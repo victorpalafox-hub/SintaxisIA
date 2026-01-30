@@ -190,8 +190,8 @@ export interface ScriptData {
  * @interface RenderOptions
  */
 export interface RenderOptions {
-  /** Composicion de Remotion a usar (default: SintaxisIA-Preview para tests) */
-  composition?: 'SintaxisIA' | 'SintaxisIA-Preview' | 'SintaxisIA-LowRes';
+  /** Composicion de Remotion a usar (default: AINewsShort-Preview para tests) */
+  composition?: 'AINewsShort' | 'AINewsShort-Preview';
   /** Timeout en milisegundos */
   timeout?: number;
   /** Nombre del archivo de salida (sin extension) */
