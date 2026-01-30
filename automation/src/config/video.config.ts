@@ -46,19 +46,38 @@ export const VIDEO_SPECS = {
 };
 
 /**
+ * Detecta el directorio raíz del proyecto
+ *
+ * Funciona tanto cuando se ejecuta desde:
+ * - Raíz del proyecto (tests con Playwright)
+ * - Directorio automation/ (CLI, scripts)
+ */
+function getProjectRoot(): string {
+  const cwd = process.cwd();
+  // Si estamos en automation/, subir un nivel
+  if (cwd.endsWith('automation') || cwd.includes('automation' + path.sep)) {
+    return path.resolve(cwd, '..');
+  }
+  // Si estamos en la raíz del proyecto
+  return cwd;
+}
+
+const PROJECT_ROOT = getProjectRoot();
+
+/**
  * Configuración de paths para Remotion
  */
 export const VIDEO_PATHS = {
   /** Directorio raíz del proyecto Remotion */
-  remotionApp: path.resolve(process.cwd(), '..', 'remotion-app'),
+  remotionApp: path.join(PROJECT_ROOT, 'remotion-app'),
   /** Directorio de salida para videos renderizados */
-  outputDir: path.resolve(process.cwd(), '..', 'output', 'videos'),
+  outputDir: path.join(PROJECT_ROOT, 'output', 'videos'),
   /** Directorio temporal para assets */
-  tempDir: path.resolve(process.cwd(), 'temp', 'video-assets'),
+  tempDir: path.join(PROJECT_ROOT, 'automation', 'temp', 'video-assets'),
   /** Directorio de assets públicos de Remotion */
-  publicAssets: path.resolve(process.cwd(), '..', 'remotion-app', 'public'),
+  publicAssets: path.join(PROJECT_ROOT, 'remotion-app', 'public'),
   /** Archivo de datos para Remotion */
-  dataJson: path.resolve(process.cwd(), '..', 'remotion-app', 'public', 'data.json'),
+  dataJson: path.join(PROJECT_ROOT, 'remotion-app', 'public', 'data.json'),
 };
 
 /**
