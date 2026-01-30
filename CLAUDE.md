@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 284 tests (280 passing, 4 skipped)
+**Test Status**: 311 tests (307 passing, 4 skipped)
 
-**Last Updated**: 2026-01-30 20:00 (Refactorización CLAUDE.md post QA Audit)
+**Last Updated**: 2026-01-30 (Prompt 17 - Video Rendering Service)
 
 ## Prerequisites
 
@@ -53,7 +53,8 @@ npm test                 # Ejecutar tests
 - Optimized: `test:video-optimized` (22) | `test:safeimage` (7) | `test:cleanup` (8)
 - Pipeline: `test:orchestrator` (16) | `test:notifications` (12) | `test:notification-fix` (12)
 - APIs: `test:gemini` (22) | `test:compliance` (70) | `test:tts` (22)
-- **Total**: 284 tests (280 passing, 4 skipped)
+- Rendering: `test:video-rendering` (27)
+- **Total**: 311 tests (307 passing, 4 skipped)
 
 Ver `README.md` para lista completa de scripts.
 
@@ -187,12 +188,13 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | 14.1 | Notificaciones Email + Telegram | 12 | Resend API + bot con callbacks |
 | 14.2 | Fix Callbacks Telegram | 12 | Aprobación desde Telegram sin dashboard |
 
-### Prompts 15-17-A: Integración APIs Reales
+### Prompts 15-17: Integración APIs Reales
 | # | Feature | Tests | Descripción |
 |---|---------|-------|-------------|
 | 15 | Gemini Script Generation | 92 | Persona Alex Torres + Compliance 6 marcadores |
 | 16 | ElevenLabs TTS | 22 | Voz Josh + cache + fallback Edge-TTS |
 | 17-A | Carnita Score Refactor | - | Eliminado Twitter/X, umbral 75 pts, max 97 pts |
+| 17 | Video Rendering Service | 27 | Remotion CLI + subtítulos + secciones |
 
 ### Prompts Detallados
 
@@ -252,11 +254,25 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 - Campos NewsScore: `isPublishable`, `suggestedAngles`, `reasons`
 - 14 tests nuevos (33 total en prompt11-news-scoring.spec.ts)
 
+**Prompt 17 - Video Rendering Service (2026-01-30):**
+- Servicio completo de renderizado con Remotion CLI
+- Configuración: 1080x1920, 30fps, h264, CRF 18
+- Secciones: hook(8s) → headline(4s) → main(30s) → impact(5s) → outro(8s)
+- Subtítulos: Sincronización palabra por palabra automática
+- Assets: Copia audio, descarga imágenes, genera data.json
+- Retry logic: Reintentos con timeout configurable (5 min)
+- Archivos:
+  - `automation/src/config/video.config.ts` - Configuración centralizada
+  - `automation/src/types/video.types.ts` - Tipos y contratos
+  - `automation/src/services/video-rendering.service.ts` - Servicio principal
+- Funciones: `renderVideo()`, `verifyRemotionSetup()`, `generateSubtitles()`, `generateSections()`
+- Scripts: `test:video-rendering`, `video:verify`
+
 **QA Audit + CI/CD Fixes (2026-01-30):**
 - Fix composiciones obsoletas: `SintaxisIA*` → `AINewsShort*` (18 ocurrencias)
 - Fix tests flaky: Calendario ajustado a rango 1-7 días
 - Git hooks pre-commit: Valida package-lock.json, .env, archivos >5MB
-- Resultado: 284 tests (280 passing, 4 skipped)
+- Resultado: 311 tests (307 passing, 4 skipped)
 
 ## Pipeline de Publicación
 
@@ -267,7 +283,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 4. `generate_script` - Gemini 2.5 Flash + Alex Torres Persona
 5. `search_images` - Multi-provider (hero, context, outro)
 6. `generate_audio` - ElevenLabs (fallback Edge-TTS)
-7. `render_video` - Remotion CLI (mock)
+7. `render_video` - Remotion CLI + VideoRenderingService (Prompt 17)
 8. `manual_approval` - Email (Resend) + Telegram (callbacks)
 9. `publish` - YouTube API (pendiente)
 
@@ -294,14 +310,14 @@ npm run automation:prod       # Producción (con notificaciones)
 | Image Search | Multi-provider + caché (7 días) | 12 |
 | Script Generation | Gemini 2.5 Flash + Alex Torres Persona | 15 |
 | Audio Generation | ElevenLabs + fallback Edge-TTS | 16 |
+| **Video Rendering** | Remotion CLI + subtítulos | **17** |
 | Publication Calendar | Cada 2 días (Lun/Mié/Vie/Dom 14:00) | 14 |
 | Notification System | Email (Resend) + Telegram callbacks | 14.1, 14.2 |
 
-### Mock (Tests pasando) 🔧
-- Video Rendering (Remotion CLI) - Pendiente integración real
+### Pendiente Integración 🔧
+- Integrar `videoRenderingService` en orchestrator (paso 7) - actualmente usa mock
 
 ### Pendientes 📅
-- **#17 Remotion CLI** - Integración real + primer video E2E
 - **#18 OCR + Thumbnails** - Extracción de texto de imágenes
 - **#19 Visual Identity** - Branding humanizado
 - **#20 YouTube Auto-Publishing** - API de publicación
