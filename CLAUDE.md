@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 284 tests (280 passing, 4 skipped) - ver `npm test`
+**Test Status**: 284 tests (280 passing, 4 skipped)
 
-**Last Updated**: 2026-01-30 (QA Audit + Fixes CI/CD)
+**Last Updated**: 2026-01-30 20:00 (Refactorización CLAUDE.md post QA Audit)
 
 ## Prerequisites
 
@@ -46,12 +46,13 @@ npm test                 # Ejecutar tests
 | Render video | `npm run render` |
 | CI validation | `npm run ci:validate` |
 
-**Test suites** (actualizado 2026-01-30):
-- `test:logger` (3), `test:services` (5), `test:video` (19), `test:content` (23), `test:design` (29)
-- `test:scoring` (19), `test:image-search` (23), `test:video-optimized` (22)
-- `test:safeimage` (7), `test:cleanup` (8)
-- `test:orchestrator` (16), `test:notifications` (12), `test:notification-fix` (12)
-- `test:gemini` (22), `test:compliance` (70), `test:tts` (22)
+**Test suites**:
+- Core: `test:logger` (3) | `test:services` (5)
+- Video: `test:video` (19) | `test:content` (23) | `test:design` (29)
+- Scoring: `test:scoring` (33) | `test:image-search` (23)
+- Optimized: `test:video-optimized` (22) | `test:safeimage` (7) | `test:cleanup` (8)
+- Pipeline: `test:orchestrator` (16) | `test:notifications` (12) | `test:notification-fix` (12)
+- APIs: `test:gemini` (22) | `test:compliance` (70) | `test:tts` (22)
 - **Total**: 284 tests (280 passing, 4 skipped)
 
 Ver `README.md` para lista completa de scripts.
@@ -142,275 +143,165 @@ GitHub Actions (`.github/workflows/test.yml`):
 ## Environment Variables
 
 ```env
-# APIs
-GEMINI_API_KEY=...
-NEWSDATA_API_KEY=...
-ELEVENLABS_API_KEY=...
-ELEVENLABS_VOICE_ID=adam
+# APIs (Requeridas)
+NEWSDATA_API_KEY=...           # NewsData.io - noticias de IA
+GEMINI_API_KEY=...             # Google AI Studio - generación de scripts
+ELEVENLABS_API_KEY=...         # ElevenLabs - TTS (10k chars/mes gratis)
+ELEVENLABS_VOICE_ID=adam       # Voz por defecto (Josh en código)
 
-# Notificaciones (opcional)
-NOTIFICATION_EMAIL=your_email@gmail.com
-RESEND_API_KEY=re_xxxxxxxxxxxxx
-TELEGRAM_BOT_TOKEN=123456789:ABC-DEF
-TELEGRAM_CHAT_ID=123456789
-DASHBOARD_URL=http://localhost:3000
-DASHBOARD_SECRET=your_secret_key
+# Notificaciones (Opcional)
+NOTIFICATION_EMAIL=...         # Email destino para notificaciones
+RESEND_API_KEY=re_...          # Resend API key (usa onboarding@resend.dev en dev)
+TELEGRAM_BOT_TOKEN=...         # Bot token de @BotFather
+TELEGRAM_CHAT_ID=...           # Chat ID (obtener con getUpdates)
 
 # Entorno
-NODE_ENV=development
+NODE_ENV=development           # development | staging | production
 TEMP_STORAGE_PATH=./automation/temp/videos
 ```
 
-Ver `.env.example` y `SETUP-NOTIFICATIONS.md` para configuración completa.
+Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIFICATIONS.md`
 
 ## Prompt History
 
-| # | Feature | Tests |
-|---|---------|-------|
-| 4 | EnvironmentManager + AppConfig | - |
-| 5 | TestLogger (Winston) | 3 |
-| 6 | Service Objects | 5 |
-| 7 | Video Generation Tests | 19 |
-| 8 | Content Validation Tests | 23 |
-| 9 | CI/CD, npm scripts, reporters | - |
-| 10 | AudioMixer, ProgressBar, Temas | 27 |
-| 10.1 | Hashtags removidos de video (solo en título YouTube) | 2 |
-| 11 | News Scoring System (rankeo por importancia) | 19 |
-| 12 | Image Search System (multi-provider con fallback) | 23 |
-| 13 | Video Optimizado (1 noticia, efectos dinámicos) | 22 |
-| 13.1 | SafeImage (fix CORS en preview) | 7 |
-| 13.2 | Limpieza de composiciones obsoletas | 8 |
-| 14 | Orchestrator + Calendario de Publicación | 16 |
-| 14.1 | Sistema de Notificaciones (Email + Telegram) | 12 |
-| 14.2 | Fix Notificaciones (callbacks + dominio Resend) | 12 |
-| 15 | Gemini Script Generation + Alex Torres Persona + Compliance | 45 |
-| 16 | ElevenLabs TTS + Cache + Fallback Edge-TTS | 27 |
+### Prompts 4-10: Fundación (Tests + Infraestructura)
+| # | Feature | Tests | Archivos Clave |
+|---|---------|-------|----------------|
+| 4 | EnvironmentManager + AppConfig | - | `src/config/EnvironmentManager.ts` |
+| 5 | TestLogger (Winston) | 3 | `tests/utils/TestLogger.ts` |
+| 6 | Service Objects | 5 | `tests/page-objects/services/` |
+| 7 | Video Generation Tests | 19 | `tests/specs/prompt7-*.spec.ts` |
+| 8 | Content Validation Tests | 23 | `tests/specs/prompt8-*.spec.ts` |
+| 9 | CI/CD + npm scripts | - | `.github/workflows/test.yml` |
+| 10 | AudioMixer + ProgressBar + Temas | 29 | `remotion-app/src/styles/themes.ts` |
 
-**Prompt 11 - News Scoring (2026-01-29):**
-- Sistema de puntuación para rankear noticias (0-37 pts)
-- Criterios: Empresa (0-10), Tipo (0-9), Engagement (0-8), Frescura (-5 a +3), Impacto (0-7)
-- Archivos: `automation/src/news-scorer.ts`, `automation/src/config/scoring-rules.ts`, `automation/src/types/{scoring,news}.types.ts`
-- Funciones: `scoreNews()`, `rankNews()`, `selectTopNews()`
+### Prompts 11-14.2.1: Pipeline de Publicación
+| # | Feature | Tests | Descripción |
+|---|---------|-------|-------------|
+| 11 | News Scoring "Carnita" | 33 | Scoring 0-97 pts, umbral 75 |
+| 12 | Image Search Multi-Provider | 23 | Clearbit → Logo.dev → Google → Unsplash |
+| 13 | Video Optimizado (1 noticia) | 22 | 55s: Hero 8s + Content 37s + Outro 10s |
+| 13.1 | SafeImage CORS Fix | 7 | Fallback UI Avatars para preview |
+| 13.2 | Cleanup Composiciones | 8 | Eliminadas SintaxisIA* (obsoletas) |
+| 14 | Orchestrator + Calendario | 16 | Pipeline 9 pasos, publica cada 2 días |
+| 14.1 | Notificaciones Email + Telegram | 12 | Resend API + bot con callbacks |
+| 14.2 | Fix Callbacks Telegram | 12 | Aprobación desde Telegram sin dashboard |
 
-**Prompt 12 - Image Search (2026-01-29):**
-- Sistema de búsqueda de imágenes con múltiples proveedores y fallback robusto
-- Estrategia 3 imágenes: HERO (logo empresa), CONTEXT (screenshot/demo), OUTRO (logo Sintaxis IA)
-- Providers: Clearbit → Logo.dev → Google → Unsplash → OpenGraph → UI Avatars (fallback garantizado)
-- Sistema de caché (7 días, `automation/cache/images/`)
-- Archivos: `automation/src/image-searcher-v2.ts`, `automation/src/image-providers/`, `automation/src/utils/image-cache.ts`
-- Tipos: `automation/src/types/image.types.ts` (ImageSearchParams, ImageSearchResult)
+### Prompts 15-17-A: Integración APIs Reales
+| # | Feature | Tests | Descripción |
+|---|---------|-------|-------------|
+| 15 | Gemini Script Generation | 92 | Persona Alex Torres + Compliance 6 marcadores |
+| 16 | ElevenLabs TTS | 22 | Voz Josh + cache + fallback Edge-TTS |
+| 17-A | Carnita Score Refactor | - | Eliminado Twitter/X, umbral 75 pts, max 97 pts |
 
-**Prompt 13 - Video Optimizado (2026-01-29):**
-- Video optimizado para 1 noticia completa con efectos dinámicos
-- Timing: Hero 8s (hook) + Content 37s (explicación) + Outro 10s (branding) = 55s
-- Efectos: zoom dramático (0.8→1.2), blur-to-focus, parallax (-20px), glow pulsante
-- 3 imágenes: hero (logo empresa), context (screenshot/demo), outro (logo Sintaxis IA hardcoded)
-- Composición: `AINewsShort` en `remotion-app/src/compositions/`
-- Escenas: `HeroScene`, `ContentScene`, `OutroScene` en `remotion-app/src/components/scenes/`
-- Tipos: `VideoProps`, `NewsType` en `remotion-app/src/types/video.types.ts`
-- Hashtags: NO se renderizan (solo metadata para YouTube)
+### Prompts Detallados
 
-**Fix CORS - Prompt 13.1 (2026-01-29):**
-- Componente `SafeImage` con fallback automatico para errores de CORS
-- Genera placeholder dinamico (UI Avatars) si imagen falla
-- Extrae inicial del dominio de Clearbit/Logo.dev para placeholder
-- Usado en HeroScene y ContentScene (reemplaza <Img> directo)
-- Preview funciona sin errores de carga de imagenes externas
-- Archivo: `remotion-app/src/components/elements/SafeImage.tsx`
+**Prompt 11 - News Scoring "Carnita" (2026-01-29, refactorizado en 17-A):**
+- Sistema de puntuación: 0-97 pts (umbral: 75 pts para publicar)
+- Criterios base: Empresa (0-10), Tipo (0-9), Engagement (0-8), Frescura (-5 a +3), Impacto (0-7)
+- Criterios carnita: Profundidad analítica (0-25), Controversia (0-20), Anti-clickbait (0-15)
+- Archivos: `automation/src/news-scorer.ts`, `automation/src/config/scoring-rules.ts`
+- Funciones: `scoreNews()`, `rankNews()`, `selectPublishableNews()`
 
-**Limpieza de Composiciones - Prompt 13.2 (2026-01-29):**
-- Eliminadas composiciones obsoletas: SintaxisIA, SintaxisIA-Preview, SintaxisIA-LowRes
-- Mantenidas solo 2 composiciones productivas:
-  - `AINewsShort` (55s) - Producción final
-  - `AINewsShort-Preview` (10s) - Desarrollo rápido
-- Eliminado import de Video.tsx (ya no se usa)
-- Preview muestra solo composiciones activas
+**Prompt 12 - Image Search Multi-Provider (2026-01-29):**
+- Estrategia: HERO (logo empresa) + CONTEXT (screenshot) + OUTRO (logo Sintaxis IA)
+- Cadena fallback: Clearbit → Logo.dev → Google → Unsplash → OpenGraph → UI Avatars
+- Caché local (7 días TTL): `automation/cache/images/`
+- Archivos: `automation/src/image-searcher-v2.ts`, `automation/src/image-providers/`
+
+**Prompt 13 - Video Optimizado 1 Noticia (2026-01-29):**
+- Timing: Hero 8s + Content 37s + Outro 10s = 55s total
+- Efectos dinámicos: zoom (0.8→1.2), blur-to-focus, parallax, glow pulsante
+- Composiciones activas: `AINewsShort` (55s producción), `AINewsShort-Preview` (10s dev)
+- Escenas: `HeroScene`, `ContentScene`, `OutroScene`
+- SafeImage (13.1): Fallback CORS con UI Avatars
+- Cleanup (13.2): Eliminadas composiciones obsoletas (SintaxisIA*)
 
 **Prompt 14 - Orchestrator + Calendario (2026-01-29):**
-- Coordinador maestro que orquesta todo el pipeline de generación
-- Calendario de publicación: cada 2 días (Lun/Mié/Vie/Dom a las 14:00)
-- Pipeline de 9 pasos: check_schedule → collect_news → select_top → generate_script → search_images → generate_audio → render_video → manual_approval → publish
-- CLI con opciones: `--dry` (sin publicar), `--force` (forzar), `--prod` (producción)
-- Archivos: `automation/src/orchestrator.ts`, `automation/src/cli.ts`, `automation/src/config/publication-calendar.ts`, `automation/src/types/orchestrator.types.ts`
-- Scripts: `npm run automation:run`, `automation:dry`, `automation:force`, `automation:prod`
-- Mocks implementados para: news collection, script generation, audio generation, video rendering
-- Funcional: calendario, scoring, image search
-
-**Prompt 14.1 - Sistema de Notificaciones (2026-01-29):**
-- Notificaciones duales: Email (Resend API) + Telegram Bot
-- Email HTML profesional con botones de acción
-- Telegram con botones inline para aprobar/rechazar desde celular
-- Variables de entorno encriptadas (.env)
-- Datos sensibles enmascarados en logs (getSafeConfig)
-- Storage temporal para videos pendientes de aprobación
-- Archivos: `automation/src/notifiers/`, `automation/src/config/env.config.ts`
-- Configurar: copiar `.env.example` a `.env` y completar credenciales
-- Obtener: API key en resend.com, bot token de @BotFather
-
-**Prompt 14.2 - Fix Notificaciones para Desarrollo (2026-01-29):**
-- Email: Usa `onboarding@resend.dev` (dominio pre-verificado, sin DNS)
-- Telegram: Botones callback (`callback_data`) en lugar de URLs
-- Callback handler: Escucha aprobaciones/rechazos directamente desde Telegram
-- Aprobación sin dashboard: 100% funcional en desarrollo local
-- CLI actualizado: Inicializa callback handler y espera Ctrl+C
-- Archivos modificados:
-  - `automation/src/notifiers/telegram-notifier.ts` (callbacks)
-  - `automation/src/notifiers/telegram-callback-handler.ts` (nuevo)
-  - `automation/src/notifiers/notification-orchestrator.ts` (videoId)
-  - `automation/src/cli.ts` (callback handler + SIGINT)
-  - `automation/src/notifiers/email-notifier.ts` (onboarding@resend.dev)
-- Flujo de aprobación:
-  1. Pipeline genera video → envía notificaciones
-  2. Usuario recibe mensaje en Telegram con 3 botones
-  3. Toca "Aprobar" / "Rechazar" / "Ver Detalles"
-  4. Bot ejecuta acción inmediatamente
-  5. Usuario recibe confirmación
-  6. Ctrl+C para salir
-
-**Prompt 14.2.1 - Fix Storage Temporal:**
-- Directorio temporal creado automáticamente (`automation/temp/videos/`)
-- Logging mejorado en callback handler para diagnóstico
-- Validaciones de existencia de archivos
-- Mensajes de error más descriptivos en Telegram
-- .gitkeep en directorio temporal
+- Pipeline 9 pasos: check_schedule → collect_news → select_top → generate_script → search_images → generate_audio → render_video → manual_approval → publish
+- Calendario: Cada 2 días (Lun/Mié/Vie/Dom 14:00)
+- CLI: `--dry`, `--force`, `--prod`
+- Notificaciones (14.1): Email (Resend) + Telegram con botones inline
+- Callbacks Telegram (14.2): Aprobación sin dashboard, 100% local
+- Archivos: `automation/src/orchestrator.ts`, `automation/src/cli.ts`, `automation/src/notifiers/`
 
 **Prompt 15 - Gemini Script Generation (2026-01-30):**
-- Integración REAL con Gemini API (modelo: `gemini-2.5-flash`)
-- Persona virtual "Alex Torres" (Tech Analyst & AI Curator)
-- Scripts con "toque humano" para cumplir políticas YouTube
-- Sistema de compliance con 6 marcadores humanos:
-  1. Primera persona ("yo creo", "me parece", "noto que")
-  2. Opinión subjetiva ("lo interesante es", "considero")
-  3. Admisión de incertidumbre ("probablemente", "quizá", "aún no está claro")
-  4. Pregunta reflexiva ("¿crees que...?", "¿qué opinas?")
-  5. Evita lenguaje corporativo (no: "revolucionario", "disruptivo", "game-changer")
-  6. Uso de analogías ("como si...", "similar a", "es como")
-- Mínimo 4/6 marcadores para aprobar compliance
-- Retry automático con feedback si no pasa compliance
-- **Cadena de fallback escalonada**: 2.5-flash → 2.0-flash → 1.5-flash
-- Metadata con `modelUsed` y `fallbackReason` para tracking
-- Archivos:
-  - `automation/src/config/persona.ts` - ALEX_TORRES_PERSONA
-  - `automation/src/prompts/script-generation-templates.ts` - Prompts y templates
-  - `automation/src/services/compliance-validator.ts` - ComplianceValidator
-  - `automation/src/types/script.types.ts` - GeneratedScript, ComplianceReport
-  - `automation/src/scriptGen.ts` - ScriptGenerator class
-- Scripts: `test:gemini`, `test:compliance`, `test:prompt15`
-- Test manual de API: `cd automation && node test-gemini.js`
+- API real: `gemini-2.5-flash` (fallback: 2.0-flash → 1.5-flash)
+- Persona: "Alex Torres" (Tech Analyst & AI Curator)
+- Compliance YouTube (6 marcadores humanos, mínimo 4/6):
+  1. Primera persona | 2. Opinión subjetiva | 3. Admite incertidumbre
+  4. Preguntas reflexivas | 5. Sin jerga corporativa | 6. Usa analogías
+- Retry automático si falla compliance
+- Archivos: `automation/src/scriptGen.ts`, `automation/src/services/compliance-validator.ts`
+- Test manual: `cd automation && node test-gemini.js`
 
-**Prompt 16 - ElevenLabs TTS Integration (2026-01-30):**
-- Integración REAL con ElevenLabs API (modelo: `eleven_multilingual_v2`)
-- Voz Josh (TxGEqnHWrfWFTfGW9XjX) - slow, natural, calm
-- Gestión de cuota free tier (10,000 chars/mes)
-- Sistema de cache para evitar regenerar audios idénticos
-- Fallback automático a Edge-TTS (es-MX-JorgeNeural) si:
-  - API key no configurada
-  - Cuota excedida
-  - Error de API
-- Auto-reset de cuota al cambiar de mes
-- Archivos:
-  - `automation/src/config/tts.config.ts` - Configuración centralizada
-  - `automation/src/types/tts.types.ts` - Tipos TypeScript
-  - `automation/src/services/tts.service.ts` - TTSService class
-  - `tests/specs/prompt16-tts.spec.ts` - 27 tests
-- Integración con orchestrator (paso 6 actualizado)
-- Scripts: `test:tts`, `test:prompt16`
-- Requisitos: `ELEVENLABS_API_KEY` en .env, ffprobe para duración exacta
+**Prompt 16 - ElevenLabs TTS (2026-01-30):**
+- API real: `eleven_multilingual_v2`, voz Josh (slow, natural, calm)
+- Fallback: Edge-TTS (es-MX-JorgeNeural) si falla API o excede cuota (10k chars/mes)
+- Caché local para evitar regenerar audios idénticos
+- Auto-reset cuota mensual
+- Archivos: `automation/src/services/tts.service.ts`, `automation/src/config/tts.config.ts`
+- Requisitos: `ELEVENLABS_API_KEY` en .env, ffprobe instalado
 
-**Prompt 17-A - Carnita Score + Eliminar Twitter/X (2026-01-30):**
-- Refactorización del sistema de scoring para eliminar dependencias de Twitter/X
-- **Eliminadas** métricas específicas: `twitterViews`, `twitterLikes`, `twitterRetweets`
-- **Agregadas** métricas genéricas: `views`, `likes`, `shares`, `comments`
-- Nuevo umbral de publicación: **75 pts** (antes 60)
-- Nuevos criterios "Carnita Score":
-  - `analyticalDepth` (0-25 pts): Profundidad analítica potencial
-  - `controversyPotential` (0-20 pts): Potencial de debate
-  - `substantiveContent` (0-15 pts): Penaliza clickbait
-- Score máximo teórico: 97 pts (antes 37)
-- Nuevas keywords en scoring-rules.ts:
-  - `ANALYTICAL_KEYWORDS` - Palabras de profundidad analítica
-  - `CONTROVERSY_KEYWORDS` - Palabras de controversia
-  - `CLICKBAIT_INDICATORS` - Indicadores de clickbait (penalización)
-  - `HIGH_IMPACT_ENTITIES` - Empresas/productos de alto impacto
-- Nuevos exports en news-scorer.ts:
-  - `selectPublishableNews()` - Selecciona noticia que supere umbral
-  - `PUBLISH_THRESHOLD` - Constante de umbral (75)
-- Campos nuevos en NewsScore:
-  - `isPublishable: boolean` - Si supera umbral
-  - `suggestedAngles: string[]` - Ángulos de análisis sugeridos
-  - `reasons: string[]` - Razones de la puntuación
-- Archivos modificados:
-  - `automation/src/types/scoring.types.ts` - Tipos refactorizados
-  - `automation/src/config/scoring-rules.ts` - Nuevas keywords
-  - `automation/src/news-scorer.ts` - Lógica de carnita
-  - `automation/src/orchestrator.ts` - metrics.views
-- **MANTENIDO**: `twitter:image` en OpenGraph (es estándar web, no scraping)
-- Scripts: `test:scoring`, `test:carnita`, `test:scoring-full`
+**Prompt 17-A - Carnita Score Refactor (2026-01-30):**
+- Eliminado Twitter/X: `twitterViews` → `views` (métricas genéricas)
+- Umbral publicación: **75 pts** (antes 60) | Máximo: **97 pts** (antes 37)
+- Nuevos criterios: Profundidad analítica (0-25), Controversia (0-20), Anti-clickbait (0-15)
+- Keywords: `ANALYTICAL_KEYWORDS`, `CONTROVERSY_KEYWORDS`, `CLICKBAIT_INDICATORS`
+- Funciones: `selectPublishableNews()`, `PUBLISH_THRESHOLD`
+- Campos NewsScore: `isPublishable`, `suggestedAngles`, `reasons`
 - 14 tests nuevos (33 total en prompt11-news-scoring.spec.ts)
 
 **QA Audit + CI/CD Fixes (2026-01-30):**
-- Auditoría completa de `/tests` con agente `qa-automation-lead`
-- **Fix composiciones obsoletas**: `SintaxisIA*` → `AINewsShort*` en 18 ocurrencias
-- **Fix tests flaky**: Calendario ajustado a rango 1-7 días (no exacto)
-- **Actualizado** `service-constants.ts`: Eliminada `SintaxisIA-LowRes`
-- **Actualizado** `VideoServiceObject.ts`: Tipo `composition` corregido
-- **Generado** `Tests.md`: Reporte de auditoría con cobertura
+- Fix composiciones obsoletas: `SintaxisIA*` → `AINewsShort*` (18 ocurrencias)
+- Fix tests flaky: Calendario ajustado a rango 1-7 días
 - Git hooks pre-commit: Valida package-lock.json, .env, archivos >5MB
 - Resultado: 284 tests (280 passing, 4 skipped)
 
 ## Pipeline de Publicación
 
 ### Orchestrator (9 pasos)
-1. **check_schedule**: Validar si toca publicar según calendario
-2. **collect_news**: Obtener noticias de NewsData.io API
-3. **select_top**: Rankear y seleccionar mejor noticia (scoring)
-4. **generate_script**: Generar guion con Gemini API
-5. **search_images**: Buscar 3 imágenes (hero, context, outro)
-6. **generate_audio**: TTS con ElevenLabs
-7. **render_video**: Renderizar con Remotion
-8. **manual_approval**: Enviar notificaciones y esperar aprobación
-9. **publish**: Publicar en YouTube (pendiente)
+1. `check_schedule` - Validar calendario (cada 2 días: Lun/Mié/Vie/Dom 14:00)
+2. `collect_news` - Obtener noticias (NewsData.io)
+3. `select_top` - Scoring Carnita (umbral 75 pts)
+4. `generate_script` - Gemini 2.5 Flash + Alex Torres Persona
+5. `search_images` - Multi-provider (hero, context, outro)
+6. `generate_audio` - ElevenLabs (fallback Edge-TTS)
+7. `render_video` - Remotion CLI (mock)
+8. `manual_approval` - Email (Resend) + Telegram (callbacks)
+9. `publish` - YouTube API (pendiente)
 
-### Calendario de Publicación
-- Frecuencia: Cada 2 días
-- Días: Lunes, Miércoles, Viernes, Domingo
-- Hora: 14:00 (timezone del servidor)
-- Configuración: `automation/src/config/publication-calendar.ts`
-
-### Sistema de Notificaciones
-- **Email**: HTML profesional con preview y botones (Resend API)
-- **Telegram**: Mensaje con botones inline para aprobar/rechazar desde celular
-- **Callbacks**: Handler que escucha respuestas de Telegram en tiempo real
-- **Desarrollo**: Usa `onboarding@resend.dev` (dominio pre-verificado)
-- **Storage**: Metadata de videos en `automation/temp/videos/{videoId}.json`
-
-### CLI Options
+### CLI
 ```bash
-npm run automation:run        # Modo normal (respeta calendario)
+npm run automation:run        # Normal (respeta calendario)
 npm run automation:dry        # Dry run (sin publicar)
-npm run automation:force      # Forzar ejecución (ignora calendario)
+npm run automation:force      # Forzar (ignora calendario)
 npm run automation:prod       # Producción (con notificaciones)
 ```
 
+### Notificaciones
+- **Email**: `onboarding@resend.dev` (dev, sin DNS) | HTML con preview
+- **Telegram**: Botones inline (Aprobar/Rechazar/Detalles) | Callbacks en tiempo real
+- **Storage**: `automation/temp/videos/{videoId}.json`
+
 ## Estado de Implementación
 
-### Funcional (Real API)
-- News Collection (NewsData.io)
-- **News Scoring "Carnita" (0-97 puntos, umbral 75)** ✅ Prompt 17-A
-- Image Search (multi-provider con caché)
-- Publication Calendar
-- Notification System (Email + Telegram)
-- **Script Generation (Gemini 2.5 Flash)** ✅ Prompt 15
-- **Audio Generation (ElevenLabs + Edge-TTS fallback)** ✅ Prompt 16
+### Funcional (Real API) ✅
+| Componente | Tecnología | Prompt |
+|------------|------------|--------|
+| News Collection | NewsData.io API | Base |
+| News Scoring | Carnita Score (0-97 pts, umbral 75) | 11, 17-A |
+| Image Search | Multi-provider + caché (7 días) | 12 |
+| Script Generation | Gemini 2.5 Flash + Alex Torres Persona | 15 |
+| Audio Generation | ElevenLabs + fallback Edge-TTS | 16 |
+| Publication Calendar | Cada 2 días (Lun/Mié/Vie/Dom 14:00) | 14 |
+| Notification System | Email (Resend) + Telegram callbacks | 14.1, 14.2 |
 
-### Mock (Tests pasando)
-- Video Rendering (Remotion CLI)
+### Mock (Tests pasando) 🔧
+- Video Rendering (Remotion CLI) - Pendiente integración real
 
-**Pendientes**:
-- ✅ **#15 Gemini + Persona "Alex Torres"** - COMPLETADO
-- ✅ **#16 ElevenLabs** - Josh voice + cache + fallback Edge-TTS - COMPLETADO
-- ✅ **#17-A Carnita Score** - Refactorizado scoring, eliminado Twitter/X - COMPLETADO
-- 🔜 **#17 Remotion CLI** - Integración real + primer video E2E
-- 📅 **#18 OCR + Thumbnails** - Extracción de texto de imágenes
-- 📅 **#19 Visual Identity** - Branding humanizado
-- 📅 **#20 YouTube Auto-Publishing** - API de publicación
+### Pendientes 📅
+- **#17 Remotion CLI** - Integración real + primer video E2E
+- **#18 OCR + Thumbnails** - Extracción de texto de imágenes
+- **#19 Visual Identity** - Branding humanizado
+- **#20 YouTube Auto-Publishing** - API de publicación
