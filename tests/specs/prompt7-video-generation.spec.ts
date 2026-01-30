@@ -34,6 +34,8 @@ import {
   VALIDATION_THRESHOLDS,
   VIDEO_CONFIG,
   REMOTION_CONFIG,
+  // Configuración centralizada de timeouts
+  TIMEOUTS,
 } from '../config';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -462,11 +464,13 @@ test.describe('Suite 3: Manejo de Errores', () => {
    * cuando el renderizado toma demasiado tiempo.
    */
   test('debe manejar timeout en renderizado largo', async () => {
-    // Arrange - Usar timeout muy corto para forzar error
-    const shortTimeout = 100; // 100ms, imposible de cumplir
+    // Arrange - Usar timeout menor que el umbral configurado para forzar error
+    // El umbral está en TIMEOUTS.shortTimeoutThreshold.value (500ms por defecto)
+    const shortTimeout = Math.floor(TIMEOUTS.shortTimeoutThreshold.value / 5); // 100ms si umbral es 500ms
 
     logger.info('Probando timeout de renderizado', {
       timeout: `${shortTimeout}ms`,
+      threshold: `${TIMEOUTS.shortTimeoutThreshold.value}ms`,
     });
 
     // Act

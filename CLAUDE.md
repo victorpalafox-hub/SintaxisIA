@@ -26,6 +26,25 @@ npx playwright install   # Instalar browsers de Playwright
 npm test                 # Ejecutar tests
 ```
 
+## Quick Debug
+
+```bash
+# Ver test fallido con detalle
+npx playwright test tests/specs/[file].spec.ts --debug
+
+# Ejecutar solo un test específico por nombre
+npx playwright test -g "debe validar estructura"
+
+# Ver último reporte HTML
+npm run test:report
+
+# Verificar setup de Remotion
+npm run video:verify
+
+# TypeScript check rápido
+npm run check
+```
+
 ## Essential Commands
 
 | Task | Command |
@@ -91,6 +110,31 @@ import { GEMINI_CONFIG, VIDEO_CONFIG, CONTENT_VALIDATION } from '../config';
 
 `src/config/EnvironmentManager.ts` carga: `.env` → `.env.local` → `.env.[env]` → `.env.[env].local`
 
+### Timeout Configuration (Anti-Hardcode)
+
+`automation/src/config/timeouts.config.ts` centraliza TODOS los timeouts del proyecto:
+
+```typescript
+import { TIMEOUTS, getTimeout, isShortTimeout } from './config/timeouts.config';
+
+// Uso directo (se adapta automáticamente a CI/CD)
+const timeout = TIMEOUTS.videoRender.value;  // 30s local, 120s CI
+
+// Con override opcional
+const customTimeout = getTimeout('videoRender', userOverride);
+
+// Verificar si timeout es "corto" (para tests de error)
+if (isShortTimeout(timeout)) { /* manejar error */ }
+```
+
+| Timeout | Local | CI/CD | Env Var |
+|---------|-------|-------|---------|
+| videoRender | 30s | 120s | `VIDEO_RENDER_TIMEOUT_MS` |
+| videoValidation | 10s | 30s | `VIDEO_VALIDATION_TIMEOUT_MS` |
+| apiCall | 15s | 60s | `API_CALL_TIMEOUT_MS` |
+| imageFetch | 5s | 15s | `IMAGE_FETCH_TIMEOUT_MS` |
+| tts | 60s | 120s | `TTS_TIMEOUT_MS` |
+
 ## Key Patterns
 
 - **Service Objects**: Toda interacción con servicios externos via clases que extienden `BaseServiceObject`
@@ -98,6 +142,18 @@ import { GEMINI_CONFIG, VIDEO_CONFIG, CONTENT_VALIDATION } from '../config';
 - **Constants**: Magic numbers en `tests/config/service-constants.ts`
 - **AAA Pattern**: Arrange, Act, Assert en todos los tests
 - **Record<string, unknown>**: Preferir sobre `any` para objetos de contexto
+- **Anti-Hardcode Timeouts**: NUNCA usar valores hardcodeados, usar `TIMEOUTS.xxx.value`
+
+## Gotchas Comunes
+
+| Problema | Solución |
+|----------|----------|
+| Tests timeout en CI | Aumentar timeout en `playwright.config.ts` o agregar `test.slow()` |
+| CORS en imágenes (preview) | `SafeImage` usa fallback UI Avatars automáticamente |
+| Composición no encontrada | Usar `AINewsShort` (producción) o `AINewsShort-Preview` (dev) |
+| FFmpeg no disponible | Instalar FFmpeg y agregar al PATH |
+| API rate limit (ElevenLabs) | Usa fallback Edge-TTS automáticamente (10k chars/mes) |
+| Tests flaky en calendario | Usar rango 1-7 días, no valores exactos |
 
 ## File Placement
 
@@ -322,3 +378,7 @@ npm run automation:prod       # Producción (con notificaciones)
 - **#18 OCR + Thumbnails** - Extracción de texto de imágenes
 - **#19 Visual Identity** - Branding humanizado
 - **#20 YouTube Auto-Publishing** - API de publicación
+
+---
+
+*Para historial detallado de prompts anteriores, ver secciones "Prompts Detallados" arriba.*

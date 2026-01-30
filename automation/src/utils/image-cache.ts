@@ -21,6 +21,7 @@ import * as path from 'path';
 import axios from 'axios';
 import { createHash } from 'crypto';
 import { IMAGE_API_CONFIG } from '../config/image-sources';
+import { TIMEOUTS } from '../config/timeouts.config';
 
 // Directorio de caché
 const CACHE_DIR = path.join(process.cwd(), IMAGE_API_CONFIG.cache.directory);
@@ -61,7 +62,7 @@ export async function cacheImage(url: string): Promise<string> {
   try {
     const response = await axios.get(url, {
       responseType: 'arraybuffer',
-      timeout: 10000,
+      timeout: TIMEOUTS.imageFetch.value,
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; SintaxisIA/1.0)',
       },

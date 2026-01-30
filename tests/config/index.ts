@@ -26,4 +26,10 @@ export {
   REMOTION_CONFIG,
   CONTENT_VALIDATION,
   CONTENT_VALIDATION_DELAYS,
+  // Configuración centralizada de timeouts
+  TIMEOUTS,
+  getTimeout,
+  isShortTimeout,
+  logTimeoutConfig,
+  type TimeoutType,
 } from './service-constants';

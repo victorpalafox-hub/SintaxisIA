@@ -50,6 +50,9 @@ import {
   MOCK_VALIDATION_VALUES,
   VALIDATION_THRESHOLDS,
   REMOTION_CONFIG,
+  // Configuración centralizada de timeouts
+  isShortTimeout,
+  TIMEOUTS,
 } from '../../config/service-constants';
 
 // ============================================================================
@@ -984,8 +987,9 @@ export class VideoServiceObject extends BaseServiceObject {
         try {
           // Verificar timeout muy corto (para test de timeout)
           // En CI/CD, delays reales pueden causar flakiness, así que
-          // simplemente retornamos el error sin delay cuando timeout < 500ms
-          if (timeout < 500) {
+          // simplemente retornamos el error sin delay cuando timeout es "corto"
+          // El umbral está configurado en TIMEOUTS.shortTimeoutThreshold (500ms por defecto)
+          if (isShortTimeout(timeout)) {
             return {
               success: false,
               outputPath,

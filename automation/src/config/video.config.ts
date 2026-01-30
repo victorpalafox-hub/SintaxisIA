@@ -10,6 +10,7 @@
  */
 
 import * as path from 'path';
+import { TIMEOUTS } from './timeouts.config';
 
 // =============================================================================
 // CONFIGURACIÓN DE VIDEO
@@ -92,8 +93,15 @@ export const REMOTION_CONFIG = {
   enableGpu: true,
   /** Número de workers concurrentes (null = auto) */
   concurrency: null as number | null,
-  /** Timeout para rendering en ms (5 minutos) */
-  timeout: 300000,
+  /**
+   * Timeout para rendering (configurable vía env vars)
+   * Usa TIMEOUTS.videoRender que se adapta automáticamente a CI/CD
+   * Local: 30s, CI: 120s (o los valores configurados en .env)
+   */
+  get timeout() {
+    // Multiplicamos por factor de seguridad para rendering largo
+    return TIMEOUTS.videoRender.value * 4; // ~2-8 minutos según entorno
+  },
   /** Número de reintentos en caso de fallo */
   retries: 2,
   /** Delay entre reintentos en ms */

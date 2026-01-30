@@ -4,6 +4,16 @@
 // Centraliza magic numbers y valores hardcodeados
 // ===================================
 
+// Re-export de la configuración centralizada de timeouts
+// para uso en tests (evita import paths largos)
+export {
+  TIMEOUTS,
+  getTimeout,
+  isShortTimeout,
+  logTimeoutConfig,
+  type TimeoutType
+} from '../../automation/src/config/timeouts.config';
+
 /**
  * Configuracion de la API de Gemini
  */
@@ -126,8 +136,15 @@ export const VALIDATION_THRESHOLDS = {
     EXPECTED_HEIGHT: 1920,
   },
 
-  /** Timeout para renderizado de video en milisegundos (2 minutos) */
-  VIDEO_RENDER_TIMEOUT_MS: 120000,
+  /**
+   * @deprecated Usar TIMEOUTS.videoRender.value en su lugar
+   * Mantenido por compatibilidad. Ver automation/src/config/timeouts.config.ts
+   */
+  get VIDEO_RENDER_TIMEOUT_MS() {
+    // Importación dinámica para evitar referencias circulares
+    const { TIMEOUTS } = require('../../automation/src/config/timeouts.config');
+    return TIMEOUTS.videoRender.value;
+  },
 } as const;
 
 /**
