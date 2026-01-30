@@ -81,7 +81,11 @@
     "test:prompt16": "playwright test tests/specs/prompt16-*.spec.ts",
 
     "test:carnita": "playwright test tests/specs/prompt11-news-scoring.spec.ts -g 'Carnita'",
-    "test:scoring-full": "playwright test tests/specs/prompt11-news-scoring.spec.ts"
+    "test:scoring-full": "playwright test tests/specs/prompt11-news-scoring.spec.ts",
+
+    "test:video-rendering": "playwright test tests/specs/prompt17-video-rendering.spec.ts",
+    "test:prompt17": "playwright test tests/specs/prompt17-*.spec.ts",
+    "video:verify": "cd automation && npx ts-node -e \"import('./src/services/video-rendering.service').then(s => s.videoRenderingService.verifyRemotionSetup().then(console.log))\""
   },
   "keywords": [
     "youtube",
