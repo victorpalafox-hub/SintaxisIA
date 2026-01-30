@@ -114,7 +114,7 @@ test.describe('Suite 1: Renderizado Básico', () => {
 
     // Act - Ejecutar renderizado
     const result = await videoService.renderVideo(VALID_SCRIPT_DATA, {
-      composition: 'SintaxisIA-Preview', // 10 segundos para test rápido
+      composition: 'AINewsShort-Preview', // 10 segundos para test rápido
       timeout: RENDER_TIMEOUT,
     });
 
@@ -158,7 +158,7 @@ test.describe('Suite 1: Renderizado Básico', () => {
 
     // Act - Intentar renderizar con script inválido
     const result = await videoService.renderVideo(INVALID_SCRIPT_DATA, {
-      composition: 'SintaxisIA-Preview',
+      composition: 'AINewsShort-Preview',
       timeout: RENDER_TIMEOUT,
     });
 
@@ -187,7 +187,7 @@ test.describe('Suite 1: Renderizado Básico', () => {
 
     // Act
     const result = await videoService.renderVideo(VALID_SCRIPT_DATA, {
-      composition: 'SintaxisIA-Preview',
+      composition: 'AINewsShort-Preview',
       outputName: 'test_extension_mp4',
     });
 
@@ -233,7 +233,7 @@ test.describe('Suite 2: Validación de Especificaciones', () => {
 
     // Act - Generar video y obtener metadatos
     const renderResult = await videoService.renderVideo(VALID_SCRIPT_DATA, {
-      composition: 'SintaxisIA-Preview',
+      composition: 'AINewsShort-Preview',
     });
 
     // Solo si el renderizado fue exitoso, validar metadatos
@@ -279,7 +279,7 @@ test.describe('Suite 2: Validación de Especificaciones', () => {
 
     // Act - Generar video y obtener metadatos
     const renderResult = await videoService.renderVideo(VALID_SCRIPT_DATA, {
-      composition: 'SintaxisIA', // Composición completa de 60s
+      composition: 'AINewsShort', // Composición completa de 60s
     });
 
     if (renderResult.success && renderResult.metadata) {
@@ -321,7 +321,7 @@ test.describe('Suite 2: Validación de Especificaciones', () => {
 
     // Act
     const renderResult = await videoService.renderVideo(VALID_SCRIPT_DATA, {
-      composition: 'SintaxisIA-Preview',
+      composition: 'AINewsShort-Preview',
     });
 
     if (renderResult.success && renderResult.metadata) {
@@ -356,7 +356,7 @@ test.describe('Suite 2: Validación de Especificaciones', () => {
 
     // Act
     const renderResult = await videoService.renderVideo(VALID_SCRIPT_DATA, {
-      composition: 'SintaxisIA-Preview',
+      composition: 'AINewsShort-Preview',
     });
 
     if (renderResult.success) {
@@ -396,7 +396,7 @@ test.describe('Suite 2: Validación de Especificaciones', () => {
 
     // Act - Generar y validar
     const renderResult = await videoService.renderVideo(VALID_SCRIPT_DATA, {
-      composition: 'SintaxisIA-Preview',
+      composition: 'AINewsShort-Preview',
     });
 
     if (renderResult.success) {
@@ -471,7 +471,7 @@ test.describe('Suite 3: Manejo de Errores', () => {
 
     // Act
     const result = await videoService.renderVideo(VALID_SCRIPT_DATA, {
-      composition: 'SintaxisIA', // Composición completa (más larga)
+      composition: 'AINewsShort', // Composición completa (más larga)
       timeout: shortTimeout,
     });
 
@@ -509,12 +509,12 @@ test.describe('Suite 3: Manejo de Errores', () => {
 
     // Act - Generar algunos archivos (exitosos o no)
     await videoService.renderVideo(VALID_SCRIPT_DATA, {
-      composition: 'SintaxisIA-Preview',
+      composition: 'AINewsShort-Preview',
       outputName: 'temp_file_1',
     });
 
     await videoService.renderVideo(VALID_SCRIPT_DATA, {
-      composition: 'SintaxisIA-Preview',
+      composition: 'AINewsShort-Preview',
       outputName: 'temp_file_2',
     });
 
@@ -642,7 +642,7 @@ test.describe('Suite 4: Performance', () => {
 
     // Act
     const result = await videoService.renderVideo(VALID_SCRIPT_DATA, {
-      composition: 'SintaxisIA-Preview',
+      composition: 'AINewsShort-Preview',
       timeout: maxDurationMs,
     });
 
@@ -679,7 +679,7 @@ test.describe('Suite 4: Performance', () => {
 
     // Act
     const result = await videoService.renderVideo(VALID_SCRIPT_DATA, {
-      composition: 'SintaxisIA-Preview',
+      composition: 'AINewsShort-Preview',
     });
 
     if (result.success && result.metadata) {
@@ -723,7 +723,7 @@ test.describe('Suite 4: Performance', () => {
 
     // Act - Realizar varias operaciones y medir tiempos
     const renderResult = await videoService.renderVideo(VALID_SCRIPT_DATA, {
-      composition: 'SintaxisIA-Preview',
+      composition: 'AINewsShort-Preview',
     });
 
     // Assert - Verificar que se reportan duraciones
@@ -761,7 +761,7 @@ test.describe('Suite 4: Performance', () => {
 
     // Act
     const result = await videoService.renderVideo(VALID_SCRIPT_DATA, {
-      composition: 'SintaxisIA-Preview',
+      composition: 'AINewsShort-Preview',
     });
 
     if (result.success && result.metadata) {
@@ -841,7 +841,7 @@ test.describe('Suite 5: Integración con Service Object Pattern', () => {
 
     // Act - Ejecutar operación que genera logs
     const result = await videoService.renderVideo(VALID_SCRIPT_DATA, {
-      composition: 'SintaxisIA-Preview',
+      composition: 'AINewsShort-Preview',
     });
 
     // Assert - Verificar que no hay errores de logging
@@ -873,12 +873,12 @@ test.describe('Suite 5: Integración con Service Object Pattern', () => {
 
     // Act - Generar múltiples videos
     await videoService.renderVideo(VALID_SCRIPT_DATA, {
-      composition: 'SintaxisIA-Preview',
+      composition: 'AINewsShort-Preview',
       outputName: 'temp_test_1',
     });
 
     await videoService.renderVideo(VALID_SCRIPT_DATA, {
-      composition: 'SintaxisIA-Preview',
+      composition: 'AINewsShort-Preview',
       outputName: 'temp_test_2',
     });
 
