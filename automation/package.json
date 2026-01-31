@@ -31,6 +31,7 @@
     "@google/generative-ai": "^0.21.0",
     "axios": "^1.7.9",
     "dotenv": "^16.4.7",
+    "googleapis": "^171.0.0",
     "node-telegram-bot-api": "^0.67.0",
     "resend": "^6.9.1"
   },
