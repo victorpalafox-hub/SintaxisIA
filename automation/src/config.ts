@@ -59,6 +59,17 @@ interface FullConfig {
 // VALIDACIÓN
 // ===================================
 
+/**
+ * Detecta si estamos en entorno CI/CD o test
+ * En estos entornos, las API keys no son requeridas porque usamos mocks
+ */
+const isTestOrCI = (): boolean => {
+  return process.env.CI === 'true' ||
+         process.env.GITHUB_ACTIONS === 'true' ||
+         process.env.NODE_ENV === 'test' ||
+         process.env.NODE_ENV === 'ci';
+};
+
 const requiredEnvVars = [
   'NEWSDATA_API_KEY',
   'GEMINI_API_KEY',
@@ -66,11 +77,18 @@ const requiredEnvVars = [
   'ELEVENLABS_VOICE_ID',
 ];
 
-for (const envVar of requiredEnvVars) {
-  if (!process.env[envVar]) {
-    throw new Error(`Variable de entorno ${envVar} no está definida en .env`);
+// Solo validar variables de entorno en producción/desarrollo
+// En CI/test usamos valores mock
+if (!isTestOrCI()) {
+  for (const envVar of requiredEnvVars) {
+    if (!process.env[envVar]) {
+      throw new Error(`Variable de entorno ${envVar} no está definida en .env`);
+    }
   }
 }
+
+// Valores por defecto para CI/test (nunca se usan en producción)
+const CI_MOCK_VALUE = 'ci-test-mock-key';
 
 // ===================================
 // HELPER FUNCTIONS
@@ -105,12 +123,12 @@ const VIDEO_FPS = getEnvNumber('VIDEO_FPS', 30);
 const VIDEO_DURATION_SECONDS = getEnvNumber('VIDEO_DURATION', 60);
 
 export const config: FullConfig = {
-  // API Keys
+  // API Keys (usar mock en CI/test)
   api: {
-    newsDataApiKey: process.env.NEWSDATA_API_KEY!,
-    geminiApiKey: process.env.GEMINI_API_KEY!,
-    elevenLabsApiKey: process.env.ELEVENLABS_API_KEY!,
-    elevenLabsVoiceId: process.env.ELEVENLABS_VOICE_ID!,
+    newsDataApiKey: process.env.NEWSDATA_API_KEY || CI_MOCK_VALUE,
+    geminiApiKey: process.env.GEMINI_API_KEY || CI_MOCK_VALUE,
+    elevenLabsApiKey: process.env.ELEVENLABS_API_KEY || CI_MOCK_VALUE,
+    elevenLabsVoiceId: process.env.ELEVENLABS_VOICE_ID || 'mock-voice-id',
   },
 
   // Video configuration
