@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 329 tests (325 passing, 4 skipped)
+**Test Status**: 334 tests (330 passing, 4 skipped)
 
-**Last Updated**: 2026-01-30 (Prompt 17 - Video Rendering Service + Smoke Tests)
+**Last Updated**: 2026-01-30 (CI/CD Env Vars Fix + Config Sync Validation)
 
 ## Prerequisites
 
@@ -154,6 +154,62 @@ if (isShortTimeout(timeout)) { /* manejar error */ }
 | FFmpeg no disponible | Instalar FFmpeg y agregar al PATH |
 | API rate limit (ElevenLabs) | Usa fallback Edge-TTS automáticamente (10k chars/mes) |
 | Tests flaky en calendario | Usar rango 1-7 días, no valores exactos |
+
+## ⚠️ CI/CD Gotchas (CRÍTICOS)
+
+### 1. Variables de Entorno en CI (20 failures fix)
+**Error**: `Variable de entorno NEWSDATA_API_KEY no está definida en .env`
+
+**Causa**: `automation/src/config.ts` lanzaba error al importar si no existían las API keys.
+
+**Solución aplicada** (commit `bdcbc29`):
+```typescript
+// automation/src/config.ts
+const isTestOrCI = (): boolean => {
+  return process.env.CI === 'true' ||
+         process.env.GITHUB_ACTIONS === 'true' ||
+         process.env.NODE_ENV === 'test' ||
+         process.env.NODE_ENV === 'ci';
+};
+
+// Solo validar en producción, no en CI/test
+if (!isTestOrCI()) {
+  for (const envVar of requiredEnvVars) {
+    if (!process.env[envVar]) {
+      throw new Error(`Variable de entorno ${envVar} no está definida`);
+    }
+  }
+}
+
+// Valores mock para CI (nunca se usan en producción real)
+const CI_MOCK_VALUE = 'ci-test-mock-key';
+```
+
+**Regla**: NUNCA lanzar errores de env vars al momento de importar módulos. Validar solo cuando realmente se use la API.
+
+### 2. Cross-Package Imports (path resolution)
+**Error**: Imports desde `tests/` a `automation/` fallan en CI (Linux vs Windows paths)
+
+**Solución**: Duplicar constantes necesarias en `tests/config/service-constants.ts` en lugar de importar de `automation/`.
+
+**Archivos sincronizados**:
+- `automation/src/config/timeouts.config.ts` (FUENTE - producción)
+- `tests/config/service-constants.ts` (COPIA - tests)
+- Test de sync: `tests/specs/config-sync.spec.ts`
+
+### 3. Timeout Tests Flaky
+**Error**: Tests de timeout con valores hardcodeados fallan intermitentemente.
+
+**Solución**: Usar `TIMEOUTS.shortTimeoutThreshold.value` (500ms) y calcular valores relativos:
+```typescript
+const shortTimeout = Math.floor(TIMEOUTS.shortTimeoutThreshold.value / 5); // 100ms
+```
+
+### 4. Archivos .env en CI
+**Regla**: NUNCA hacer commit de `.env` real. CI usa:
+- Variables de entorno del workflow (`.github/workflows/test.yml`)
+- Valores mock en código (`CI_MOCK_VALUE`)
+- Detección automática con `isTestOrCI()`
 
 ## File Placement
 
