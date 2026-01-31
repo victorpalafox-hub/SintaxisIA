@@ -68,6 +68,44 @@ if [ -f "automation/src/config/video.config.ts" ]; then
     fi
 fi
 
+# ═══════════════════════════════════════════════════════════════
+# 7. Validación de TypeScript (previene errores en CI)
+# ═══════════════════════════════════════════════════════════════
+
+echo "📝 Verificando tipos TypeScript..."
+
+# 7a. Verificar tipos en automation/
+if [ -d "automation" ] && [ -f "automation/tsconfig.json" ]; then
+    echo "   Checking automation/..."
+    TSC_OUTPUT=$(cd automation && npx tsc --noEmit 2>&1)
+    TSC_EXIT=$?
+    if [ $TSC_EXIT -ne 0 ]; then
+        echo "❌ ERROR: Errores de TypeScript en automation/"
+        echo "$TSC_OUTPUT" | head -20
+        echo ""
+        echo "   Ejecuta: cd automation && npx tsc --noEmit"
+        ERRORS=$((ERRORS + 1))
+    else
+        echo "   ✓ automation/ OK"
+    fi
+fi
+
+# 7b. Verificar tipos en remotion-app/
+if [ -d "remotion-app" ] && [ -f "remotion-app/tsconfig.json" ]; then
+    echo "   Checking remotion-app/..."
+    TSC_OUTPUT=$(cd remotion-app && npx tsc --noEmit 2>&1)
+    TSC_EXIT=$?
+    if [ $TSC_EXIT -ne 0 ]; then
+        echo "❌ ERROR: Errores de TypeScript en remotion-app/"
+        echo "$TSC_OUTPUT" | head -20
+        echo ""
+        echo "   Ejecuta: cd remotion-app && npx tsc --noEmit"
+        ERRORS=$((ERRORS + 1))
+    else
+        echo "   ✓ remotion-app/ OK"
+    fi
+fi
+
 # Resultado
 if [ $ERRORS -gt 0 ]; then
     echo ""
