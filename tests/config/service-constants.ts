@@ -4,15 +4,87 @@
 // Centraliza magic numbers y valores hardcodeados
 // ===================================
 
-// Re-export de la configuración centralizada de timeouts
-// para uso en tests (evita import paths largos)
-export {
-  TIMEOUTS,
-  getTimeout,
-  isShortTimeout,
-  logTimeoutConfig,
-  type TimeoutType
-} from '../../automation/src/config/timeouts.config';
+// ============================================================================
+// TIMEOUT CONFIGURATION (LOCAL - evita imports cross-package que fallan en CI)
+// ============================================================================
+// NOTA: Estos valores DEBEN coincidir con automation/src/config/timeouts.config.ts
+// Si cambias valores allá, actualízalos aquí también.
+
+/**
+ * Detecta si estamos en entorno CI/CD
+ */
+export const isCI = (): boolean => {
+  return process.env.CI === 'true' ||
+         process.env.GITHUB_ACTIONS === 'true' ||
+         process.env.NODE_ENV === 'ci' ||
+         process.env.NODE_ENV === 'test';
+};
+
+/**
+ * Interface para configuración de timeout
+ */
+interface TimeoutConfig {
+  readonly default: number;
+  readonly ci: number;
+  readonly value: number;
+}
+
+/**
+ * Crea configuración de timeout adaptativa
+ */
+const createTimeoutConfig = (
+  envVar: string,
+  defaultValue: number,
+  ciValue: number
+): TimeoutConfig => ({
+  default: parseInt(process.env[`${envVar}_MS`] || String(defaultValue), 10),
+  ci: parseInt(process.env[`${envVar}_CI_MS`] || String(ciValue), 10),
+  get value() {
+    return isCI() ? this.ci : this.default;
+  }
+});
+
+/**
+ * Configuración de timeouts para TESTS
+ * Valores idénticos a automation/src/config/timeouts.config.ts
+ */
+export const TIMEOUTS = {
+  videoRender: createTimeoutConfig('VIDEO_RENDER_TIMEOUT', 30000, 120000),
+  videoValidation: createTimeoutConfig('VIDEO_VALIDATION_TIMEOUT', 10000, 30000),
+  fileOperation: createTimeoutConfig('FILE_OPERATION_TIMEOUT', 5000, 15000),
+  apiCall: createTimeoutConfig('API_CALL_TIMEOUT', 15000, 60000),
+  test: createTimeoutConfig('TEST_TIMEOUT', 30000, 120000),
+  build: createTimeoutConfig('BUILD_TIMEOUT', 60000, 180000),
+  imageFetch: createTimeoutConfig('IMAGE_FETCH_TIMEOUT', 5000, 15000),
+  tts: createTimeoutConfig('TTS_TIMEOUT', 60000, 120000),
+  /** Umbral para timeout "corto" - NO cambia entre entornos */
+  shortTimeoutThreshold: {
+    default: 500,
+    ci: 500,
+    get value() { return this.default; }
+  }
+} as const;
+
+export type TimeoutType = keyof typeof TIMEOUTS;
+
+export function getTimeout(type: TimeoutType, override?: number): number {
+  if (override !== undefined && override > 0) return override;
+  return TIMEOUTS[type].value;
+}
+
+export function isShortTimeout(timeout: number): boolean {
+  return timeout < TIMEOUTS.shortTimeoutThreshold.value;
+}
+
+export function logTimeoutConfig(): void {
+  console.log('⏱️  Timeout Configuration:');
+  console.log(`   Environment: ${isCI() ? 'CI/CD' : 'Local'}`);
+  Object.entries(TIMEOUTS).forEach(([key, config]) => {
+    if (typeof config === 'object' && 'value' in config) {
+      console.log(`     ${key}: ${config.value}ms`);
+    }
+  });
+}
 
 /**
  * Configuracion de la API de Gemini
@@ -138,11 +210,8 @@ export const VALIDATION_THRESHOLDS = {
 
   /**
    * @deprecated Usar TIMEOUTS.videoRender.value en su lugar
-   * Mantenido por compatibilidad. Ver automation/src/config/timeouts.config.ts
    */
   get VIDEO_RENDER_TIMEOUT_MS() {
-    // Importación dinámica para evitar referencias circulares
-    const { TIMEOUTS } = require('../../automation/src/config/timeouts.config');
     return TIMEOUTS.videoRender.value;
   },
 } as const;

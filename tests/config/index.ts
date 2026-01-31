@@ -26,10 +26,11 @@ export {
   REMOTION_CONFIG,
   CONTENT_VALIDATION,
   CONTENT_VALIDATION_DELAYS,
-  // Configuración centralizada de timeouts
+  // Configuración de timeouts (local, sin cross-package imports)
   TIMEOUTS,
   getTimeout,
   isShortTimeout,
   logTimeoutConfig,
+  isCI,
   type TimeoutType,
 } from './service-constants';
