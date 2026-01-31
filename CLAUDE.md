@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 334 tests (330 passing, 4 skipped)
+**Test Status**: 383 tests (383 passing, 4 skipped)
 
-**Last Updated**: 2026-01-30 (CI/CD Env Vars Fix + Config Sync Validation)
+**Last Updated**: 2026-01-30 (Prompt 18 - YouTube Upload Service)
 
 ## Prerequisites
 
@@ -74,7 +74,8 @@ npm run check
 - Pipeline: `test:orchestrator` (16) | `test:notifications` (12) | `test:notification-fix` (12)
 - APIs: `test:gemini` (22) | `test:compliance` (70) | `test:tts` (22)
 - Rendering: `test:video-rendering` (27)
-- **Total**: 329 tests (325 passing, 4 skipped)
+- YouTube: `test:youtube` (53)
+- **Total**: 383 tests (383 passing, 4 skipped)
 
 Ver `README.md` para lista completa de scripts.
 
@@ -263,6 +264,14 @@ GEMINI_API_KEY=...             # Google AI Studio - generación de scripts
 ELEVENLABS_API_KEY=...         # ElevenLabs - TTS (10k chars/mes gratis)
 ELEVENLABS_VOICE_ID=adam       # Voz por defecto (Josh en código)
 
+# YouTube Data API v3 (Prompt 18)
+YOUTUBE_CLIENT_ID=...          # OAuth2 Client ID (Google Cloud Console)
+YOUTUBE_CLIENT_SECRET=...      # OAuth2 Client Secret
+YOUTUBE_REFRESH_TOKEN=...      # Refresh token (obtener con flujo OAuth)
+YOUTUBE_REDIRECT_URI=...       # Callback URL (default: localhost:3000)
+YOUTUBE_CATEGORY_ID=28         # 28 = Science & Technology
+YOUTUBE_DEFAULT_PRIVACY=private # private | unlisted | public
+
 # Notificaciones (Opcional)
 NOTIFICATION_EMAIL=...         # Email destino para notificaciones
 RESEND_API_KEY=re_...          # Resend API key (usa onboarding@resend.dev en dev)
@@ -301,13 +310,14 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | 14.1 | Notificaciones Email + Telegram | 12 | Resend API + bot con callbacks |
 | 14.2 | Fix Callbacks Telegram | 12 | Aprobación desde Telegram sin dashboard |
 
-### Prompts 15-17: Integración APIs Reales
+### Prompts 15-18: Integración APIs Reales
 | # | Feature | Tests | Descripción |
 |---|---------|-------|-------------|
 | 15 | Gemini Script Generation | 92 | Persona Alex Torres + Compliance 6 marcadores |
 | 16 | ElevenLabs TTS | 22 | Voz Josh + cache + fallback Edge-TTS |
 | 17-A | Carnita Score Refactor | - | Eliminado Twitter/X, umbral 75 pts, max 97 pts |
 | 17 | Video Rendering Service | 27 | Remotion CLI + subtítulos + secciones |
+| 18 | YouTube Upload Service | 53 | OAuth2 + upload resumible + quota management |
 
 ### Prompts Detallados
 
@@ -381,6 +391,21 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 - Funciones: `renderVideo()`, `verifyRemotionSetup()`, `generateSubtitles()`, `generateSections()`
 - Scripts: `test:video-rendering`, `video:verify`
 
+**Prompt 18 - YouTube Upload Service (2026-01-30):**
+- YouTube Data API v3 con OAuth2 authentication
+- Upload resumible con tracking de progreso
+- Quota management (10k units/día, upload cuesta 1600 units → ~6 videos/día)
+- Mock automático en CI/tests (`isTestOrCI()` detection)
+- Validación de metadata (título max 100 chars, descripción max 5000, tags max 500)
+- Archivos:
+  - `automation/src/config/youtube.config.ts` - Configuración anti-hardcode
+  - `automation/src/types/youtube.types.ts` - Interfaces TypeScript
+  - `automation/src/services/youtube-upload.service.ts` - Servicio principal
+- Funciones: `uploadVideo()`, `checkAuth()`, `getAuthUrl()`, `getQuotaStatus()`, `getChannelInfo()`
+- Env vars: `YOUTUBE_CLIENT_ID`, `YOUTUBE_CLIENT_SECRET`, `YOUTUBE_REFRESH_TOKEN`
+- Categoría por defecto: 28 (Science & Technology)
+- Privacidad por defecto: private (seguro para pruebas)
+
 **QA Audit + CI/CD Fixes (2026-01-30):**
 - Fix composiciones obsoletas: `SintaxisIA*` → `AINewsShort*` (18 ocurrencias)
 - Fix tests flaky: Calendario ajustado a rango 1-7 días
@@ -398,7 +423,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 6. `generate_audio` - ElevenLabs (fallback Edge-TTS)
 7. `render_video` - Remotion CLI + VideoRenderingService (Prompt 17)
 8. `manual_approval` - Email (Resend) + Telegram (callbacks)
-9. `publish` - YouTube API (pendiente)
+9. `publish` - YouTubeUploadService (Prompt 18)
 
 ### CLI
 ```bash
@@ -423,17 +448,19 @@ npm run automation:prod       # Producción (con notificaciones)
 | Image Search | Multi-provider + caché (7 días) | 12 |
 | Script Generation | Gemini 2.5 Flash + Alex Torres Persona | 15 |
 | Audio Generation | ElevenLabs + fallback Edge-TTS | 16 |
-| **Video Rendering** | Remotion CLI + subtítulos | **17** |
+| Video Rendering | Remotion CLI + subtítulos | 17 |
+| **YouTube Upload** | OAuth2 + upload resumible + quota | **18** |
 | Publication Calendar | Cada 2 días (Lun/Mié/Vie/Dom 14:00) | 14 |
 | Notification System | Email (Resend) + Telegram callbacks | 14.1, 14.2 |
 
 ### Pendiente Integración 🔧
 - Integrar `videoRenderingService` en orchestrator (paso 7) - actualmente usa mock
+- Integrar `youtubeService` en orchestrator (paso 9) - actualmente usa mock
 
 ### Pendientes 📅
-- **#18 OCR + Thumbnails** - Extracción de texto de imágenes
-- **#19 Visual Identity** - Branding humanizado
-- **#20 YouTube Auto-Publishing** - API de publicación
+- **#19 OCR + Thumbnails** - Extracción de texto de imágenes
+- **#20 Visual Identity** - Branding humanizado
+- **#21 End-to-End Pipeline** - Integración completa del pipeline
 
 ---
 
