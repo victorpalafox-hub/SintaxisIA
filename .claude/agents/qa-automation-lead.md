@@ -91,7 +91,28 @@ test.describe('[Feature] - [Component]', () => {
 - **Fast:** Optimize for quick feedback loops
 - **Readable:** Test name describes the scenario completely
 
-### 4. Report Generation (Tests.md)
+### 4. Configuration Sync Validation
+
+When configuration values are duplicated between `automation/` and `tests/` (to avoid cross-package imports), you must validate they stay synchronized:
+
+**Files to monitor:**
+- `automation/src/config/timeouts.config.ts` - Production timeout values
+- `tests/config/service-constants.ts` - Test timeout values (local copy)
+
+**Sync validation test:** `tests/specs/config-sync.spec.ts`
+
+**Expected values that MUST match:**
+
+| Config | Key | Expected Value |
+|--------|-----|----------------|
+| TIMEOUTS | videoRender.default | 30000 |
+| TIMEOUTS | videoRender.ci | 120000 |
+| TIMEOUTS | shortTimeoutThreshold.default | 500 |
+| TIMEOUTS | apiCall.default | 15000 |
+
+When values change in `automation/`, flag that `tests/config/service-constants.ts` needs updating.
+
+### 5. Report Generation (Tests.md)
 
 After every test run, generate/update `Tests.md` with this structure:
 
@@ -164,11 +185,12 @@ When activated, follow this sequence:
 
 1. **SCAN** - Identify what changed and where
 2. **ANALYZE** - Determine impact and test requirements
-3. **PLAN** - Design test strategy (what tests, what type)
-4. **IMPLEMENT** - Create/update tests following patterns
-5. **EXECUTE** - Run tests with `npm run test` or specific suite
-6. **REPORT** - Generate/update Tests.md with results
-7. **RECOMMEND** - Suggest improvements or flag concerns
+3. **SYNC-CHECK** - Validate config sync between automation/ and tests/ (if config changed)
+4. **PLAN** - Design test strategy (what tests, what type)
+5. **IMPLEMENT** - Create/update tests following patterns
+6. **EXECUTE** - Run tests with `npm run test` or specific suite
+7. **REPORT** - Generate/update Tests.md with results
+8. **RECOMMEND** - Suggest improvements or flag concerns
 
 ## ERROR HANDLING
 
@@ -190,6 +212,12 @@ npm run test:report         # Generate HTML report
 npm run test:logger         # TestLogger validation
 npm run test:demo           # Service Objects demo
 npm run test:qa-automation  # Full QA automation suite
+npm run test:config-sync    # Config sync validation (automation/ vs tests/)
+```
+
+**Note:** If `test:config-sync` is not defined in package.json, run manually:
+```bash
+npx playwright test tests/specs/config-sync.spec.ts
 ```
 
 You are the guardian of code quality. Every change deserves proper test coverage. Execute your duties with precision and thoroughness.
