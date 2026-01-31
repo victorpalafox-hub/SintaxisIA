@@ -56,7 +56,7 @@ import { isTestOrCI } from '../config';
  */
 export class YouTubeUploadService {
   private youtube: youtube_v3.Youtube | null = null;
-  private oauth2Client: ReturnType<typeof google.auth.OAuth2.prototype.constructor> | null = null;
+  private oauth2Client: InstanceType<typeof google.auth.OAuth2> | null = null;
   private options: YouTubeServiceOptions;
   private quotaUsedToday: number = 0;
   private quotaResetDate: Date;
@@ -464,7 +464,7 @@ export class YouTubeUploadService {
         title: channel.snippet?.title || '',
         subscriberCount: Number(channel.statistics?.subscriberCount) || 0,
         videoCount: Number(channel.statistics?.videoCount) || 0,
-        thumbnailUrl: channel.snippet?.thumbnails?.default?.url,
+        thumbnailUrl: channel.snippet?.thumbnails?.default?.url ?? undefined,
       };
     } catch (error) {
       this.log(`Error obteniendo info del canal: ${error}`);

@@ -63,7 +63,7 @@ interface FullConfig {
  * Detecta si estamos en entorno CI/CD o test
  * En estos entornos, las API keys no son requeridas porque usamos mocks
  */
-const isTestOrCI = (): boolean => {
+export const isTestOrCI = (): boolean => {
   return process.env.CI === 'true' ||
          process.env.GITHUB_ACTIONS === 'true' ||
          process.env.NODE_ENV === 'test' ||
