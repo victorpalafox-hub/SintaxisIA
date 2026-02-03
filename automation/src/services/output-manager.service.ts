@@ -28,7 +28,7 @@ import * as path from 'path';
 import { NewsItem } from '../types/news.types';
 import { NewsScore } from '../types/scoring.types';
 import { GeneratedScript } from '../types/script.types';
-import { ImageSearchResult } from '../types/image.types';
+import { ImageSearchResult, DynamicImagesResult } from '../types/image.types';
 import { VideoMetadata, OutputSummary } from '../types/orchestrator.types';
 import { OUTPUT_CONFIG, OUTPUT_PATHS, OUTPUT_FORMAT, OUTPUT_FILES, SCRIPT_FORMAT } from '../config/output.config';
 
@@ -48,8 +48,10 @@ export interface OutputData {
   generatedScript: GeneratedScript;
   /** Script completo (texto para TTS) */
   fullScript: string;
-  /** Imágenes encontradas */
+  /** Imágenes encontradas (formato legacy para compatibilidad) */
   images: ImageSearchResult;
+  /** Imágenes dinámicas por segmento (Prompt 19.1) */
+  dynamicImages?: DynamicImagesResult;
   /** Path del archivo de audio */
   audioPath: string;
   /** Metadata completa del video */
@@ -97,7 +99,7 @@ class OutputManagerService {
       score: await this.saveScoreJson(outputFolder, data.score),
       scriptJson: await this.saveScriptJson(outputFolder, data.generatedScript),
       scriptTxt: await this.saveScriptTxt(outputFolder, data.generatedScript, data.news, data.score),
-      images: await this.saveImagesJson(outputFolder, data.images),
+      images: await this.saveImagesJson(outputFolder, data.images, data.dynamicImages),
       audio: await this.copyAudioFile(outputFolder, data.audioPath),
       metadata: await this.saveMetadataJson(outputFolder, data.metadata),
       video: await this.copyVideoFile(outputFolder, data.videoPath),
@@ -229,10 +231,29 @@ class OutputManagerService {
 
   /**
    * Guarda las imágenes encontradas como JSON
+   *
+   * Si hay imágenes dinámicas (Prompt 19.1), guarda el nuevo formato.
+   * Si no, guarda el formato legacy para compatibilidad.
+   *
+   * @param folder - Carpeta destino
+   * @param legacyImages - Imágenes en formato legacy (hero/context)
+   * @param dynamicImages - Imágenes dinámicas por segmento (opcional)
    */
-  private async saveImagesJson(folder: string, images: ImageSearchResult): Promise<string> {
+  private async saveImagesJson(
+    folder: string,
+    legacyImages: ImageSearchResult,
+    dynamicImages?: DynamicImagesResult
+  ): Promise<string> {
     const filePath = path.join(folder, OUTPUT_FILES.images);
-    await this.writeJsonFile(filePath, images);
+
+    // Si hay imágenes dinámicas, guardar el nuevo formato
+    if (dynamicImages && dynamicImages.scenes.length > 0) {
+      await this.writeJsonFile(filePath, dynamicImages);
+    } else {
+      // Fallback a formato legacy
+      await this.writeJsonFile(filePath, legacyImages);
+    }
+
     return filePath;
   }
 

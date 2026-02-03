@@ -47,6 +47,8 @@ import {
 import { selectTopNews } from './news-scorer';
 import { searchImagesV2 } from './image-searcher-v2';
 import { ScriptGenerator } from './scriptGen';
+import { SceneSegmenterService } from './services/scene-segmenter.service';
+import { ImageOrchestrationService } from './services/image-orchestration.service';
 import { ttsService } from './services/tts.service';
 import { notifyVideoReady, notifyPipelineError } from './notifiers';
 import {
@@ -58,7 +60,7 @@ import {
   OutputSummary,
 } from './types/orchestrator.types';
 import { NewsItem } from './types/news.types';
-import { ImageSearchResult } from './types/image.types';
+import { ImageSearchResult, DynamicImagesResult } from './types/image.types';
 import { NewsScore } from './types/scoring.types';
 import { GeneratedScript } from './types/script.types';
 import { videoRenderingService } from './services/video-rendering.service';
@@ -241,28 +243,47 @@ export async function runPipeline(
     });
 
     // ==========================================
-    // PASO 5: BUSCAR IMÁGENES
+    // PASO 5: BUSCAR IMÁGENES DINÁMICAS POR SEGMENTO (Prompt 19.1)
     // ==========================================
     const imagesStep = await executeStep('search_images', steps, async () => {
-      console.log('🖼️  PASO 5: Buscando imágenes específicas...');
+      console.log('🖼️  PASO 5: Buscando imágenes dinámicas por segmento...');
 
       const { news } = topNewsStep.data as { news: NewsItem; score: NewsScore };
+      const { generatedScript } = scriptStep.data as { generatedScript: GeneratedScript; fullScript: string };
 
-      // Extraer topics del título y empresa
-      const topics = extractTopics(news);
+      // Estimar duración basada en el script (usaremos ~55s por defecto)
+      const estimatedDuration = generatedScript.duration || 55;
 
-      const images = await searchImagesV2({
-        topics,
-        company: news.company,
-        productName: extractProductName(news.title),
-        officialUrl: news.url,
+      // Segmentar script y extraer keywords
+      const segmenter = new SceneSegmenterService();
+      const segments = segmenter.segmentScript(generatedScript, estimatedDuration, news.company);
+
+      console.log(`   📊 ${segments.length} segmentos creados`);
+
+      // Buscar 1 imagen por segmento
+      const imageOrchestrator = new ImageOrchestrationService();
+      const dynamicImages = await imageOrchestrator.orchestrate(segments);
+
+      console.log(`   ✅ Imágenes encontradas: ${dynamicImages.scenes.length}`);
+      dynamicImages.scenes.forEach((scene, i) => {
+        console.log(`      - Segmento ${i}: ${scene.source} (${scene.startSecond}-${scene.endSecond}s)`);
       });
 
-      console.log(`   ✅ Imágenes encontradas:`);
-      console.log(`      - Hero: ${images.hero.source}`);
-      console.log(`      - Context: ${images.context?.source || 'usando hero duplicate'}`);
+      // Para mantener compatibilidad con código existente, también generamos formato legacy
+      const legacyImages: ImageSearchResult = {
+        hero: {
+          url: dynamicImages.scenes[0]?.imageUrl || 'https://ui-avatars.com/api/?name=AI&size=400&background=00F0FF',
+          source: (dynamicImages.scenes[0]?.source as 'clearbit' | 'logodev' | 'google' | 'unsplash' | 'ui-avatars') || 'ui-avatars',
+          cached: false,
+        },
+        context: dynamicImages.scenes[1] ? {
+          url: dynamicImages.scenes[1].imageUrl,
+          source: (dynamicImages.scenes[1].source as 'google' | 'unsplash' | 'opengraph' | 'hero-duplicate') || 'google',
+          cached: false,
+        } : undefined,
+      };
 
-      return images;
+      return { dynamicImages, legacyImages };
     });
 
     // ==========================================
@@ -309,7 +330,8 @@ export async function runPipeline(
 
       const { news, score } = topNewsStep.data as { news: NewsItem; score: NewsScore };
       const { generatedScript, fullScript } = scriptStep.data as { generatedScript: GeneratedScript; fullScript: string };
-      const images = imagesStep.data as ImageSearchResult;
+      const { dynamicImages, legacyImages } = imagesStep.data as { dynamicImages: DynamicImagesResult; legacyImages: ImageSearchResult };
+      const images = legacyImages; // Formato legacy para compatibilidad
       const audioData = audioStep.data as { audioPath: string; durationSeconds: number; provider: string; fromCache: boolean };
 
       // Generar videoId único
@@ -403,7 +425,7 @@ export async function runPipeline(
 
         const { news, score } = topNewsStep.data as { news: NewsItem; score: NewsScore };
         const { generatedScript, fullScript } = scriptStep.data as { generatedScript: GeneratedScript; fullScript: string };
-        const images = imagesStep.data as ImageSearchResult;
+        const { dynamicImages, legacyImages } = imagesStep.data as { dynamicImages: DynamicImagesResult; legacyImages: ImageSearchResult };
         const audioData = audioStep.data as { audioPath: string; durationSeconds: number };
         const { videoPath, metadata } = videoStep.data;
 
@@ -412,7 +434,8 @@ export async function runPipeline(
           score,
           generatedScript,
           fullScript,
-          images,
+          images: legacyImages,
+          dynamicImages, // Nuevo formato Prompt 19.1
           audioPath: audioData.audioPath,
           metadata,
           videoPath,

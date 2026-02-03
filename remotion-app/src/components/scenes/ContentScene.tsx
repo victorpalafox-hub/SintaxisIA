@@ -37,12 +37,15 @@ import type { ContentSceneProps } from '../../types/video.types';
  * - Parallax en imagen (movimiento vertical sutil)
  * - Zoom sutil (1.0 -> 1.05)
  * - Fade in escalonado de bullet points
+ * - Imágenes dinámicas que cambian cada ~15s (Prompt 19.1)
  *
  * @example
  * <ContentScene
  *   description="Google presenta una IA revolucionaria..."
  *   details={["Genera mundos 3D", "Usa transformers", "Open source"]}
  *   images={{ context: "https://example.com/screenshot.png" }}
+ *   dynamicScenes={[{ sceneIndex: 0, startSecond: 8, endSecond: 23, imageUrl: "...", ... }]}
+ *   sceneStartSecond={8}
  *   totalDuration={1650}
  *   fps={30}
  *   dynamicEffects={true}
@@ -52,6 +55,8 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
   description,
   details,
   images,
+  dynamicScenes,
+  sceneStartSecond = 8,
   totalDuration,
   fps,
   dynamicEffects = true,
@@ -71,11 +76,43 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
   );
 
   // ==========================================
-  // EFECTOS DE IMAGEN CONTEXT
+  // SELECCIÓN DE IMAGEN (Legacy vs Dinámico)
   // ==========================================
 
-  // Usar context image, fallback a hero si no existe
-  const contextImage = images?.context || images?.hero;
+  // Calcular segundo actual del video
+  const currentSecond = sceneStartSecond + (frame / fps);
+
+  /**
+   * Obtiene la imagen actual basándose en el tiempo del video.
+   *
+   * Si hay imágenes dinámicas (Prompt 19.1), busca la imagen del segmento actual.
+   * Si no, usa el comportamiento legacy (context image → hero fallback).
+   */
+  const getCurrentImage = (): string | undefined => {
+    // Si hay imágenes dinámicas, buscar la del segmento actual
+    if (dynamicScenes && dynamicScenes.length > 0) {
+      const currentScene = dynamicScenes.find(
+        scene => currentSecond >= scene.startSecond && currentSecond < scene.endSecond
+      );
+      // Si encontramos una escena, usar su imagen
+      if (currentScene) {
+        return currentScene.imageUrl;
+      }
+      // Si estamos fuera de rango, usar la última imagen disponible
+      const lastScene = dynamicScenes[dynamicScenes.length - 1];
+      if (currentSecond >= lastScene.endSecond) {
+        return lastScene.imageUrl;
+      }
+      // Si estamos antes del primer segmento, usar la primera imagen
+      return dynamicScenes[0].imageUrl;
+    }
+
+    // Fallback a comportamiento legacy
+    return images?.context || images?.hero;
+  };
+
+  // Imagen actual a mostrar
+  const contextImage = getCurrentImage();
 
   // Parallax: movimiento vertical sutil de 20px hacia arriba
   // Durante 10 segundos (300 frames a 30fps)

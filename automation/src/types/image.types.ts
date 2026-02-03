@@ -147,3 +147,88 @@ export interface CacheStats {
   /** Archivos más antiguos que maxAge */
   expiredCount: number;
 }
+
+// =============================================================================
+// PROMPT 19.1 - IMÁGENES DINÁMICAS POR SEGMENTO
+// =============================================================================
+
+/**
+ * Fuentes de imágenes disponibles para búsqueda por segmento
+ * @since Prompt 19.1
+ */
+export type SceneImageSource =
+  | 'pexels'
+  | 'unsplash'
+  | 'google'
+  | 'fallback';
+
+/**
+ * Segmento de script con keywords extraídas
+ * Representa un fragmento de ~15 segundos del video
+ *
+ * @since Prompt 19.1
+ */
+export interface SceneSegment {
+  /** Índice del segmento (0, 1, 2, 3) */
+  index: number;
+
+  /** Segundo de inicio del segmento */
+  startSecond: number;
+
+  /** Segundo de fin del segmento */
+  endSecond: number;
+
+  /** Texto del segmento (hook, body, opinion, cta) */
+  text: string;
+
+  /** Keywords extraídas del texto */
+  keywords: string[];
+
+  /** Query optimizada para búsqueda de imágenes */
+  searchQuery: string;
+}
+
+/**
+ * Imagen encontrada para un segmento específico
+ *
+ * @since Prompt 19.1
+ */
+export interface SceneImage {
+  /** Índice del segmento al que pertenece */
+  sceneIndex: number;
+
+  /** Segundo de inicio donde mostrar la imagen */
+  startSecond: number;
+
+  /** Segundo de fin donde mostrar la imagen */
+  endSecond: number;
+
+  /** URL de la imagen */
+  imageUrl: string;
+
+  /** Query usada para encontrar la imagen */
+  query: string;
+
+  /** Proveedor que encontró la imagen */
+  source: SceneImageSource;
+
+  /** Si la imagen está cacheada localmente */
+  cached: boolean;
+}
+
+/**
+ * Resultado de búsqueda de imágenes dinámicas por segmento
+ * Reemplaza ImageSearchResult para el nuevo sistema
+ *
+ * @since Prompt 19.1
+ */
+export interface DynamicImagesResult {
+  /** Array de imágenes, una por segmento */
+  scenes: SceneImage[];
+
+  /** Número total de segmentos */
+  totalSegments: number;
+
+  /** Timestamp de generación */
+  generatedAt: string;
+}

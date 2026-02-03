@@ -171,7 +171,8 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
           CONTENT SCENE - Explicación Completa (8-45s)
           ==========================================
           Muestra contenido con:
-          - Imagen context con parallax
+          - Imagen context con parallax (legacy)
+          - O imágenes dinámicas que cambian cada ~15s (Prompt 19.1)
           - Descripción completa
           - Bullet points escalonados
           - Barra de progreso
@@ -188,6 +189,8 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
             hero: images.hero,
             context: images.context,
           }}
+          dynamicScenes={images.dynamicScenes}
+          sceneStartSecond={heroSceneDuration / fps}
           totalDuration={durationInFrames}
           fps={fps}
           dynamicEffects={enhancedEffects}

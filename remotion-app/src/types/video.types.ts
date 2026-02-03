@@ -15,6 +15,46 @@
  */
 
 // =============================================================================
+// TIPOS PARA IMÁGENES DINÁMICAS (Prompt 19.1)
+// =============================================================================
+
+/**
+ * Imagen de escena dinámica
+ *
+ * Cada segmento del video (~15s) tiene su propia imagen basada en el contenido.
+ */
+export interface SceneImage {
+  /** Índice del segmento (0, 1, 2, 3...) */
+  sceneIndex: number;
+  /** Segundo de inicio del segmento */
+  startSecond: number;
+  /** Segundo de fin del segmento */
+  endSecond: number;
+  /** URL de la imagen */
+  imageUrl: string;
+  /** Query usada para buscar la imagen */
+  query: string;
+  /** Proveedor de la imagen */
+  source: 'pexels' | 'unsplash' | 'google' | 'fallback';
+  /** Si la imagen está cacheada */
+  cached: boolean;
+}
+
+/**
+ * Resultado de imágenes dinámicas
+ *
+ * Array de imágenes, una por cada segmento del video.
+ */
+export interface DynamicImages {
+  /** Array de imágenes por segmento */
+  scenes: SceneImage[];
+  /** Número total de segmentos */
+  totalSegments: number;
+  /** Fecha de generación */
+  generatedAt: string;
+}
+
+// =============================================================================
 // TIPOS DE NOTICIAS
 // =============================================================================
 
@@ -86,16 +126,22 @@ export interface VideoProps {
   };
 
   /**
-   * Imágenes específicas (3 totales)
-   * - hero: Logo empresa (0-8s)
-   * - context: Screenshot/demo (8-45s)
-   * - outro: Logo "Sintaxis IA" hardcoded en componente
+   * Imágenes específicas
+   *
+   * Soporta dos formatos:
+   * - Legacy: hero + context (Prompt 13)
+   * - Dinámico: scenes[] con N imágenes por segmento (Prompt 19.1)
    */
   images: {
-    /** URL imagen hero - Logo empresa/producto (requerido) */
+    /** URL imagen hero - Logo empresa/producto (requerido para legacy) */
     hero: string;
-    /** URL imagen context - Screenshot/demo (opcional) */
+    /** URL imagen context - Screenshot/demo (opcional, legacy) */
     context?: string;
+    /**
+     * Imágenes dinámicas por segmento (Prompt 19.1)
+     * Si existe, ContentScene cambiará imagen cada ~15s
+     */
+    dynamicScenes?: SceneImage[];
     // Nota: outro logo está hardcoded en OutroScene
   };
 
@@ -185,6 +231,7 @@ export interface HeroSceneProps {
  *
  * Escena de explicación (8-45s)
  * - Imagen context (screenshot/demo) con parallax
+ * - O imágenes dinámicas que cambian cada ~15s (Prompt 19.1)
  * - Texto descriptivo completo
  * - Bullet points opcionales
  * - Barra de progreso
@@ -194,13 +241,20 @@ export interface ContentSceneProps {
   description: string;
   /** Bullet points opcionales */
   details?: string[];
-  /** Imágenes disponibles */
+  /** Imágenes disponibles (legacy) */
   images?: {
     /** Logo pequeño opcional */
     hero?: string;
     /** Screenshot/demo principal */
     context?: string;
   };
+  /**
+   * Imágenes dinámicas por segmento (Prompt 19.1)
+   * Si existe, la imagen cambia cada ~15 segundos según el contenido
+   */
+  dynamicScenes?: SceneImage[];
+  /** Segundo de inicio de ContentScene (para calcular imagen actual) */
+  sceneStartSecond?: number;
   /** Duración total del video en frames */
   totalDuration: number;
   /** FPS del video */

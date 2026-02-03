@@ -71,6 +71,20 @@ export const IMAGE_API_CONFIG = {
   },
 
   /**
+   * Pexels API (Prompt 19.1)
+   * - Requiere API Key (free tier)
+   * - Free tier: 200 requests/hora
+   * - Fotos de alta calidad, buena selección tech
+   * - Soporta orientación portrait para YouTube Shorts
+   */
+  pexels: {
+    apiKey: process.env.PEXELS_API_KEY,
+    baseUrl: 'https://api.pexels.com/v1',
+    timeout: 5000,
+    priority: 3, // Entre Google y Unsplash
+  },
+
+  /**
    * Configuración de caché local
    */
   cache: {

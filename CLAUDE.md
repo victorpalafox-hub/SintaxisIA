@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 430 tests (430 passing, 4 skipped)
+**Test Status**: 466 tests (462 passing, 4 skipped)
 
-**Last Updated**: 2026-02-03 (Prompt 19 - Output Manager + Dry-Run Real)
+**Last Updated**: 2026-02-03 (Prompt 19.1 - Dynamic Images per Segment)
 
 ## Prerequisites
 
@@ -77,7 +77,8 @@ npm run check
 - Rendering: `test:video-rendering` (27)
 - YouTube: `test:youtube` (53) | `test:prompt18` (alias)
 - Output: `test:output-manager` (43) | `test:prompt19` (alias)
-- **Total**: 430 tests (430 passing, 4 skipped)
+- Dynamic Images: `test:dynamic-images` (36) | `test:prompt19.1` (alias)
+- **Total**: 466 tests (462 passing, 4 skipped)
 
 Ver `README.md` para lista completa de scripts.
 
@@ -446,6 +447,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | 17 | Video Rendering Service | 27 | Remotion CLI + subtítulos + secciones |
 | 18 | YouTube Upload Service | 53 | OAuth2 + upload resumible + quota management |
 | 19 | Output Manager + Dry-Run Real | 43 | VideoRenderingService integrado + --dry-real CLI |
+| 19.1 | Dynamic Images per Segment | 36 | N segmentos = N imágenes únicas + Pexels API |
 
 ### Archivos Clave por Feature
 
@@ -461,6 +463,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | Video Rendering | `automation/src/services/video-rendering.service.ts`, `automation/src/config/video.config.ts` |
 | YouTube Upload | `automation/src/services/youtube-upload.service.ts`, `automation/src/config/youtube.config.ts` |
 | Output Manager | `automation/src/services/output-manager.service.ts`, `automation/src/config/output.config.ts` |
+| Dynamic Images | `automation/src/services/scene-segmenter.service.ts`, `automation/src/services/image-orchestration.service.ts`, `automation/src/image-providers/pexels-provider.ts` |
 
 ### Quick Reference
 
