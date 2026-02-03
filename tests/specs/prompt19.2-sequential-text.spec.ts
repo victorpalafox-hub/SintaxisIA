@@ -396,13 +396,17 @@ test.describe('Prompt 19.2 - Anti-Patterns Evitados', () => {
     expect(content).not.toContain('getPhraseTiming');
   });
 
-  test('NO afecta bullet points (details)', async () => {
+  test('Bullet points eliminados en Prompt 19.2.6 (actualizado)', async () => {
     const filePath = path.join(COMPONENTS_PATH, 'ContentScene.tsx');
     const content = fs.readFileSync(filePath, 'utf-8');
 
-    // Bullet points siguen usando details directamente
-    expect(content).toContain('details.map');
-    expect(content).toContain('bulletOpacity');
+    // Nota: Bullet points fueron eliminados en Prompt 19.2.6
+    // Este test verifica que la eliminación no afectó el texto secuencial
+    expect(content).not.toContain('details.map');
+    expect(content).not.toContain('bulletOpacity');
+
+    // Pero el texto secuencial sigue funcionando
+    expect(content).toContain('currentPhrase');
   });
 
 });

@@ -592,18 +592,16 @@ class VideoRenderingService {
     request: VideoRenderRequest,
     assets: { audioPath: string; heroImage: string; contextImage: string; outroImage: string }
   ): Record<string, unknown> {
-    // Extraer detalles del script (bullet points)
-    const details = request.script
-      .split(/[.!?]+/)
-      .map(s => s.trim())
-      .filter(s => s.length > 20 && s.length < 150)
-      .slice(0, 4);
+    // Nota: Bullet points (details) eliminados en Prompt 19.2.6
+    // Antes se extraían oraciones del script como bullet points visuales,
+    // pero competían con el texto secuencial implementado en Prompt 19.2.
+    // Ahora solo se muestra texto secuencial sin bullet points adicionales.
 
     return {
       news: {
         title: request.title,
         description: request.body || request.script,
-        details,
+        details: [], // Bullet points eliminados en Prompt 19.2.6
         source: request.newsSource || 'Sintaxis IA',
         publishedAt: new Date().toISOString().split('T')[0],
       },

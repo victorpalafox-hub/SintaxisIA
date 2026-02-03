@@ -14,9 +14,10 @@
  * Layout flexible: con imagen o sin imagen
  *
  * @author Sintaxis IA
- * @version 2.1.0
+ * @version 2.2.0
  * @since Prompt 13
  * @updated Prompt 19.2 - Texto secuencial
+ * @updated Prompt 19.2.6 - Bullet points eliminados
  */
 
 import React, { useMemo } from 'react';
@@ -271,64 +272,24 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
             maxWidth: contextImage ? 900 : 1000,
             padding: '0 40px',
             // Altura mínima para evitar saltos de layout
-            minHeight: 100,
+            // Aumentado a 150 en Prompt 19.2.6 al eliminar bullet points
+            minHeight: 150,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            // Espacio extra para compensar bullet points eliminados (Prompt 19.2.6)
+            marginBottom: contextImage ? 40 : 60,
           }}
         >
           {/* Mostrar frase actual o descripción completa como fallback */}
           {currentPhrase?.text || description}
         </div>
 
-        {/* BULLET POINTS (si existen) */}
-        {details && details.length > 0 && (
-          <div
-            style={{
-              opacity: descriptionOpacity,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 12,
-              maxWidth: 800,
-              padding: '0 40px',
-            }}
-          >
-            {details.map((detail, index) => {
-              // Fade in escalonado: cada bullet point aparece 15 frames después del anterior
-              // Empieza en frame 50
-              const bulletOpacity = interpolate(
-                frame,
-                [50 + index * 15, 80 + index * 15],
-                [0, 1],
-                {
-                  extrapolateRight: 'clamp',
-                }
-              );
-
-              return (
-                <div
-                  key={index}
-                  style={{
-                    opacity: bulletOpacity,
-                    fontFamily: 'Inter, Roboto, Arial, sans-serif',
-                    fontWeight: 400,
-                    fontSize: 24,
-                    color: colors.text.secondary,
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: 12,
-                  }}
-                >
-                  {/* Bullet point con color primario */}
-                  <span style={{ color: colors.primary, fontSize: 32 }}>
-                    {'\u2022'}
-                  </span>
-                  <span>{detail}</span>
-                </div>
-              );
-            })}
-          </div>
-        )}
+        {/* BULLET POINTS eliminados en Prompt 19.2.6
+           * Razón: Compiten visualmente con el texto secuencial (Prompt 19.2)
+           * Los bullet points eran extractos del mismo script que ya se muestra
+           * secuencialmente arriba. Eliminarlos simplifica el layout.
+           */}
       </AbsoluteFill>
 
       {/* BARRA DE PROGRESO */}

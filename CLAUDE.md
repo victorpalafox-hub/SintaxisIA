@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 533 tests (529 passing, 4 skipped)
+**Test Status**: 554 tests (550 passing, 4 skipped)
 
-**Last Updated**: 2026-02-03 (Prompt 19.3 - Image Preload & Transition Fix)
+**Last Updated**: 2026-02-03 (Prompt 19.2.6 - Eliminar Bullet Points)
 
 ## Prerequisites
 
@@ -80,7 +80,8 @@ npm run check
 - Dynamic Images: `test:dynamic-images` (36) | `test:prompt19.1` (alias)
 - Sequential Text: `test:sequential-text` (41) | `test:prompt19.2` (alias)
 - Image Preload: `test:image-preload` (26) | `test:prompt19.3` (alias)
-- **Total**: 533 tests (529 passing, 4 skipped)
+- No Bullet Points: `test:no-bullet-points` (21) | `test:prompt19.2.6` (alias)
+- **Total**: 554 tests (550 passing, 4 skipped)
 
 Ver `README.md` para lista completa de scripts.
 
@@ -458,6 +459,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | 19.2 | Texto Secuencial en Escenas | 41 | Frases con fade in/out en ContentScene |
 | 19.3 | Image Preload & Transition Fix | 26 | Transiciones suaves 30 frames, imageAnimation config |
 | 19.3.1 | ELEVENLABS Optional Fallback | - | TTS usa Edge-TTS si API key no está definida |
+| 19.2.6 | No Bullet Points | 21 | Elimina bullet points de ContentScene, solo texto secuencial |
 
 ### Archivos Clave por Feature
 
