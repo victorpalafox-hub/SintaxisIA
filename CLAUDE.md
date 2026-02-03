@@ -159,6 +159,7 @@ if (isShortTimeout(timeout)) { /* manejar error */ }
 | Composición no encontrada | Usar `AINewsShort` (producción) o `AINewsShort-Preview` (dev) |
 | FFmpeg no disponible | Instalar FFmpeg y agregar al PATH |
 | API rate limit (ElevenLabs) | Usa fallback Edge-TTS automáticamente (10k chars/mes) |
+| Desarrollo sin créditos TTS | Comentar ELEVENLABS_API_KEY → usa Edge-TTS gratis |
 | Tests flaky en calendario | Usar rango 1-7 días, no valores exactos |
 
 ## Windows-specific
@@ -383,8 +384,11 @@ GitHub Actions (`.github/workflows/test.yml`):
 # APIs (Requeridas)
 NEWSDATA_API_KEY=...           # NewsData.io - noticias de IA
 GEMINI_API_KEY=...             # Google AI Studio - generación de scripts
-ELEVENLABS_API_KEY=...         # ElevenLabs - TTS (10k chars/mes gratis)
-ELEVENLABS_VOICE_ID=adam       # Voz por defecto (Josh en código)
+
+# TTS (Opcional - Prompt 19.3.1)
+# Si no están definidas, usa Edge-TTS gratis como fallback
+ELEVENLABS_API_KEY=...         # ElevenLabs - voz profesional Josh
+ELEVENLABS_VOICE_ID=adam       # Voz por defecto
 
 # YouTube Data API v3 (Prompt 18)
 YOUTUBE_CLIENT_ID=...          # OAuth2 Client ID (Google Cloud Console)
@@ -453,6 +457,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | 19.1 | Dynamic Images per Segment | 36 | N segmentos = N imágenes únicas + Pexels API |
 | 19.2 | Texto Secuencial en Escenas | 41 | Frases con fade in/out en ContentScene |
 | 19.3 | Image Preload & Transition Fix | 26 | Transiciones suaves 30 frames, imageAnimation config |
+| 19.3.1 | ELEVENLABS Optional Fallback | - | TTS usa Edge-TTS si API key no está definida |
 
 ### Archivos Clave por Feature
 

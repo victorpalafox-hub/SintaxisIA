@@ -70,20 +70,32 @@ export const isTestOrCI = (): boolean => {
          process.env.NODE_ENV === 'ci';
 };
 
+// Variables REQUERIDAS - el pipeline falla sin ellas
 const requiredEnvVars = [
   'NEWSDATA_API_KEY',
   'GEMINI_API_KEY',
+];
+
+// Variables OPCIONALES - tienen fallback automático
+// ELEVENLABS_API_KEY: Si no está, usa Edge-TTS gratis (Prompt 19.3.1)
+// ELEVENLABS_VOICE_ID: Si no está, usa voz por defecto
+const optionalEnvVars = [
   'ELEVENLABS_API_KEY',
   'ELEVENLABS_VOICE_ID',
 ];
 
-// Solo validar variables de entorno en producción/desarrollo
+// Solo validar variables REQUERIDAS en producción/desarrollo
 // En CI/test usamos valores mock
 if (!isTestOrCI()) {
-  for (const envVar of requiredEnvVars) {
-    if (!process.env[envVar]) {
-      throw new Error(`Variable de entorno ${envVar} no está definida en .env`);
-    }
+  const missing = requiredEnvVars.filter((envVar) => !process.env[envVar]);
+  if (missing.length > 0) {
+    throw new Error(`Variables de entorno requeridas no definidas: ${missing.join(', ')}`);
+  }
+
+  // Log informativo para variables opcionales faltantes
+  const missingOptional = optionalEnvVars.filter((envVar) => !process.env[envVar]);
+  if (missingOptional.length > 0) {
+    console.log(`ℹ️  Variables opcionales no definidas (usando fallback): ${missingOptional.join(', ')}`);
   }
 }
 
