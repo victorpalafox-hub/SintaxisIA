@@ -26,7 +26,7 @@ import {
   useCurrentFrame,
   Easing,
 } from 'remotion';
-import { colors, spacing, textAnimation } from '../../styles/themes';
+import { colors, spacing, textAnimation, imageAnimation } from '../../styles/themes';
 import { ProgressBar } from '../ui/ProgressBar';
 import { SafeImage } from '../elements/SafeImage';
 import { splitIntoReadablePhrases, getPhraseTiming } from '../../utils';
@@ -143,9 +143,9 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
       )
     : 1.0;
 
-  // Fade in de imagen
+  // Fade in de imagen (Prompt 19.3 - transición más suave)
   const imageOpacity = contextImage
-    ? interpolate(frame, [0, 20], [0, 1], { extrapolateRight: 'clamp' })
+    ? interpolate(frame, [0, imageAnimation.fadeInFrames], [0, 1], { extrapolateRight: 'clamp' })
     : 0;
 
   // ==========================================

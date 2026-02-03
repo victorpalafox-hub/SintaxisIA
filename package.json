@@ -97,7 +97,10 @@
     "test:prompt19.1": "playwright test tests/specs/prompt19.1-*.spec.ts",
 
     "test:sequential-text": "playwright test tests/specs/prompt19.2-sequential-text.spec.ts",
-    "test:prompt19.2": "playwright test tests/specs/prompt19.2-sequential-text.spec.ts"
+    "test:prompt19.2": "playwright test tests/specs/prompt19.2-sequential-text.spec.ts",
+
+    "test:image-preload": "playwright test tests/specs/prompt19.3-image-preload.spec.ts",
+    "test:prompt19.3": "playwright test tests/specs/prompt19.3-image-preload.spec.ts"
   },
   "keywords": [
     "youtube",

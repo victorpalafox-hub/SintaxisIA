@@ -213,6 +213,25 @@ export const textAnimation = {
   minWordsPerPhrase: 3,
 };
 
+// ==========================================
+// CONFIGURACIÓN DE TRANSICIONES DE IMAGEN (Prompt 19.3)
+// ==========================================
+
+/**
+ * Configuración para transiciones de imagen en escenas
+ *
+ * Controla cómo las imágenes aparecen y desaparecen.
+ * El componente <Img> de Remotion ya incluye preload automático.
+ */
+export const imageAnimation = {
+  /** Frames para fade in de imagen (1s @ 30fps) */
+  fadeInFrames: 30,
+  /** Frames para fade out de imagen (0.5s @ 30fps) */
+  fadeOutFrames: 15,
+  /** Frames de overlap en crossfade entre imágenes */
+  crossfadeFrames: 20,
+};
+
 // Colección de todos los temas disponibles
 export const themes = {
   cyberpunk: cyberpunkTheme,

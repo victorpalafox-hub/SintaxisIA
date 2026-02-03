@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 507 tests (503 passing, 4 skipped)
+**Test Status**: 533 tests (529 passing, 4 skipped)
 
-**Last Updated**: 2026-02-03 (Prompt 19.2 - Texto Secuencial en Escenas)
+**Last Updated**: 2026-02-03 (Prompt 19.3 - Image Preload & Transition Fix)
 
 ## Prerequisites
 
@@ -79,7 +79,8 @@ npm run check
 - Output: `test:output-manager` (43) | `test:prompt19` (alias)
 - Dynamic Images: `test:dynamic-images` (36) | `test:prompt19.1` (alias)
 - Sequential Text: `test:sequential-text` (41) | `test:prompt19.2` (alias)
-- **Total**: 507 tests (503 passing, 4 skipped)
+- Image Preload: `test:image-preload` (26) | `test:prompt19.3` (alias)
+- **Total**: 533 tests (529 passing, 4 skipped)
 
 Ver `README.md` para lista completa de scripts.
 
@@ -174,7 +175,7 @@ if (isShortTimeout(timeout)) { /* manejar error */ }
 
 ```bash
 npm run check          # TypeScript sin errores
-npm test              # Tests pasando (507 tests)
+npm test              # Tests pasando (533 tests)
 npm run security:check # Sin vulnerabilidades críticas
 ```
 
@@ -451,6 +452,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | 19 | Output Manager + Dry-Run Real | 43 | VideoRenderingService integrado + --dry-real CLI |
 | 19.1 | Dynamic Images per Segment | 36 | N segmentos = N imágenes únicas + Pexels API |
 | 19.2 | Texto Secuencial en Escenas | 41 | Frases con fade in/out en ContentScene |
+| 19.3 | Image Preload & Transition Fix | 26 | Transiciones suaves 30 frames, imageAnimation config |
 
 ### Archivos Clave por Feature
 
@@ -468,6 +470,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | Output Manager | `automation/src/services/output-manager.service.ts`, `automation/src/config/output.config.ts` |
 | Dynamic Images | `automation/src/services/scene-segmenter.service.ts`, `automation/src/services/image-orchestration.service.ts`, `automation/src/image-providers/pexels-provider.ts` |
 | Sequential Text | `remotion-app/src/utils/text-splitter.ts`, `remotion-app/src/utils/phrase-timing.ts`, `remotion-app/src/styles/themes.ts` (textAnimation) |
+| Image Transitions | `remotion-app/src/styles/themes.ts` (imageAnimation), `remotion-app/src/components/elements/SafeImage.tsx` |
 
 ### Quick Reference
 
