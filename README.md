@@ -201,7 +201,7 @@ npm test
 
 | Script | Description |
 |--------|-------------|
-| `npm test` | Run all Playwright tests (198 tests) |
+| `npm test` | Run all Playwright tests (383 tests) |
 | `npm run test:ui` | Open Playwright UI mode (interactive) |
 | `npm run test:logger` | Run TestLogger validation tests (Prompt #5) |
 | `npm run test:demo` | Run Service Objects demo tests (Prompt #6) |
@@ -214,6 +214,11 @@ npm test
 | `npm run test:orchestrator` | Run Orchestrator tests (Prompt #14) |
 | `npm run test:notifications` | Run Notifications tests (Prompt #14.1) |
 | `npm run test:notification-fix` | Run Notification Fix tests (Prompt #14.2) |
+| `npm run test:gemini` | Run Gemini API tests (Prompt #15) |
+| `npm run test:compliance` | Run Compliance tests (Prompt #15) |
+| `npm run test:tts` | Run TTS tests (Prompt #16) |
+| `npm run test:video-rendering` | Run Video Rendering tests (Prompt #17) |
+| `npm run test:youtube` | Run YouTube Upload tests (Prompt #18) |
 | `npm run test:headed` | Run tests with visible browser |
 | `npm run test:debug` | Run tests in debug mode |
 | `npm run test:report` | Open HTML test report |
@@ -443,7 +448,12 @@ npm run test:report
 | Orchestrator (Prompt #14) | 16 | ✅ Passing |
 | Notifications (Prompt #14.1) | 12 | ✅ Passing |
 | Notification Fix (Prompt #14.2) | 12 | ✅ Passing |
-| **Total** | **198** | **✅ All Passing** |
+| Gemini Real (Prompt #15) | 22 | ✅ Passing |
+| Compliance (Prompt #15) | 70 | ✅ Passing |
+| TTS (Prompt #16) | 22 | ✅ Passing |
+| Video Rendering (Prompt #17) | 27 | ✅ Passing |
+| YouTube Upload (Prompt #18) | 53 | ✅ Passing |
+| **Total** | **383** | **✅ All Passing (4 skipped)** |
 
 ### Completed (Prompts #4-10)
 
@@ -502,15 +512,22 @@ npm run test:report
 | Notification Fix | ✅ Done | Callback handlers for local development (Prompt #14.2) |
 | Storage Fix | ✅ Done | Auto-create temp directories (Prompt #14.2.1) |
 
-### Pending (Prompt #15+)
+### Completed (Prompts #15-18)
 
 | Feature | Status | Description |
 |---------|--------|-------------|
-| Real Gemini API | ⏳ Pending | Replace mocks with actual API calls |
-| Real Video Rendering | ⏳ Pending | Integrate Remotion CLI for actual renders |
-| OCR Validation | ⏳ Pending | Tesseract.js for text extraction from frames |
-| STT Validation | ⏳ Pending | Audio transcription and sync checking |
-| E2E Tests | ⏳ Pending | Complete pipeline: Prompt → Gemini → Video → Validation |
+| Gemini Script Generation | ✅ Done | Real API with Alex Torres persona + compliance (Prompt #15) |
+| ElevenLabs TTS | ✅ Done | Real API with Edge-TTS fallback (Prompt #16) |
+| Video Rendering Service | ✅ Done | Remotion CLI integration + subtitles (Prompt #17) |
+| YouTube Upload | ✅ Done | OAuth2 + resumable upload + quota management (Prompt #18) |
+
+### Pending (Prompt #19+)
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| OCR + Thumbnails | ⏳ Pending | Text extraction from images (Prompt #19) |
+| Visual Identity | ⏳ Pending | Humanized branding (Prompt #20) |
+| E2E Pipeline | ⏳ Pending | Full integration of all services (Prompt #21) |
 
 ---
 

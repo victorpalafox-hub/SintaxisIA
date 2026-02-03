@@ -65,8 +65,8 @@ npm run check
 | Render video | `npm run render` |
 | CI validation | `npm run ci:validate` |
 
-**Test suites**:
-- Smoke: `00-smoke-paths` (18) - Validación de rutas críticas (corre primero)
+**Test suites** (por script npm):
+- Smoke: `test` con `00-smoke-paths` (18) - Validación de rutas críticas
 - Core: `test:logger` (3) | `test:services` (5)
 - Video: `test:video` (19) | `test:content` (23) | `test:design` (29)
 - Scoring: `test:scoring` (33) | `test:image-search` (23)
@@ -74,7 +74,7 @@ npm run check
 - Pipeline: `test:orchestrator` (16) | `test:notifications` (12) | `test:notification-fix` (12)
 - APIs: `test:gemini` (22) | `test:compliance` (70) | `test:tts` (22)
 - Rendering: `test:video-rendering` (27)
-- YouTube: `test:youtube` (53)
+- YouTube: `test:youtube` (53) | `test:prompt18` (alias)
 - **Total**: 383 tests (383 passing, 4 skipped)
 
 Ver `README.md` para lista completa de scripts.
@@ -156,6 +156,24 @@ if (isShortTimeout(timeout)) { /* manejar error */ }
 | API rate limit (ElevenLabs) | Usa fallback Edge-TTS automáticamente (10k chars/mes) |
 | Tests flaky en calendario | Usar rango 1-7 días, no valores exactos |
 
+## Windows-specific
+
+| Problema | Solución |
+|----------|----------|
+| Scripts bash no funcionan | Usar Git Bash o WSL |
+| FFmpeg no encontrado | `choco install ffmpeg` o agregar manualmente al PATH |
+| Playwright browsers fallan | `npx playwright install --with-deps` |
+| Paths con espacios | Usar comillas: `cd "Videos short"` |
+| Line endings (CRLF vs LF) | Configurar: `git config core.autocrlf true` |
+
+## Pre-commit Checklist
+
+```bash
+npm run check          # TypeScript sin errores
+npm test              # Tests pasando (383 tests)
+npm run security:check # Sin vulnerabilidades críticas
+```
+
 ## ⚠️ CI/CD Gotchas (CRÍTICOS)
 
 ### 1. Variables de Entorno en CI (20 failures fix)
@@ -220,6 +238,49 @@ const shortTimeout = Math.floor(TIMEOUTS.shortTimeoutThreshold.value / 5); // 10
 | Service Objects | `tests/page-objects/services/` |
 | Constants | `tests/config/service-constants.ts` |
 | Production services | `src/services/` |
+| Automation services | `automation/src/services/` |
+| Config files | `automation/src/config/` |
+
+## Common Workflows
+
+### Añadir nuevo test suite
+```bash
+# 1. Crear archivo de test
+touch tests/specs/prompt[N]-nombre.spec.ts
+
+# 2. Estructura básica
+import { test, expect } from '@playwright/test';
+import { TestLogger } from '../utils';
+import { NombreServiceObject } from '../page-objects';
+
+test.describe('Prompt [N] - Nombre Feature', () => {
+  const logger = TestLogger.getInstance();
+
+  test('debe validar X', async () => {
+    // Arrange, Act, Assert
+  });
+});
+
+# 3. Agregar script en package.json
+"test:nombre": "playwright test tests/specs/prompt[N]-nombre.spec.ts"
+
+# 4. Actualizar conteo en CLAUDE.md
+```
+
+### Añadir nuevo Service Object
+```bash
+# 1. Crear clase en tests/page-objects/services/
+# 2. Extender BaseServiceObject
+# 3. Exportar desde tests/page-objects/index.ts
+```
+
+### Añadir nuevo servicio de producción
+```bash
+# 1. Crear en automation/src/services/nombre.service.ts
+# 2. Crear tipos en automation/src/types/nombre.types.ts
+# 3. Crear config en automation/src/config/nombre.config.ts
+# 4. Exportar desde automation/src/services/index.ts
+```
 
 ## Video Specs
 
@@ -319,98 +380,29 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | 17 | Video Rendering Service | 27 | Remotion CLI + subtítulos + secciones |
 | 18 | YouTube Upload Service | 53 | OAuth2 + upload resumible + quota management |
 
-### Prompts Detallados
+### Archivos Clave por Feature
 
-**Prompt 11 - News Scoring "Carnita" (2026-01-29, refactorizado en 17-A):**
-- Sistema de puntuación: 0-97 pts (umbral: 75 pts para publicar)
-- Criterios base: Empresa (0-10), Tipo (0-9), Engagement (0-8), Frescura (-5 a +3), Impacto (0-7)
-- Criterios carnita: Profundidad analítica (0-25), Controversia (0-20), Anti-clickbait (0-15)
-- Archivos: `automation/src/news-scorer.ts`, `automation/src/config/scoring-rules.ts`
-- Funciones: `scoreNews()`, `rankNews()`, `selectPublishableNews()`
+| Feature | Archivos Principales |
+|---------|---------------------|
+| News Scoring | `automation/src/news-scorer.ts`, `automation/src/config/scoring-rules.ts` |
+| Image Search | `automation/src/image-searcher-v2.ts`, `automation/src/image-providers/` |
+| Video Optimizado | `remotion-app/src/` (HeroScene, ContentScene, OutroScene) |
+| Orchestrator | `automation/src/orchestrator.ts`, `automation/src/cli.ts` |
+| Notificaciones | `automation/src/notifiers/` (email, telegram, callbacks) |
+| Gemini Scripts | `automation/src/scriptGen.ts`, `automation/src/services/compliance-validator.ts` |
+| TTS | `automation/src/services/tts.service.ts`, `automation/src/config/tts.config.ts` |
+| Video Rendering | `automation/src/services/video-rendering.service.ts`, `automation/src/config/video.config.ts` |
+| YouTube Upload | `automation/src/services/youtube-upload.service.ts`, `automation/src/config/youtube.config.ts` |
 
-**Prompt 12 - Image Search Multi-Provider (2026-01-29):**
-- Estrategia: HERO (logo empresa) + CONTEXT (screenshot) + OUTRO (logo Sintaxis IA)
-- Cadena fallback: Clearbit → Logo.dev → Google → Unsplash → OpenGraph → UI Avatars
-- Caché local (7 días TTL): `automation/cache/images/`
-- Archivos: `automation/src/image-searcher-v2.ts`, `automation/src/image-providers/`
+### Quick Reference
 
-**Prompt 13 - Video Optimizado 1 Noticia (2026-01-29):**
-- Timing: Hero 8s + Content 37s + Outro 10s = 55s total
-- Efectos dinámicos: zoom (0.8→1.2), blur-to-focus, parallax, glow pulsante
-- Composiciones activas: `AINewsShort` (55s producción), `AINewsShort-Preview` (10s dev)
-- Escenas: `HeroScene`, `ContentScene`, `OutroScene`
-- SafeImage (13.1): Fallback CORS con UI Avatars
-- Cleanup (13.2): Eliminadas composiciones obsoletas (SintaxisIA*)
-
-**Prompt 14 - Orchestrator + Calendario (2026-01-29):**
-- Pipeline 9 pasos: check_schedule → collect_news → select_top → generate_script → search_images → generate_audio → render_video → manual_approval → publish
-- Calendario: Cada 2 días (Lun/Mié/Vie/Dom 14:00)
-- CLI: `--dry`, `--force`, `--prod`
-- Notificaciones (14.1): Email (Resend) + Telegram con botones inline
-- Callbacks Telegram (14.2): Aprobación sin dashboard, 100% local
-- Archivos: `automation/src/orchestrator.ts`, `automation/src/cli.ts`, `automation/src/notifiers/`
-
-**Prompt 15 - Gemini Script Generation (2026-01-30):**
-- API real: `gemini-2.5-flash` (fallback: 2.0-flash → 1.5-flash)
-- Persona: "Alex Torres" (Tech Analyst & AI Curator)
-- Compliance YouTube (6 marcadores humanos, mínimo 4/6):
-  1. Primera persona | 2. Opinión subjetiva | 3. Admite incertidumbre
-  4. Preguntas reflexivas | 5. Sin jerga corporativa | 6. Usa analogías
-- Retry automático si falla compliance
-- Archivos: `automation/src/scriptGen.ts`, `automation/src/services/compliance-validator.ts`
-- Test manual: `cd automation && node test-gemini.js`
-
-**Prompt 16 - ElevenLabs TTS (2026-01-30):**
-- API real: `eleven_multilingual_v2`, voz Josh (slow, natural, calm)
-- Fallback: Edge-TTS (es-MX-JorgeNeural) si falla API o excede cuota (10k chars/mes)
-- Caché local para evitar regenerar audios idénticos
-- Auto-reset cuota mensual
-- Archivos: `automation/src/services/tts.service.ts`, `automation/src/config/tts.config.ts`
-- Requisitos: `ELEVENLABS_API_KEY` en .env, ffprobe instalado
-
-**Prompt 17-A - Carnita Score Refactor (2026-01-30):**
-- Eliminado Twitter/X: `twitterViews` → `views` (métricas genéricas)
-- Umbral publicación: **75 pts** (antes 60) | Máximo: **97 pts** (antes 37)
-- Nuevos criterios: Profundidad analítica (0-25), Controversia (0-20), Anti-clickbait (0-15)
-- Keywords: `ANALYTICAL_KEYWORDS`, `CONTROVERSY_KEYWORDS`, `CLICKBAIT_INDICATORS`
-- Funciones: `selectPublishableNews()`, `PUBLISH_THRESHOLD`
-- Campos NewsScore: `isPublishable`, `suggestedAngles`, `reasons`
-- 14 tests nuevos (33 total en prompt11-news-scoring.spec.ts)
-
-**Prompt 17 - Video Rendering Service (2026-01-30):**
-- Servicio completo de renderizado con Remotion CLI
-- Configuración: 1080x1920, 30fps, h264, CRF 18
-- Secciones: hook(8s) → headline(4s) → main(30s) → impact(5s) → outro(8s)
-- Subtítulos: Sincronización palabra por palabra automática
-- Assets: Copia audio, descarga imágenes, genera data.json
-- Retry logic: Reintentos con timeout configurable (5 min)
-- Archivos:
-  - `automation/src/config/video.config.ts` - Configuración centralizada
-  - `automation/src/types/video.types.ts` - Tipos y contratos
-  - `automation/src/services/video-rendering.service.ts` - Servicio principal
-- Funciones: `renderVideo()`, `verifyRemotionSetup()`, `generateSubtitles()`, `generateSections()`
-- Scripts: `test:video-rendering`, `video:verify`
-
-**Prompt 18 - YouTube Upload Service (2026-01-30):**
-- YouTube Data API v3 con OAuth2 authentication
-- Upload resumible con tracking de progreso
-- Quota management (10k units/día, upload cuesta 1600 units → ~6 videos/día)
-- Mock automático en CI/tests (`isTestOrCI()` detection)
-- Validación de metadata (título max 100 chars, descripción max 5000, tags max 500)
-- Archivos:
-  - `automation/src/config/youtube.config.ts` - Configuración anti-hardcode
-  - `automation/src/types/youtube.types.ts` - Interfaces TypeScript
-  - `automation/src/services/youtube-upload.service.ts` - Servicio principal
-- Funciones: `uploadVideo()`, `checkAuth()`, `getAuthUrl()`, `getQuotaStatus()`, `getChannelInfo()`
-- Env vars: `YOUTUBE_CLIENT_ID`, `YOUTUBE_CLIENT_SECRET`, `YOUTUBE_REFRESH_TOKEN`
-- Categoría por defecto: 28 (Science & Technology)
-- Privacidad por defecto: private (seguro para pruebas)
-
-**QA Audit + CI/CD Fixes (2026-01-30):**
-- Fix composiciones obsoletas: `SintaxisIA*` → `AINewsShort*` (18 ocurrencias)
-- Fix tests flaky: Calendario ajustado a rango 1-7 días
-- Git hooks pre-commit: Valida package-lock.json, .env, archivos >5MB
-- Resultado: 311 tests (307 passing, 4 skipped)
+| Componente | Función Principal | Umbral/Límite |
+|------------|-------------------|---------------|
+| Carnita Score | `scoreNews()`, `selectPublishableNews()` | 75 pts mínimo, 97 máximo |
+| Gemini | `generateScript()` + Alex Torres Persona | 4/6 marcadores compliance |
+| ElevenLabs | `generateAudio()` + fallback Edge-TTS | 10k chars/mes |
+| YouTube | `uploadVideo()` + OAuth2 | 6 videos/día (quota 10k units) |
+| Video | 55s total: Hero 8s + Content 37s + Outro 10s | 1080x1920, 30fps |
 
 ## Pipeline de Publicación
 
