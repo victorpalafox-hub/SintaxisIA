@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 426 tests (426 passing, 4 skipped)
+**Test Status**: 430 tests (430 passing, 4 skipped)
 
 **Last Updated**: 2026-02-03 (Prompt 19 - Output Manager + Dry-Run Real)
 
@@ -67,17 +67,17 @@ npm run check
 | CI validation | `npm run ci:validate` |
 
 **Test suites** (por script npm):
-- Smoke: `test` con `00-smoke-paths` (18) - Validación de rutas críticas
-- Core: `test:logger` (3) | `test:services` (5)
+- Smoke: `test` con `00-smoke-paths` (18) + `config-sync` (5) - Validación crítica
+- Core: `test:logger` (4) | `test:services` (4)
 - Video: `test:video` (19) | `test:content` (23) | `test:design` (29)
 - Scoring: `test:scoring` (33) | `test:image-search` (23)
 - Optimized: `test:video-optimized` (22) | `test:safeimage` (7) | `test:cleanup` (8)
 - Pipeline: `test:orchestrator` (16) | `test:notifications` (12) | `test:notification-fix` (12)
-- APIs: `test:gemini` (22) | `test:compliance` (70) | `test:tts` (22)
+- APIs: `test:gemini` (27) | `test:compliance` (18) | `test:tts` (27)
 - Rendering: `test:video-rendering` (27)
 - YouTube: `test:youtube` (53) | `test:prompt18` (alias)
 - Output: `test:output-manager` (43) | `test:prompt19` (alias)
-- **Total**: 426 tests (426 passing, 4 skipped)
+- **Total**: 430 tests (430 passing, 4 skipped)
 
 Ver `README.md` para lista completa de scripts.
 
@@ -172,7 +172,7 @@ if (isShortTimeout(timeout)) { /* manejar error */ }
 
 ```bash
 npm run check          # TypeScript sin errores
-npm test              # Tests pasando (383 tests)
+npm test              # Tests pasando (430 tests)
 npm run security:check # Sin vulnerabilidades críticas
 ```
 
@@ -311,6 +311,43 @@ Usar **proactivamente** cuando corresponda:
 
 **Invocar**: `Task tool → subagent_type: "[agent-name]"`
 
+### 🔴 Context7 Obligatorio en Agentes
+
+**TODOS los agentes DEBEN usar Context7** antes de realizar cualquier modificación, creación o cambio. Esto garantiza que usen documentación actualizada y mejores prácticas.
+
+**Flujo obligatorio de cada agente:**
+```
+1. Recibir tarea
+2. mcp__context7__resolve-library-id → Obtener ID de librería
+3. mcp__context7__query-docs → Consultar documentación actual
+4. Implementar siguiendo best practices de docs oficiales
+```
+
+**Librerías por agente:**
+
+| Agent | Librerías a Consultar |
+|-------|----------------------|
+| `qa-automation-lead` | playwright, typescript, node, winston |
+| `clean-code-refactorer` | typescript, node, eslint |
+| `security-reviewer` | node, googleapis, dotenv |
+| `devops-pipeline-architect` | github-actions, remotion, playwright |
+| `documentation-specialist` | playwright, remotion, typescript, node |
+
+**Ejemplo de uso Context7:**
+```typescript
+// Paso 1: Resolver ID de librería
+mcp__context7__resolve-library-id({
+  libraryName: "playwright",
+  query: "test fixtures and page object pattern"
+})
+
+// Paso 2: Consultar documentación
+mcp__context7__query-docs({
+  libraryId: "/microsoft/playwright",
+  query: "How to create reusable test fixtures"
+})
+```
+
 ## MCP Servers
 
 Servidores MCP configurados para este proyecto:
@@ -381,8 +418,8 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | # | Feature | Tests | Archivos Clave |
 |---|---------|-------|----------------|
 | 4 | EnvironmentManager + AppConfig | - | `src/config/EnvironmentManager.ts` |
-| 5 | TestLogger (Winston) | 3 | `tests/utils/TestLogger.ts` |
-| 6 | Service Objects | 5 | `tests/page-objects/services/` |
+| 5 | TestLogger (Winston) | 4 | `tests/utils/TestLogger.ts` |
+| 6 | Service Objects | 4 | `tests/page-objects/services/` |
 | 7 | Video Generation Tests | 19 | `tests/specs/prompt7-*.spec.ts` |
 | 8 | Content Validation Tests | 23 | `tests/specs/prompt8-*.spec.ts` |
 | 9 | CI/CD + npm scripts | - | `.github/workflows/test.yml` |
@@ -403,8 +440,8 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 ### Prompts 15-19: Integración APIs Reales
 | # | Feature | Tests | Descripción |
 |---|---------|-------|-------------|
-| 15 | Gemini Script Generation | 92 | Persona Alex Torres + Compliance 6 marcadores |
-| 16 | ElevenLabs TTS | 22 | Voz Josh + cache + fallback Edge-TTS |
+| 15 | Gemini Script Generation | 45 | Persona Alex Torres + Compliance 6 marcadores |
+| 16 | ElevenLabs TTS | 27 | Voz Josh + cache + fallback Edge-TTS |
 | 17-A | Carnita Score Refactor | - | Eliminado Twitter/X, umbral 75 pts, max 97 pts |
 | 17 | Video Rendering Service | 27 | Remotion CLI + subtítulos + secciones |
 | 18 | YouTube Upload Service | 53 | OAuth2 + upload resumible + quota management |

@@ -201,7 +201,7 @@ npm test
 
 | Script | Description |
 |--------|-------------|
-| `npm test` | Run all Playwright tests (383 tests) |
+| `npm test` | Run all Playwright tests (430 tests) |
 | `npm run test:ui` | Open Playwright UI mode (interactive) |
 | `npm run test:logger` | Run TestLogger validation tests (Prompt #5) |
 | `npm run test:demo` | Run Service Objects demo tests (Prompt #6) |
@@ -435,12 +435,12 @@ npm run test:report
 
 | Test Suite | Tests | Status |
 |------------|-------|--------|
-| TestLogger Validation (Prompt #5) | 3 | ✅ Passing |
-| Service Objects Demo (Prompt #6) | 5 | ✅ Passing |
+| TestLogger Validation (Prompt #5) | 4 | ✅ Passing |
+| Service Objects Demo (Prompt #6) | 4 | ✅ Passing |
 | Video Generation (Prompt #7) | 19 | ✅ Passing |
 | Content Validation (Prompt #8) | 23 | ✅ Passing |
 | Video Design (Prompt #10) | 29 | ✅ Passing |
-| News Scoring (Prompt #11) | 19 | ✅ Passing |
+| News Scoring (Prompt #11) | 33 | ✅ Passing |
 | Image Search (Prompt #12) | 23 | ✅ Passing |
 | Video Optimized (Prompt #13) | 22 | ✅ Passing |
 | SafeImage Fix (Prompt #13.1) | 7 | ✅ Passing |
@@ -448,12 +448,15 @@ npm run test:report
 | Orchestrator (Prompt #14) | 16 | ✅ Passing |
 | Notifications (Prompt #14.1) | 12 | ✅ Passing |
 | Notification Fix (Prompt #14.2) | 12 | ✅ Passing |
-| Gemini Real (Prompt #15) | 22 | ✅ Passing |
-| Compliance (Prompt #15) | 70 | ✅ Passing |
-| TTS (Prompt #16) | 22 | ✅ Passing |
+| Gemini Real (Prompt #15) | 27 | ✅ Passing |
+| Compliance (Prompt #15) | 18 | ✅ Passing |
+| TTS (Prompt #16) | 27 | ✅ Passing |
 | Video Rendering (Prompt #17) | 27 | ✅ Passing |
 | YouTube Upload (Prompt #18) | 53 | ✅ Passing |
-| **Total** | **383** | **✅ All Passing (4 skipped)** |
+| Output Manager (Prompt #19) | 43 | ✅ Passing |
+| Smoke Paths | 18 | ✅ Passing |
+| Config Sync | 5 | ✅ Passing |
+| **Total** | **430** | **✅ All Passing (4 skipped)** |
 
 ### Completed (Prompts #4-10)
 
@@ -520,14 +523,15 @@ npm run test:report
 | ElevenLabs TTS | ✅ Done | Real API with Edge-TTS fallback (Prompt #16) |
 | Video Rendering Service | ✅ Done | Remotion CLI integration + subtitles (Prompt #17) |
 | YouTube Upload | ✅ Done | OAuth2 + resumable upload + quota management (Prompt #18) |
+| Output Manager | ✅ Done | Save outputs + TikTok copy + Dry-Run Real (Prompt #19) |
 
-### Pending (Prompt #19+)
+### Pending (Prompt #20+)
 
 | Feature | Status | Description |
 |---------|--------|-------------|
-| OCR + Thumbnails | ⏳ Pending | Text extraction from images (Prompt #19) |
 | Visual Identity | ⏳ Pending | Humanized branding (Prompt #20) |
-| E2E Pipeline | ⏳ Pending | Full integration of all services (Prompt #21) |
+| E2E Pipeline | ⏳ Pending | Full integration of YouTubeService (Prompt #21) |
+| OCR + Thumbnails | ⏳ Pending | Text extraction from images (Prompt #22) |
 
 ---
 
