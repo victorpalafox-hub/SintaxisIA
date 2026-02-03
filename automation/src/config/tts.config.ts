@@ -19,7 +19,7 @@
 const ELEVENLABS_VOICE_MAP: Record<string, string> = {
   // Voces masculinas
   adam: 'pNInz6obpgDQGcFmaJgB',
-  josh: 'TxGEqnHWrfWFTfGW9XjX',
+  josh: 'Rsz5u2Huh1hPlPr0oxRQ', // Josh - Slow, Natural and Calm
   arnold: 'VR6AewLTigWG4xSOukaG',
   sam: 'yoZ06aMxZJJ28mfd3POQ',
   daniel: 'onwK4e9ZLuTAKqWW03F9',
