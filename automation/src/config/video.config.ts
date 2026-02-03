@@ -44,8 +44,8 @@ export const VIDEO_SPECS = {
   minDuration: 30,
   /** Duración máxima permitida (YouTube Shorts LIMITE ABSOLUTO) */
   maxDuration: 58,
-  /** Máximo de palabras en script (~2.5 palabras/segundo) */
-  maxScriptWords: 130,
+  /** Máximo de palabras en script (~2 palabras/segundo con voz Josh slow) */
+  maxScriptWords: 115,
 };
 
 /**

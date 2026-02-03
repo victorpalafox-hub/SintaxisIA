@@ -389,8 +389,8 @@ export class ScriptGenerator {
       },
     };
 
-    // Validar longitud del script (YouTube Shorts < 60s, ~130 palabras max)
-    const MAX_WORDS = 130;
+    // Validar longitud del script (YouTube Shorts < 60s, ~115 palabras max con voz Josh slow)
+    const MAX_WORDS = 115;
     const fullScript = `${script.hook} ${script.body} ${script.opinion} ${script.cta}`;
     const wordCount = fullScript.split(/\s+/).filter(w => w.length > 0).length;
 
