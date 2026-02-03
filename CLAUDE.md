@@ -311,6 +311,24 @@ Usar **proactivamente** cuando corresponda:
 
 **Invocar**: `Task tool → subagent_type: "[agent-name]"`
 
+## MCP Servers
+
+Servidores MCP configurados para este proyecto:
+
+| Server | Comando | Descripción |
+|--------|---------|-------------|
+| `context7` | `npx -y @upstash/context7-mcp@latest` | Documentación actualizada de librerías |
+
+**Uso de context7**: Cuando necesites documentación actualizada de una librería (React, Remotion, Playwright, etc.), usa el MCP context7 para obtener docs frescos en lugar de depender del conocimiento base.
+
+```bash
+# Agregar MCP server
+claude mcp add context7 -- npx -y @upstash/context7-mcp@latest
+
+# Ver servidores configurados
+claude mcp list
+```
+
 ## CI/CD
 
 GitHub Actions (`.github/workflows/test.yml`):
@@ -340,6 +358,15 @@ NOTIFICATION_EMAIL=...         # Email destino para notificaciones
 RESEND_API_KEY=re_...          # Resend API key (usa onboarding@resend.dev en dev)
 TELEGRAM_BOT_TOKEN=...         # Bot token de @BotFather
 TELEGRAM_CHAT_ID=...           # Chat ID (obtener con getUpdates)
+
+# Output Manager (Prompt 19) - Todos opcionales con defaults
+OUTPUT_BASE_DIR=./output              # Directorio base de outputs
+OUTPUT_TIKTOK_DIR=./output/tiktok-manual  # Copia para TikTok
+OUTPUT_SLUG_MAX_LENGTH=50             # Longitud máxima del slug
+OUTPUT_FILE_NEWS=news.json            # Nombre archivo noticia
+OUTPUT_FILE_SCRIPT_JSON=script.json   # Nombre archivo script JSON
+OUTPUT_FILE_SCRIPT_TXT=script.txt     # Nombre archivo script legible
+OUTPUT_FILE_VIDEO=video-final.mp4     # Nombre archivo video
 
 # Entorno
 NODE_ENV=development           # development | staging | production
