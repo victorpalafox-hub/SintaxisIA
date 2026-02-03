@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 383 tests (383 passing, 4 skipped)
+**Test Status**: 426 tests (426 passing, 4 skipped)
 
-**Last Updated**: 2026-01-30 (Prompt 18 - YouTube Upload Service)
+**Last Updated**: 2026-02-03 (Prompt 19 - Output Manager + Dry-Run Real)
 
 ## Prerequisites
 
@@ -59,6 +59,7 @@ npm run check
 | Generate content | `npm run generate` |
 | Run orchestrator | `npm run automation:run` |
 | Dry run (no publish) | `npm run automation:dry` |
+| Dry run REAL (video sin publicar) | `npm run automation:dry-real` |
 | Force run (ignore schedule) | `npm run automation:force` |
 | Production mode | `npm run automation:prod` |
 | Preview in Remotion | `npm run dev` |
@@ -75,7 +76,8 @@ npm run check
 - APIs: `test:gemini` (22) | `test:compliance` (70) | `test:tts` (22)
 - Rendering: `test:video-rendering` (27)
 - YouTube: `test:youtube` (53) | `test:prompt18` (alias)
-- **Total**: 383 tests (383 passing, 4 skipped)
+- Output: `test:output-manager` (43) | `test:prompt19` (alias)
+- **Total**: 426 tests (426 passing, 4 skipped)
 
 Ver `README.md` para lista completa de scripts.
 
@@ -371,7 +373,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | 14.1 | Notificaciones Email + Telegram | 12 | Resend API + bot con callbacks |
 | 14.2 | Fix Callbacks Telegram | 12 | Aprobación desde Telegram sin dashboard |
 
-### Prompts 15-18: Integración APIs Reales
+### Prompts 15-19: Integración APIs Reales
 | # | Feature | Tests | Descripción |
 |---|---------|-------|-------------|
 | 15 | Gemini Script Generation | 92 | Persona Alex Torres + Compliance 6 marcadores |
@@ -379,6 +381,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | 17-A | Carnita Score Refactor | - | Eliminado Twitter/X, umbral 75 pts, max 97 pts |
 | 17 | Video Rendering Service | 27 | Remotion CLI + subtítulos + secciones |
 | 18 | YouTube Upload Service | 53 | OAuth2 + upload resumible + quota management |
+| 19 | Output Manager + Dry-Run Real | 43 | VideoRenderingService integrado + --dry-real CLI |
 
 ### Archivos Clave por Feature
 
@@ -393,6 +396,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | TTS | `automation/src/services/tts.service.ts`, `automation/src/config/tts.config.ts` |
 | Video Rendering | `automation/src/services/video-rendering.service.ts`, `automation/src/config/video.config.ts` |
 | YouTube Upload | `automation/src/services/youtube-upload.service.ts`, `automation/src/config/youtube.config.ts` |
+| Output Manager | `automation/src/services/output-manager.service.ts`, `automation/src/config/output.config.ts` |
 
 ### Quick Reference
 
@@ -403,26 +407,47 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | ElevenLabs | `generateAudio()` + fallback Edge-TTS | 10k chars/mes |
 | YouTube | `uploadVideo()` + OAuth2 | 6 videos/día (quota 10k units) |
 | Video | 55s total: Hero 8s + Content 37s + Outro 10s | 1080x1920, 30fps |
+| Output Manager | `saveAllOutputs()` + TikTok copy | slug max 50 chars |
 
 ## Pipeline de Publicación
 
-### Orchestrator (9 pasos)
+### Orchestrator (11 pasos)
 1. `check_schedule` - Validar calendario (cada 2 días: Lun/Mié/Vie/Dom 14:00)
 2. `collect_news` - Obtener noticias (NewsData.io)
 3. `select_top` - Scoring Carnita (umbral 75 pts)
 4. `generate_script` - Gemini 2.5 Flash + Alex Torres Persona
 5. `search_images` - Multi-provider (hero, context, outro)
 6. `generate_audio` - ElevenLabs (fallback Edge-TTS)
-7. `render_video` - Remotion CLI + VideoRenderingService (Prompt 17)
-8. `manual_approval` - Email (Resend) + Telegram (callbacks)
-9. `publish` - YouTubeUploadService (Prompt 18)
+7. `render_video` - Remotion CLI + VideoRenderingService (INTEGRADO Prompt 19)
+8. `save_outputs` - OutputManager (news, score, script, images, audio, video, TikTok)
+9. `send_notifications` - Email (Resend) + Telegram (callbacks)
+10. `manual_approval` - Esperar aprobación humana
+11. `publish` - YouTubeUploadService (pendiente integración)
 
 ### CLI
 ```bash
 npm run automation:run        # Normal (respeta calendario)
-npm run automation:dry        # Dry run (sin publicar)
+npm run automation:dry        # Dry run (simula, sin video real)
+npm run automation:dry-real   # Dry run REAL (genera video, no publica)
 npm run automation:force      # Forzar (ignora calendario)
 npm run automation:prod       # Producción (con notificaciones)
+```
+
+### Estructura de Output (Prompt 19)
+```
+output/
+├── YYYY-MM-DD_slug-titulo/   # Carpeta por video
+│   ├── news.json             # Noticia original
+│   ├── score.json            # Score Carnita
+│   ├── script.json           # Script estructurado
+│   ├── script.txt            # Script legible (para revisión)
+│   ├── images.json           # Imágenes encontradas
+│   ├── audio.mp3             # Audio TTS
+│   ├── metadata.json         # Metadata completa
+│   └── video-final.mp4       # Video renderizado
+│
+└── tiktok-manual/            # Copia para subir a TikTok
+    └── YYYY-MM-DD_slug.mp4
 ```
 
 ### Notificaciones
@@ -440,19 +465,19 @@ npm run automation:prod       # Producción (con notificaciones)
 | Image Search | Multi-provider + caché (7 días) | 12 |
 | Script Generation | Gemini 2.5 Flash + Alex Torres Persona | 15 |
 | Audio Generation | ElevenLabs + fallback Edge-TTS | 16 |
-| Video Rendering | Remotion CLI + subtítulos | 17 |
-| **YouTube Upload** | OAuth2 + upload resumible + quota | **18** |
+| Video Rendering | Remotion CLI + subtítulos (INTEGRADO) | 17, **19** |
+| YouTube Upload | OAuth2 + upload resumible + quota | 18 |
+| **Output Manager** | Guarda outputs + TikTok copy | **19** |
 | Publication Calendar | Cada 2 días (Lun/Mié/Vie/Dom 14:00) | 14 |
 | Notification System | Email (Resend) + Telegram callbacks | 14.1, 14.2 |
 
 ### Pendiente Integración 🔧
-- Integrar `videoRenderingService` en orchestrator (paso 7) - actualmente usa mock
-- Integrar `youtubeService` en orchestrator (paso 9) - actualmente usa mock
+- Integrar `youtubeService` en orchestrator (paso 10) - actualmente usa mock
 
 ### Pendientes 📅
-- **#19 OCR + Thumbnails** - Extracción de texto de imágenes
 - **#20 Visual Identity** - Branding humanizado
-- **#21 End-to-End Pipeline** - Integración completa del pipeline
+- **#21 End-to-End Pipeline** - Integración YouTubeService + producción completa
+- **#22 OCR + Thumbnails** - Extracción de texto de imágenes
 
 ---
 

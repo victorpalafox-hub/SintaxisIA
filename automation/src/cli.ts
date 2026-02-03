@@ -45,6 +45,7 @@ function parseArgs(): CLIOptions {
 
   return {
     dry: args.includes('--dry') || args.includes('-d'),
+    dryReal: args.includes('--dry-real') || args.includes('-dr'),
     prod: args.includes('--prod') || args.includes('-p'),
     force: args.includes('--force') || args.includes('-f'),
     help: args.includes('--help') || args.includes('-h'),
@@ -66,35 +67,53 @@ function showHelp(): void {
 Uso: npm run automation:[comando]
 
 Comandos disponibles:
-  npm run automation:run     Ejecutar pipeline (modo desarrollo)
-  npm run automation:dry     Dry run (no publica, no consume APIs)
-  npm run automation:prod    Ejecutar en modo producción
-  npm run automation:force   Forzar ejecución aunque no sea día de publicación
+  npm run automation:run       Ejecutar pipeline (modo desarrollo)
+  npm run automation:dry       Dry run (simula, no genera video real)
+  npm run automation:dry-real  Dry run REAL (genera video, no publica)
+  npm run automation:prod      Ejecutar en modo producción
+  npm run automation:force     Forzar ejecución aunque no sea día
 
 Opciones:
-  --dry, -d      Dry run - simula ejecución sin acciones reales
-  --prod, -p     Modo producción (logs mínimos)
-  --force, -f    Forzar ejecución aunque no sea día de publicación
-  --help, -h     Mostrar esta ayuda
+  --dry, -d       Dry run - simula ejecución sin generar video
+  --dry-real, -dr Dry run REAL - genera video pero no publica
+  --prod, -p      Modo producción (logs mínimos)
+  --force, -f     Forzar ejecución aunque no sea día de publicación
+  --help, -h      Mostrar esta ayuda
 
 Ejemplos:
-  npx ts-node automation/src/cli.ts              # Normal
-  npx ts-node automation/src/cli.ts --dry        # Dry run
-  npx ts-node automation/src/cli.ts --force      # Forzar ejecución
-  npx ts-node automation/src/cli.ts --prod -f    # Producción + forzar
+  npx ts-node src/cli.ts                  # Normal
+  npx ts-node src/cli.ts --dry            # Dry run (simulado)
+  npx ts-node src/cli.ts --dry-real -f    # Dry run REAL + forzar
+  npx ts-node src/cli.ts --prod -f        # Producción + forzar
 
-Pipeline (10 pasos):
+Pipeline (11 pasos):
   1. Verificar calendario (cada 2 días: Lun/Mié/Vie/Dom)
-  2. Recolectar noticias (NewsData.io - mock)
-  3. Rankear por score
-  4. Seleccionar top 1
-  5. Generar script (Gemini - mock)
-  6. Buscar imágenes (funcional)
-  7. Generar audio (ElevenLabs - mock)
-  8. Renderizar video (Remotion - mock)
-  8.5. Enviar notificaciones (Email + Telegram)
-  9. Esperar aprobación (Telegram callbacks)
-  10. Publicar (manual)
+  2. Recolectar noticias (NewsData.io)
+  3. Rankear por score (Carnita Score)
+  4. Seleccionar top 1 (umbral 75 pts)
+  5. Generar script (Gemini + Alex Torres)
+  6. Buscar imágenes (multi-provider)
+  7. Generar audio (ElevenLabs/Edge-TTS)
+  8. Renderizar video (Remotion)
+  8.5. Guardar outputs (output/YYYY-MM-DD_slug/)
+  9. Enviar notificaciones (Email + Telegram)
+  10. Esperar aprobación (Telegram callbacks)
+  11. Publicar (YouTube)
+
+Estructura de Output (--dry-real):
+  output/
+  ├── YYYY-MM-DD_slug-titulo/
+  │   ├── news.json        # Noticia original
+  │   ├── score.json       # Score Carnita
+  │   ├── script.json      # Script estructurado
+  │   ├── script.txt       # Script legible (para revisión)
+  │   ├── images.json      # Imágenes encontradas
+  │   ├── audio.mp3        # Audio TTS
+  │   ├── metadata.json    # Metadata completa
+  │   └── video-final.mp4  # Video renderizado
+  │
+  └── tiktok-manual/       # Copia para subir a TikTok
+      └── YYYY-MM-DD_slug.mp4
 
 Flujo de Aprobación:
   1. Pipeline genera video y envía notificaciones
@@ -133,12 +152,21 @@ async function main(): Promise<void> {
   // Mostrar configuración
   console.log('📋 Configuración:');
   console.log(`   Modo: ${options.prod ? 'producción' : 'desarrollo'}`);
-  console.log(`   Dry run: ${options.dry ? 'Sí' : 'No'}`);
+  if (options.dry) {
+    console.log(`   Dry run: Sí (simulado - sin video real)`);
+  } else if (options.dryReal) {
+    console.log(`   Dry run: Sí (VIDEO REAL - sin publicar)`);
+  } else {
+    console.log(`   Dry run: No`);
+  }
   console.log(`   Forzar: ${options.force ? 'Sí' : 'No'}`);
   console.log('');
 
-  // Inicializar callback handler si no es dry run y notificaciones están habilitadas
-  const shouldWaitForApproval = !options.dry && areNotificationsEnabled();
+  // Inicializar callback handler solo si:
+  // - No es dry run (simulado)
+  // - No es dry real (no necesita aprobación)
+  // - Notificaciones están habilitadas
+  const shouldWaitForApproval = !options.dry && !options.dryReal && areNotificationsEnabled();
 
   if (shouldWaitForApproval) {
     initCallbackHandler();
@@ -150,7 +178,8 @@ async function main(): Promise<void> {
     const result = await runPipeline({
       mode: options.prod ? 'production' : 'development',
       dryRun: options.dry,
-      requireManualApproval: !options.prod, // Auto-aprobar en producción
+      dryReal: options.dryReal,
+      requireManualApproval: !options.prod && !options.dryReal, // Auto-aprobar en producción o dryReal
       forceRun: options.force,
     });
 
@@ -159,6 +188,23 @@ async function main(): Promise<void> {
       console.log('');
       console.log('🎉 Pipeline completado exitosamente!');
       console.log(`   Video: ${result.videoPath || 'N/A'}`);
+
+      // Mostrar resumen de outputs si existe (Prompt 19)
+      if (result.outputSummary) {
+        console.log('');
+        console.log('📁 OUTPUTS GUARDADOS:');
+        console.log(`   Carpeta: ${result.outputSummary.folderName}`);
+        console.log(`   Path: ${result.outputSummary.outputFolder}`);
+        console.log(`   Tamaño total: ${result.outputSummary.totalSizeFormatted}`);
+        console.log('');
+        console.log(`   📱 TikTok: ${result.outputSummary.tiktokPath}`);
+        console.log('');
+        console.log('   Archivos generados:');
+        Object.entries(result.outputSummary.files).forEach(([key, filePath]) => {
+          const fileName = filePath.split(/[/\\]/).pop();
+          console.log(`     - ${key}: ${fileName}`);
+        });
+      }
 
       // Si no es dry run y hay notificaciones, esperar aprobación
       if (shouldWaitForApproval) {

@@ -65,6 +65,7 @@
 
     "automation:run": "cd automation && npm run pipeline",
     "automation:dry": "cd automation && npm run pipeline:dry",
+    "automation:dry-real": "cd automation && npm run pipeline:dry-real",
     "automation:force": "cd automation && npm run pipeline:force",
     "automation:prod": "cd automation && npm run pipeline:prod",
     "automation:help": "cd automation && npm run pipeline:help",
@@ -88,7 +89,10 @@
     "video:verify": "cd automation && npx ts-node -e \"import('./src/services/video-rendering.service').then(s => s.videoRenderingService.verifyRemotionSetup().then(console.log))\"",
 
     "test:youtube": "playwright test tests/specs/prompt18-youtube-upload.spec.ts",
-    "test:prompt18": "playwright test tests/specs/prompt18-*.spec.ts"
+    "test:prompt18": "playwright test tests/specs/prompt18-*.spec.ts",
+
+    "test:output-manager": "playwright test tests/specs/prompt19-output-manager.spec.ts",
+    "test:prompt19": "playwright test tests/specs/prompt19-*.spec.ts"
   },
   "keywords": [
     "youtube",

@@ -14,6 +14,7 @@
     "check": "tsc --noEmit",
     "pipeline": "ts-node src/cli.ts",
     "pipeline:dry": "ts-node src/cli.ts --dry",
+    "pipeline:dry-real": "ts-node src/cli.ts --dry-real",
     "pipeline:force": "ts-node src/cli.ts --force",
     "pipeline:prod": "ts-node src/cli.ts --prod",
     "pipeline:help": "ts-node src/cli.ts --help"

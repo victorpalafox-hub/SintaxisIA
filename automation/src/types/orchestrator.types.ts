@@ -54,6 +54,13 @@ export interface OrchestratorConfig {
    * Útil para testing
    */
   forceRun?: boolean;
+
+  /**
+   * Dry run REAL: genera video pero no publica ni notifica
+   * Útil para verificar el pipeline completo sin publicar
+   * @since Prompt 19
+   */
+  dryReal?: boolean;
 }
 
 // =============================================================================
@@ -87,6 +94,12 @@ export interface PipelineResult {
 
   /** Timestamp de fin */
   completedAt?: Date;
+
+  /**
+   * Resumen de outputs guardados
+   * @since Prompt 19
+   */
+  outputSummary?: OutputSummary;
 }
 
 /**
@@ -137,9 +150,10 @@ export type PipelineStepStatus =
  * 6. search_images - Buscar imágenes relevantes
  * 7. generate_audio - Generar audio con ElevenLabs
  * 8. render_video - Renderizar con Remotion
- * 8.5. send_notifications - Enviar notificaciones (email + Telegram)
- * 9. manual_approval - Esperar aprobación humana
- * 10. publish - Publicar en YouTube
+ * 8.5. save_outputs - Guardar todos los outputs organizados (Prompt 19)
+ * 9. send_notifications - Enviar notificaciones (email + Telegram)
+ * 10. manual_approval - Esperar aprobación humana
+ * 11. publish - Publicar en YouTube
  */
 export type PipelineStepName =
   | 'check_schedule'
@@ -150,6 +164,7 @@ export type PipelineStepName =
   | 'search_images'
   | 'generate_audio'
   | 'render_video'
+  | 'save_outputs'
   | 'send_notifications'
   | 'manual_approval'
   | 'publish';
@@ -218,6 +233,58 @@ export interface VideoMetadata {
 }
 
 // =============================================================================
+// OUTPUT SUMMARY (Prompt 19)
+// =============================================================================
+
+/**
+ * Resumen de outputs guardados por el OutputManager
+ *
+ * Contiene información sobre todos los archivos generados
+ * y su ubicación para fácil acceso.
+ *
+ * @since Prompt 19
+ */
+export interface OutputSummary {
+  /** Carpeta principal de output (path completo) */
+  outputFolder: string;
+
+  /** Nombre de la carpeta (YYYY-MM-DD_slug) */
+  folderName: string;
+
+  /** Archivos guardados (paths completos) */
+  files: {
+    /** Noticia original (news.json) */
+    news: string;
+    /** Score calculado (score.json) */
+    score: string;
+    /** Script estructurado (script.json) */
+    scriptJson: string;
+    /** Script legible (script.txt) */
+    scriptTxt: string;
+    /** Imágenes (images.json) */
+    images: string;
+    /** Audio copiado (audio.mp3) */
+    audio: string;
+    /** Metadata completa (metadata.json) */
+    metadata: string;
+    /** Video final (video-final.mp4) */
+    video: string;
+  };
+
+  /** Path de la copia para TikTok */
+  tiktokPath: string;
+
+  /** Tamaño total en bytes de todos los archivos */
+  totalSizeBytes: number;
+
+  /** Tamaño total formateado (ej: "45.2 MB") */
+  totalSizeFormatted: string;
+
+  /** Timestamp de guardado */
+  savedAt: Date;
+}
+
+// =============================================================================
 // TIPOS AUXILIARES
 // =============================================================================
 
@@ -233,8 +300,14 @@ export interface StepExecutionResult<T = unknown> {
  * Opciones para ejecutar el CLI
  */
 export interface CLIOptions {
-  /** Ejecutar en modo dry run */
+  /** Ejecutar en modo dry run (simula sin generar video) */
   dry: boolean;
+
+  /**
+   * Ejecutar en modo dry run REAL (genera video pero no publica)
+   * @since Prompt 19
+   */
+  dryReal: boolean;
 
   /** Ejecutar en modo producción */
   prod: boolean;

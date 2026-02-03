@@ -6,24 +6,27 @@
  * 2. Recolectar noticias
  * 3. Rankear por score
  * 4. Seleccionar top 1
- * 5. Generar script (Gemini - mock)
- * 6. Buscar imágenes
- * 7. Generar audio (ElevenLabs - mock)
- * 8. Renderizar video (Remotion - mock)
- * 9. Mostrar preview para aprobación
- * 10. Publicar (manual por ahora)
+ * 5. Generar script (Gemini + Alex Torres)
+ * 6. Buscar imágenes (multi-provider)
+ * 7. Generar audio (ElevenLabs/Edge-TTS)
+ * 8. Renderizar video (Remotion - REAL desde Prompt 19)
+ * 8.5. Guardar outputs organizados (Prompt 19)
+ * 9. Enviar notificaciones (email + Telegram)
+ * 10. Esperar aprobación manual
+ * 11. Publicar (YouTube)
  *
  * @example
  * ```typescript
  * import { runPipeline } from './orchestrator';
  *
- * const result = await runPipeline({ dryRun: true });
- * console.log(result.success ? 'Video generado!' : result.error);
+ * // Dry run real: genera video pero no publica
+ * const result = await runPipeline({ dryReal: true, forceRun: true });
+ * console.log(result.outputSummary?.outputFolder);
  * ```
  *
  * @author Sintaxis IA
- * @version 1.0.0
- * @since Prompt 14
+ * @version 2.0.0
+ * @since Prompt 14, actualizado Prompt 19
  */
 
 import * as crypto from 'crypto';
@@ -52,11 +55,14 @@ import {
   PipelineStep,
   PipelineStepName,
   VideoMetadata,
+  OutputSummary,
 } from './types/orchestrator.types';
 import { NewsItem } from './types/news.types';
 import { ImageSearchResult } from './types/image.types';
 import { NewsScore } from './types/scoring.types';
 import { GeneratedScript } from './types/script.types';
+import { videoRenderingService } from './services/video-rendering.service';
+import { outputManager, OutputData } from './services/output-manager.service';
 
 // =============================================================================
 // CONFIGURACIÓN POR DEFECTO
@@ -69,6 +75,7 @@ const DEFAULT_CONFIG: OrchestratorConfig = {
   mode: 'development',
   requireManualApproval: true,
   dryRun: false,
+  dryReal: false,
   maxNewsToFetch: 50,
   forceRun: false,
 };
@@ -295,53 +302,144 @@ export async function runPipeline(
     });
 
     // ==========================================
-    // PASO 7: RENDERIZAR VIDEO
+    // PASO 7: RENDERIZAR VIDEO (REAL - Prompt 19)
     // ==========================================
     const videoStep = await executeStep('render_video', steps, async () => {
-      console.log('🎬 PASO 7: Renderizando video...');
+      console.log('🎬 PASO 7: Renderizando video con Remotion...');
 
       const { news, score } = topNewsStep.data as { news: NewsItem; score: NewsScore };
       const { generatedScript, fullScript } = scriptStep.data as { generatedScript: GeneratedScript; fullScript: string };
       const images = imagesStep.data as ImageSearchResult;
       const audioData = audioStep.data as { audioPath: string; durationSeconds: number; provider: string; fromCache: boolean };
-      const audioUrl = audioData.audioPath;
 
-      // TODO: Implementar en Prompt 16 con Remotion CLI
-      // const videoPath = await renderVideo({ news, script: generatedScript, images, audioUrl });
+      // Generar videoId único
+      const videoId = crypto.randomBytes(8).toString('hex');
 
-      // Mock por ahora
-      const mockVideoPath = 'output/videos/video_mock.mp4';
+      // Si es dry run puro (no dryReal), usar mock
+      if (finalConfig.dryRun && !finalConfig.dryReal) {
+        const mockVideoPath = 'output/videos/video_mock.mp4';
+        console.log(`   ✅ Video renderizado (MOCK - dry run): ${mockVideoPath}`);
+        console.log(`   📐 Resolución: 1080x1920 (9:16)`);
+        console.log(`   ⏱️  Duración: ${generatedScript.duration}s`);
 
-      console.log(`   ✅ Video renderizado (mock): ${mockVideoPath}`);
-      console.log(`   📐 Resolución: 1080x1920 (9:16)`);
-      console.log(`   ⏱️  Duración: ${generatedScript.duration}s`);
+        const metadata: VideoMetadata = {
+          newsItem: news,
+          score,
+          images,
+          script: fullScript,
+          generatedScript,
+          audioUrl: audioData.audioPath,
+          audioDuration: audioData.durationSeconds,
+          audioProvider: audioData.provider,
+          duration: audioData.durationSeconds || generatedScript.duration || 55,
+          generatedAt: new Date(),
+          youtubeTitle: generateYouTubeTitle(news),
+          youtubeDescription: generateYouTubeDescription(news, fullScript),
+          youtubeTags: generateYouTubeTags(news),
+        };
 
-      // Construir metadata completa (incluyendo script estructurado)
+        return { videoPath: mockVideoPath, metadata, videoId };
+      }
+
+      // Renderizar video REAL con VideoRenderingService
+      console.log('   🎯 Iniciando renderizado REAL con Remotion...');
+      console.log(`   📊 Audio duración: ${audioData.durationSeconds}s`);
+
+      const renderResult = await videoRenderingService.renderVideo({
+        videoId,
+        title: news.title,
+        script: fullScript,
+        audioPath: audioData.audioPath,
+        imagePath: images.hero.url,
+        topic: news.company || 'Tech',
+        newsSource: news.source,
+        audioDuration: audioData.durationSeconds,
+        hook: generatedScript.hook,
+        body: generatedScript.body,
+        cta: generatedScript.cta,
+        company: news.company,
+        newsType: news.type,
+      });
+
+      if (!renderResult.success) {
+        throw new Error(`Error en renderizado: ${renderResult.error}`);
+      }
+
+      console.log(`   ✅ Video renderizado: ${renderResult.videoPath}`);
+      console.log(`   📐 Resolución: ${renderResult.metadata.resolution}`);
+      console.log(`   📦 Tamaño: ${renderResult.fileSizeFormatted}`);
+      console.log(`   ⏱️  Duración: ${renderResult.durationSeconds}s`);
+      console.log(`   🔄 Tiempo de render: ${renderResult.renderTimeSeconds.toFixed(1)}s`);
+
+      // Construir metadata completa
       const metadata: VideoMetadata = {
         newsItem: news,
         score,
         images,
         script: fullScript,
-        generatedScript, // Script estructurado con compliance report
-        audioUrl,
+        generatedScript,
+        audioUrl: audioData.audioPath,
         audioDuration: audioData.durationSeconds,
         audioProvider: audioData.provider,
-        duration: audioData.durationSeconds || generatedScript.duration || 55,
+        duration: renderResult.durationSeconds,
         generatedAt: new Date(),
         youtubeTitle: generateYouTubeTitle(news),
         youtubeDescription: generateYouTubeDescription(news, fullScript),
         youtubeTags: generateYouTubeTags(news),
       };
 
-      return { videoPath: mockVideoPath, metadata };
+      return { videoPath: renderResult.videoPath, metadata, videoId };
     });
 
     // ==========================================
-    // PASO 7.5: ENVIAR NOTIFICACIONES
+    // PASO 7.5: GUARDAR OUTPUTS (Prompt 19)
     // ==========================================
-    if (areNotificationsEnabled() && !finalConfig.dryRun) {
+    let outputSummary: OutputSummary | undefined;
+
+    // Solo guardar outputs si se generó video real (no dry run puro)
+    if (!finalConfig.dryRun || finalConfig.dryReal) {
+      const saveOutputsStep = await executeStep('save_outputs', steps, async () => {
+        console.log('💾 PASO 7.5: Guardando outputs organizados...');
+
+        const { news, score } = topNewsStep.data as { news: NewsItem; score: NewsScore };
+        const { generatedScript, fullScript } = scriptStep.data as { generatedScript: GeneratedScript; fullScript: string };
+        const images = imagesStep.data as ImageSearchResult;
+        const audioData = audioStep.data as { audioPath: string; durationSeconds: number };
+        const { videoPath, metadata } = videoStep.data;
+
+        const outputData: OutputData = {
+          news,
+          score,
+          generatedScript,
+          fullScript,
+          images,
+          audioPath: audioData.audioPath,
+          metadata,
+          videoPath,
+        };
+
+        outputSummary = await outputManager.saveAllOutputs(outputData);
+
+        console.log(`   ✅ Outputs guardados en: ${outputSummary.folderName}`);
+        console.log(`   📁 Path: ${outputSummary.outputFolder}`);
+        console.log(`   📦 Tamaño total: ${outputSummary.totalSizeFormatted}`);
+        console.log(`   📱 TikTok: ${outputSummary.tiktokPath}`);
+
+        return outputSummary;
+      });
+    } else {
+      console.log('');
+      console.log('⏭️  PASO 7.5: Guardado de outputs omitido (dry run)');
+      console.log('');
+    }
+
+    // ==========================================
+    // PASO 8: ENVIAR NOTIFICACIONES
+    // ==========================================
+    // No enviar notificaciones si es dry run (simulado o real)
+    if (areNotificationsEnabled() && !finalConfig.dryRun && !finalConfig.dryReal) {
       await executeStep('send_notifications', steps, async () => {
-        console.log('📢 PASO 7.5: Enviando notificaciones...');
+        console.log('📢 PASO 8: Enviando notificaciones...');
 
         const { videoPath, metadata } = videoStep.data;
 
@@ -375,20 +473,24 @@ export async function runPipeline(
       });
     } else if (!areNotificationsEnabled()) {
       console.log('');
-      console.log('⏭️  PASO 7.5: Notificaciones omitidas (no configuradas)');
+      console.log('⏭️  PASO 8: Notificaciones omitidas (no configuradas)');
+      console.log('');
+    } else if (finalConfig.dryReal) {
+      console.log('');
+      console.log('⏭️  PASO 8: Notificaciones omitidas (dry-real: video sin publicar)');
       console.log('');
     } else {
       console.log('');
-      console.log('⏭️  PASO 7.5: Notificaciones omitidas (dry run)');
+      console.log('⏭️  PASO 8: Notificaciones omitidas (dry run)');
       console.log('');
     }
 
     // ==========================================
-    // PASO 8: APROBACIÓN MANUAL (si está habilitado)
+    // PASO 9: APROBACIÓN MANUAL (si está habilitado y no es dryReal)
     // ==========================================
-    if (finalConfig.requireManualApproval) {
+    if (finalConfig.requireManualApproval && !finalConfig.dryReal) {
       await executeStep('manual_approval', steps, async () => {
-        console.log('👀 PASO 8: Esperando aprobación manual...');
+        console.log('👀 PASO 9: Esperando aprobación manual...');
         console.log('');
         console.log('   📹 Video generado y listo para revisión');
         console.log('   🌐 Preview: npm run dev (Remotion Studio)');
@@ -409,14 +511,14 @@ export async function runPipeline(
     }
 
     // ==========================================
-    // PASO 9: PUBLICAR (manual por ahora)
+    // PASO 10: PUBLICAR (manual por ahora)
     // ==========================================
-    if (!finalConfig.dryRun) {
+    if (!finalConfig.dryRun && !finalConfig.dryReal) {
       await executeStep('publish', steps, async () => {
-        console.log('📤 PASO 9: Publicación...');
+        console.log('📤 PASO 10: Publicación...');
 
-        // TODO: Implementar YouTube upload en futuro
-        console.log('   ⏭️  Publicación manual (YouTube API no implementado)');
+        // TODO: Integrar YouTubeUploadService (Prompt 18)
+        console.log('   ⏭️  Publicación manual (YouTube API pendiente integración)');
         console.log('   📁 Video disponible en: ' + videoStep.data.videoPath);
         console.log('   📋 Siguiente paso: Subir manualmente a YouTube');
 
@@ -425,9 +527,16 @@ export async function runPipeline(
 
         return { published: false, manual: true };
       });
+    } else if (finalConfig.dryReal) {
+      console.log('');
+      console.log('⏭️  PASO 10: Publicación omitida (dry-real: video generado para revisión)');
+      if (outputSummary) {
+        console.log(`   📁 Video disponible en: ${outputSummary.files.video}`);
+        console.log(`   📱 TikTok: ${outputSummary.tiktokPath}`);
+      }
     } else {
       console.log('');
-      console.log('⏭️  PASO 9: Publicación omitida (dry run)');
+      console.log('⏭️  PASO 10: Publicación omitida (dry run)');
     }
 
     // ==========================================
@@ -437,6 +546,7 @@ export async function runPipeline(
     result.success = true;
     result.videoPath = videoStep.data.videoPath;
     result.metadata = videoStep.data.metadata;
+    result.outputSummary = outputSummary;
     result.completedAt = endTime;
     result.totalDuration = endTime.getTime() - startTime.getTime();
 
@@ -661,7 +771,13 @@ function printHeader(config: OrchestratorConfig): void {
   console.log('🚀 SINTAXIS IA - PIPELINE DE GENERACIÓN');
   console.log('🚀 ========================================');
   console.log(`   Modo: ${config.mode}`);
-  console.log(`   Dry run: ${config.dryRun ? 'Sí' : 'No'}`);
+  if (config.dryRun) {
+    console.log(`   Dry run: Sí (simulado)`);
+  } else if (config.dryReal) {
+    console.log(`   Dry run: Sí (VIDEO REAL - sin publicar)`);
+  } else {
+    console.log(`   Dry run: No`);
+  }
   console.log(`   Aprobación manual: ${config.requireManualApproval ? 'Sí' : 'No'}`);
   console.log(`   Forzar: ${config.forceRun ? 'Sí' : 'No'}`);
   console.log('');
@@ -706,6 +822,23 @@ function printSummary(result: PipelineResult): void {
     console.log(`   Empresa: ${result.metadata.newsItem.company || 'N/A'}`);
     console.log(`   Score: ${result.metadata.score?.totalScore || 0} pts`);
     console.log(`   Duración: ${result.metadata.duration}s`);
+  }
+
+  // Mostrar resumen de outputs (Prompt 19)
+  if (result.outputSummary) {
+    console.log('');
+    console.log('📁 OUTPUTS GUARDADOS:');
+    console.log(`   Carpeta: ${result.outputSummary.folderName}`);
+    console.log(`   Path: ${result.outputSummary.outputFolder}`);
+    console.log(`   Tamaño: ${result.outputSummary.totalSizeFormatted}`);
+    console.log('');
+    console.log('   Archivos:');
+    Object.entries(result.outputSummary.files).forEach(([key, filePath]) => {
+      const fileName = filePath.split(/[/\\]/).pop();
+      console.log(`     - ${key}: ${fileName}`);
+    });
+    console.log('');
+    console.log(`   📱 TikTok: ${result.outputSummary.tiktokPath}`);
   }
 
   console.log('');

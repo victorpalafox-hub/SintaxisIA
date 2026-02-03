@@ -243,8 +243,9 @@ test.describe('PROMPT 14.1: Notification System', () => {
       expect(content).toContain('./config/env.config');
 
       // Verificar paso de notificaciones
+      // Nota: Desde Prompt 19, notificaciones es PASO 8 (antes 7.5, ahora 7.5 es save_outputs)
       expect(content).toContain('send_notifications');
-      expect(content).toContain('PASO 7.5: Enviando notificaciones');
+      expect(content).toContain('PASO 8: Enviando notificaciones');
 
       await logger.info('✅ Orchestrator integrado con notificaciones');
     });
