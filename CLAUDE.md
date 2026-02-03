@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 466 tests (462 passing, 4 skipped)
+**Test Status**: 507 tests (503 passing, 4 skipped)
 
-**Last Updated**: 2026-02-03 (Prompt 19.1 - Dynamic Images per Segment)
+**Last Updated**: 2026-02-03 (Prompt 19.2 - Texto Secuencial en Escenas)
 
 ## Prerequisites
 
@@ -78,7 +78,8 @@ npm run check
 - YouTube: `test:youtube` (53) | `test:prompt18` (alias)
 - Output: `test:output-manager` (43) | `test:prompt19` (alias)
 - Dynamic Images: `test:dynamic-images` (36) | `test:prompt19.1` (alias)
-- **Total**: 466 tests (462 passing, 4 skipped)
+- Sequential Text: `test:sequential-text` (41) | `test:prompt19.2` (alias)
+- **Total**: 507 tests (503 passing, 4 skipped)
 
 Ver `README.md` para lista completa de scripts.
 
@@ -173,7 +174,7 @@ if (isShortTimeout(timeout)) { /* manejar error */ }
 
 ```bash
 npm run check          # TypeScript sin errores
-npm test              # Tests pasando (430 tests)
+npm test              # Tests pasando (507 tests)
 npm run security:check # Sin vulnerabilidades críticas
 ```
 
@@ -292,6 +293,7 @@ test.describe('Prompt [N] - Nombre Feature', () => {
   - Timing: Hero 8s + Content 37s + Outro 10s
   - Efectos: zoom, blur-to-focus, parallax, glow pulsante
   - 3 imágenes: hero (logo), context (screenshot), outro (hardcoded)
+  - ContentScene: Texto secuencial con fade in/out (Prompt 19.2)
 - **Composición Preview** (`AINewsShort-Preview`): 10s para desarrollo rápido
 - Tema activo: Cyberpunk Neón (`remotion-app/src/styles/themes.ts`)
 - AudioMixer: ducking automático (voz 100%, música 15% → 9%)
@@ -448,6 +450,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | 18 | YouTube Upload Service | 53 | OAuth2 + upload resumible + quota management |
 | 19 | Output Manager + Dry-Run Real | 43 | VideoRenderingService integrado + --dry-real CLI |
 | 19.1 | Dynamic Images per Segment | 36 | N segmentos = N imágenes únicas + Pexels API |
+| 19.2 | Texto Secuencial en Escenas | 41 | Frases con fade in/out en ContentScene |
 
 ### Archivos Clave por Feature
 
@@ -464,6 +467,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | YouTube Upload | `automation/src/services/youtube-upload.service.ts`, `automation/src/config/youtube.config.ts` |
 | Output Manager | `automation/src/services/output-manager.service.ts`, `automation/src/config/output.config.ts` |
 | Dynamic Images | `automation/src/services/scene-segmenter.service.ts`, `automation/src/services/image-orchestration.service.ts`, `automation/src/image-providers/pexels-provider.ts` |
+| Sequential Text | `remotion-app/src/utils/text-splitter.ts`, `remotion-app/src/utils/phrase-timing.ts`, `remotion-app/src/styles/themes.ts` (textAnimation) |
 
 ### Quick Reference
 
@@ -475,6 +479,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | YouTube | `uploadVideo()` + OAuth2 | 6 videos/día (quota 10k units) |
 | Video | 55s total: Hero 8s + Content 37s + Outro 10s | 1080x1920, 30fps |
 | Output Manager | `saveAllOutputs()` + TikTok copy | slug max 50 chars |
+| Sequential Text | `splitIntoReadablePhrases()` + `getPhraseTiming()` | 100 chars/frase, fade 15 frames |
 
 ## Pipeline de Publicación
 

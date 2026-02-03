@@ -7,27 +7,29 @@
  *
  * Elementos:
  * - Imagen CONTEXT (screenshot/demo) con parallax
- * - Texto descriptivo completo
+ * - Texto descriptivo secuencial (frases que cambian cada ~12s) - Prompt 19.2
  * - Bullet points con fade in escalonado
  * - Barra de progreso continua
  *
  * Layout flexible: con imagen o sin imagen
  *
  * @author Sintaxis IA
- * @version 2.0.0
+ * @version 2.1.0
  * @since Prompt 13
+ * @updated Prompt 19.2 - Texto secuencial
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   AbsoluteFill,
   interpolate,
   useCurrentFrame,
   Easing,
 } from 'remotion';
-import { colors, spacing } from '../../styles/themes';
+import { colors, spacing, textAnimation } from '../../styles/themes';
 import { ProgressBar } from '../ui/ProgressBar';
 import { SafeImage } from '../elements/SafeImage';
+import { splitIntoReadablePhrases, getPhraseTiming } from '../../utils';
 import type { ContentSceneProps } from '../../types/video.types';
 
 /**
@@ -147,21 +149,40 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
     : 0;
 
   // ==========================================
-  // EFECTOS DE TEXTO
+  // TEXTO SECUENCIAL (Prompt 19.2)
   // ==========================================
 
-  // Fade in escalonado de descripción (empieza frame 10)
-  const descriptionOpacity = interpolate(
+  // Duración de ContentScene: 37 segundos
+  const sceneDurationFrames = 37 * fps;
+
+  // Dividir descripción en frases legibles
+  const phrases = useMemo(
+    () => splitIntoReadablePhrases(description, {
+      maxCharsPerPhrase: textAnimation.maxCharsPerPhrase,
+      minWordsPerPhrase: textAnimation.minWordsPerPhrase,
+    }),
+    [description]
+  );
+
+  // Calcular frase actual y opacity para transiciones
+  const phraseTiming = getPhraseTiming(
     frame,
-    [10, 40],
-    [0, 1],
+    sceneDurationFrames,
+    phrases.length,
     {
-      extrapolateRight: 'clamp',
-      easing: Easing.bezier(0.16, 1, 0.3, 1), // Ease out expo
+      fadeInFrames: textAnimation.fadeInFrames,
+      fadeOutFrames: textAnimation.fadeOutFrames,
     }
   );
 
-  // Slide up sutil del texto (30px -> 0px)
+  // Obtener frase actual a mostrar
+  const currentPhrase = phrases[phraseTiming.currentPhraseIndex];
+
+  // ==========================================
+  // EFECTOS DE TEXTO
+  // ==========================================
+
+  // Slide up sutil del texto (30px -> 0px) - solo al inicio de la escena
   const textY = interpolate(
     frame,
     [10, 40],
@@ -171,6 +192,20 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
       easing: Easing.bezier(0.16, 1, 0.3, 1),
     }
   );
+
+  // Opacity combinada: fade inicial de escena + transición de frase
+  const baseOpacity = interpolate(
+    frame,
+    [10, 40],
+    [0, 1],
+    {
+      extrapolateRight: 'clamp',
+      easing: Easing.bezier(0.16, 1, 0.3, 1),
+    }
+  );
+
+  // Opacity final: combina fade de escena con transición de frase
+  const descriptionOpacity = baseOpacity * phraseTiming.opacity;
 
   // ==========================================
   // RENDER
@@ -221,7 +256,7 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
           </div>
         )}
 
-        {/* DESCRIPCION */}
+        {/* DESCRIPCION - Texto Secuencial (Prompt 19.2) */}
         <div
           style={{
             transform: `translateY(${textY}px)`,
@@ -235,9 +270,15 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
             // Más ancho si no hay imagen
             maxWidth: contextImage ? 900 : 1000,
             padding: '0 40px',
+            // Altura mínima para evitar saltos de layout
+            minHeight: 100,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
-          {description}
+          {/* Mostrar frase actual o descripción completa como fallback */}
+          {currentPhrase?.text || description}
         </div>
 
         {/* BULLET POINTS (si existen) */}

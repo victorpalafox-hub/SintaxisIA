@@ -94,7 +94,10 @@
     "test:output-manager": "playwright test tests/specs/prompt19-output-manager.spec.ts",
     "test:prompt19": "playwright test tests/specs/prompt19-output-manager.spec.ts",
     "test:dynamic-images": "playwright test tests/specs/prompt19.1-dynamic-images.spec.ts",
-    "test:prompt19.1": "playwright test tests/specs/prompt19.1-*.spec.ts"
+    "test:prompt19.1": "playwright test tests/specs/prompt19.1-*.spec.ts",
+
+    "test:sequential-text": "playwright test tests/specs/prompt19.2-sequential-text.spec.ts",
+    "test:prompt19.2": "playwright test tests/specs/prompt19.2-sequential-text.spec.ts"
   },
   "keywords": [
     "youtube",

@@ -192,6 +192,27 @@ export const layout = {
   },
 };
 
+// ==========================================
+// CONFIGURACIÓN DE TEXTO SECUENCIAL (Prompt 19.2)
+// ==========================================
+
+/**
+ * Configuración para texto secuencial en ContentScene
+ *
+ * El texto de la descripción se divide en frases que aparecen
+ * secuencialmente con transiciones suaves.
+ */
+export const textAnimation = {
+  /** Frames para fade in de cada frase (0.5s @ 30fps) */
+  fadeInFrames: 15,
+  /** Frames para fade out de cada frase (0.5s @ 30fps) */
+  fadeOutFrames: 15,
+  /** Máximo de caracteres por frase */
+  maxCharsPerPhrase: 100,
+  /** Mínimo de palabras para considerar frase completa */
+  minWordsPerPhrase: 3,
+};
+
 // Colección de todos los temas disponibles
 export const themes = {
   cyberpunk: cyberpunkTheme,
