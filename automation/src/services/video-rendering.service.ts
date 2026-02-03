@@ -133,7 +133,7 @@ class VideoRenderingService {
       while (attempts < maxRetries) {
         attempts++;
         try {
-          const outputPath = await this.executeRemotionRender(request, options);
+          const outputPath = await this.executeRemotionRender(request, options, preparedAssets);
 
           // Verificar resultado
           if (!fs.existsSync(outputPath)) {
@@ -584,6 +584,65 @@ class VideoRenderingService {
     fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
   }
 
+  /**
+   * Genera el archivo props.json en formato VideoProps para Remotion
+   * Este formato coincide con lo que espera AINewsShort.tsx
+   */
+  private generateVideoProps(
+    request: VideoRenderRequest,
+    assets: { audioPath: string; heroImage: string; contextImage: string; outroImage: string }
+  ): Record<string, unknown> {
+    // Extraer detalles del script (bullet points)
+    const details = request.script
+      .split(/[.!?]+/)
+      .map(s => s.trim())
+      .filter(s => s.length > 20 && s.length < 150)
+      .slice(0, 4);
+
+    return {
+      news: {
+        title: request.title,
+        description: request.body || request.script,
+        details,
+        source: request.newsSource || 'Sintaxis IA',
+        publishedAt: new Date().toISOString().split('T')[0],
+      },
+      images: {
+        hero: assets.heroImage,
+        context: assets.contextImage,
+      },
+      topics: request.topic ? [request.topic, request.company || ''].filter(Boolean) : [],
+      hashtags: ['#IA', '#AI', '#Tech'],
+      newsType: request.newsType || 'other',
+      audio: {
+        voice: {
+          src: assets.audioPath,
+          volume: 1.0,
+        },
+      },
+      config: {
+        duration: Math.ceil(request.audioDuration) + 5, // Audio + 5s buffer
+        fps: VIDEO_CONFIG.specs.fps,
+        enhancedEffects: true,
+      },
+    };
+  }
+
+  /**
+   * Escribe el props.json para pasar a Remotion CLI
+   * Retorna la ruta absoluta del archivo
+   */
+  private writePropsJson(
+    request: VideoRenderRequest,
+    assets: { audioPath: string; heroImage: string; contextImage: string; outroImage: string }
+  ): string {
+    const props = this.generateVideoProps(request, assets);
+    const propsPath = path.join(VIDEO_CONFIG.paths.remotionApp, 'props.json');
+
+    fs.writeFileSync(propsPath, JSON.stringify(props, null, 2));
+    return propsPath;
+  }
+
   // ===========================================================================
   // REMOTION EXECUTION
   // ===========================================================================
@@ -593,7 +652,8 @@ class VideoRenderingService {
    */
   private async executeRemotionRender(
     request: VideoRenderRequest,
-    options: VideoRenderOptions
+    options: VideoRenderOptions,
+    assets: { audioPath: string; heroImage: string; contextImage: string; outroImage: string }
   ): Promise<string> {
     const compositionId = options.usePreview
       ? VIDEO_CONFIG.remotion.previewCompositionId
@@ -610,12 +670,17 @@ class VideoRenderingService {
     const outputPath = path.join(outputDir, `${outputFileName}.mp4`);
     const crf = this.getCrf(options.quality);
 
+    // Generar props.json con los datos dinámicos
+    const propsPath = this.writePropsJson(request, assets);
+
     // Construir comando de Remotion
+    // Nota: En Windows, paths con espacios deben ir entre comillas
     const remotionArgs = [
       'remotion',
       'render',
       compositionId,
-      outputPath,
+      `"${outputPath}"`,
+      `--props="${propsPath}"`,
       `--codec=${VIDEO_CONFIG.specs.codec}`,
       `--crf=${crf}`,
       `--pixel-format=${VIDEO_CONFIG.specs.pixelFormat}`,

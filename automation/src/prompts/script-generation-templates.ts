@@ -96,10 +96,16 @@ Fuente: ${news.source}
 Empresa: ${news.company || 'No especificada'}
 Tipo: ${news.type || 'general'}
 
-## ESTRUCTURA OBLIGATORIA DEL SCRIPT (50-55 segundos):
+## ESTRUCTURA OBLIGATORIA DEL SCRIPT (45-50 segundos, MAXIMO 130 palabras):
 
-### [0-3 seg] HOOK INTELIGENTE (NO CLICKBAIT)
+⚠️ LIMITE CRITICO: El script completo (hook + analysis + reflection + cta) debe tener MAXIMO 130 PALABRAS.
+- YouTube Shorts tiene limite de 60 segundos
+- A velocidad de narración pausada (~2.5 palabras/segundo), 130 palabras = ~52 segundos
+- NUNCA generar scripts de más de 130 palabras totales
+
+### [0-3 seg] HOOK INTELIGENTE (~8 palabras)
 **Objetivo**: Captar atencion con pregunta tecnica o afirmacion contraintuitiva
+**Limite**: 8-12 palabras MAXIMO
 
 **Evitar**:
 ${persona.contentApproach.writingStyle.avoid.map(a => `- "${a}"`).join('\n')}
@@ -117,13 +123,14 @@ Una o dos frases cortas (maximo 15 palabras) que generen curiosidad genuina.
 
 ---
 
-### [3-35 seg] ANALISIS ESTRUCTURADO
+### [3-30 seg] ANALISIS ESTRUCTURADO (~70 palabras)
 **NO narres la noticia cronologicamente. HAZ analisis del por que importa.**
+**Limite**: 60-75 palabras MAXIMO
 
 **Estructura ideal**:
-1. **Que paso** (5-8 seg): Solo hechos esenciales
-2. **Por que es significativo** (10-15 seg): Contexto e implicaciones
-3. **Que cambia** (10-12 seg): Impacto practico
+1. **Que paso** (5 seg, ~12 palabras): Solo hechos esenciales
+2. **Por que es significativo** (12 seg, ~30 palabras): Contexto e implicaciones
+3. **Que cambia** (10 seg, ~25 palabras): Impacto practico
 
 **Usa conectores analiticos**:
 - "Esto es significativo porque..."
@@ -135,7 +142,8 @@ Una o dos frases cortas (maximo 15 palabras) que generen curiosidad genuina.
 
 ---
 
-### [35-50 seg] REFLEXION PERSONAL (CRITICO PARA YOUTUBE COMPLIANCE)
+### [30-45 seg] REFLEXION PERSONAL (~40 palabras)
+**Limite**: 35-45 palabras MAXIMO
 
 **NO es opinion superficial tipo "me parece genial".**
 **ES analisis desde experiencia tecnica en primera persona.**
@@ -161,7 +169,8 @@ Una o dos frases cortas (maximo 15 palabras) que generen curiosidad genuina.
 
 ---
 
-### [50-55 seg] CTA INTELIGENTE
+### [45-50 seg] CTA INTELIGENTE (~12 palabras)
+**Limite**: 10-15 palabras MAXIMO
 
 **Evitar genericos**:
 - "Que opinas? Comenta abajo"
@@ -211,11 +220,12 @@ Devuelve SOLO el script en formato JSON:
 
 \`\`\`json
 {
-  "hook": "[Hook inteligente de 2-3 frases, maximo 15 palabras totales]",
-  "analysis": "[Analisis estructurado: que paso, por que importa, que cambia]",
-  "reflection": "[Reflexion personal en primera persona con perspectiva tecnica]",
-  "cta": "[Pregunta especifica relacionada con el analisis]",
-  "estimatedDuration": 52,
+  "hook": "[Hook inteligente, MAXIMO 12 palabras]",
+  "analysis": "[Analisis estructurado, MAXIMO 75 palabras]",
+  "reflection": "[Reflexion personal en primera persona, MAXIMO 45 palabras]",
+  "cta": "[Pregunta especifica, MAXIMO 15 palabras]",
+  "estimatedDuration": 50,
+  "wordCount": 130,
   "technicalTermsUsed": ["termino1", "termino2"],
   "humanMarkers": {
     "firstPersonUsage": "[frase en primera persona del script]",
@@ -225,11 +235,14 @@ Devuelve SOLO el script en formato JSON:
 }
 \`\`\`
 
-**CRITICO**:
+**CRITICO - LIMITES DE PALABRAS**:
+- Hook: ~10 palabras
+- Analysis: ~70 palabras
+- Reflection: ~40 palabras
+- CTA: ~12 palabras
+- TOTAL MAXIMO: 130 palabras (YouTube Shorts limite 60s)
 - La reflexion DEBE sonar como analisis genuino de alguien inmerso en tech
 - NO debe sonar como comunicado de prensa o analisis corporativo
-- Debe incluir perspectiva personal pero fundamentada
-- Total: 50-55 segundos cuando se lee en voz pausada
 
 ---
 

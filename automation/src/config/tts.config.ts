@@ -7,6 +7,54 @@
  */
 
 // =============================================================================
+// ELEVENLABS VOICE ID MAPPING
+// =============================================================================
+
+/**
+ * Mapeo de nombres amigables a voice IDs de ElevenLabs
+ * Permite usar ELEVENLABS_VOICE_ID=adam en lugar del ID alfanumérico
+ *
+ * Lista completa de voces: https://elevenlabs.io/docs/voices/premade-voices
+ */
+const ELEVENLABS_VOICE_MAP: Record<string, string> = {
+  // Voces masculinas
+  adam: 'pNInz6obpgDQGcFmaJgB',
+  josh: 'TxGEqnHWrfWFTfGW9XjX',
+  arnold: 'VR6AewLTigWG4xSOukaG',
+  sam: 'yoZ06aMxZJJ28mfd3POQ',
+  daniel: 'onwK4e9ZLuTAKqWW03F9',
+  charlie: 'IKne3meq5aSn9XLyUdCD',
+  james: 'ZQe5CZNOzWyzPSCn5a3c',
+  ethan: 'g5CIjZEefAph4nQFvHAz',
+  clyde: '2EiwWnXFnvU5JabPnv8n',
+  // Voces femeninas
+  bella: 'EXAVITQu4vr4xnSDxMaL',
+  rachel: '21m00Tcm4TlvDq8ikWAM',
+  domi: 'AZnzlk1XvdvUeBnXmlld',
+  elli: 'MF3mGyEYCl7XYWbV9V6O',
+  emily: 'LcfcDJNUP1GQjkzn1xUU',
+  grace: 'oWAxZDx7w5VEj9dCyTzz',
+  charlotte: 'XB0fDUnXU5powFXDhCwa',
+  matilda: 'XrExE9yKIg1WjnnlVkGX',
+  serena: 'pMsXgVXv3BLzUgSXRplE',
+  // Voces narración
+  bill: 'pqHfZKP75CvOlQylNhV4',
+  george: 'JBFqnCBsd6RMkjVDRZzb',
+  callum: 'N2lVS1w4EtoT3dr4eOWO',
+  liam: 'TX3LPaxmHKxFdv7VOQHJ',
+  will: 'bIHbv24MWmeRgasZH58o',
+};
+
+/**
+ * Resuelve un voice ID de ElevenLabs
+ * Acepta tanto nombres amigables (adam, josh) como IDs directos
+ */
+function resolveVoiceId(input: string): string {
+  const lower = input.toLowerCase();
+  return ELEVENLABS_VOICE_MAP[lower] || input;
+}
+
+// =============================================================================
 // CONFIGURACION TTS
 // =============================================================================
 
@@ -32,8 +80,8 @@ export const TTS_CONFIG = {
     modelId: 'eleven_multilingual_v2',
 
     // Voz seleccionada (Josh - slow, natural, calm)
-    // NOTA: El user selecciono esta voz en conversaciones anteriores
-    voiceId: process.env.ELEVENLABS_VOICE_ID || 'TxGEqnHWrfWFTfGW9XjX', // Josh default
+    // NOTA: Acepta nombres amigables (adam, josh) o IDs directos
+    voiceId: resolveVoiceId(process.env.ELEVENLABS_VOICE_ID || 'josh'), // Josh default
 
     // Voice settings para tono profesional de noticias
     voiceSettings: {

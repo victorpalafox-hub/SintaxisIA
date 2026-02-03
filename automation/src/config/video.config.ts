@@ -38,12 +38,14 @@ export const VIDEO_SPECS = {
   crf: 18,
   /** Pixel format */
   pixelFormat: 'yuv420p' as const,
-  /** Duración objetivo en segundos */
-  targetDuration: 55,
+  /** Duración objetivo en segundos (YouTube Shorts < 60s) */
+  targetDuration: 50,
   /** Duración mínima permitida */
   minDuration: 30,
-  /** Duración máxima permitida */
-  maxDuration: 60,
+  /** Duración máxima permitida (YouTube Shorts LIMITE ABSOLUTO) */
+  maxDuration: 58,
+  /** Máximo de palabras en script (~2.5 palabras/segundo) */
+  maxScriptWords: 130,
 };
 
 /**
@@ -96,11 +98,11 @@ export const REMOTION_CONFIG = {
   /**
    * Timeout para rendering (configurable vía env vars)
    * Usa TIMEOUTS.videoRender que se adapta automáticamente a CI/CD
-   * Local: 30s, CI: 120s (o los valores configurados en .env)
+   * Videos de 60-90s a 1080p pueden tomar 5-10 minutos
    */
   get timeout() {
-    // Multiplicamos por factor de seguridad para rendering largo
-    return TIMEOUTS.videoRender.value * 4; // ~2-8 minutos según entorno
+    // Multiplicamos por factor de seguridad para rendering largo (5-10 min)
+    return TIMEOUTS.videoRender.value * 10; // ~5-20 minutos según entorno
   },
   /** Número de reintentos en caso de fallo */
   retries: 2,

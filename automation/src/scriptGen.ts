@@ -68,7 +68,7 @@ export type GeminiFallbackModel = (typeof GEMINI_FALLBACK_CHAIN)[number];
  * Opciones por defecto del generador
  */
 const DEFAULT_OPTIONS: Required<ScriptGeneratorOptions> = {
-  maxRetries: 2,
+  maxRetries: 3,
   temperature: 0.8,
   model: 'gemini-2.5-flash',
   validateCompliance: true,
@@ -318,6 +318,7 @@ export class ScriptGenerator {
     }
 
     // Configurar modelo
+    // maxOutputTokens aumentado de 1024 a 4096 para evitar truncamiento de JSON
     const model = this.genAI.getGenerativeModel({
       model: this.options.model,
       systemInstruction: GEMINI_SYSTEM_INSTRUCTION,
@@ -325,7 +326,7 @@ export class ScriptGenerator {
         temperature: this.options.temperature,
         topK: 40,
         topP: 0.95,
-        maxOutputTokens: 1024,
+        maxOutputTokens: 4096,
         responseMimeType: 'application/json',
       },
     });
@@ -347,9 +348,19 @@ export class ScriptGenerator {
         .replace(/```json\n?/g, '')
         .replace(/```\n?/g, '')
         .trim();
+
+      // Detectar JSON truncado (no termina en } o ])
+      if (!cleanText.endsWith('}') && !cleanText.endsWith(']')) {
+        logger.error(`[ScriptGenerator] JSON truncado detectado (${cleanText.length} chars)`);
+        logger.error(`[ScriptGenerator] Ultimos 50 chars: ...${cleanText.slice(-50)}`);
+        throw new Error(`JSON truncado - respuesta incompleta de Gemini (${cleanText.length} chars)`);
+      }
+
       parsedScript = JSON.parse(cleanText);
     } catch (parseError) {
-      logger.error(`[ScriptGenerator] Fallo al parsear JSON: ${text}`);
+      // Mostrar solo los primeros 200 chars para no saturar logs
+      const preview = text.length > 200 ? text.slice(0, 200) + '...' : text;
+      logger.error(`[ScriptGenerator] Fallo al parsear JSON: ${preview}`);
       throw new Error(`Gemini devolvio JSON invalido: ${parseError}`);
     }
 
@@ -366,7 +377,7 @@ export class ScriptGenerator {
       duration:
         (parsedScript.estimatedDuration as number) ||
         (parsedScript.duration as number) ||
-        55,
+        50,
       hashtags: [],
       metadata: {
         newsId: news.id,
@@ -377,6 +388,18 @@ export class ScriptGenerator {
         humanMarkers: (parsedScript.humanMarkers as Record<string, string>) || {},
       },
     };
+
+    // Validar longitud del script (YouTube Shorts < 60s, ~130 palabras max)
+    const MAX_WORDS = 130;
+    const fullScript = `${script.hook} ${script.body} ${script.opinion} ${script.cta}`;
+    const wordCount = fullScript.split(/\s+/).filter(w => w.length > 0).length;
+
+    if (wordCount > MAX_WORDS) {
+      logger.warn(`[ScriptGenerator] ⚠️ Script excede limite: ${wordCount} palabras (max: ${MAX_WORDS})`);
+      logger.warn(`[ScriptGenerator] El video podria exceder 60s. Considera regenerar.`);
+    } else {
+      logger.info(`[ScriptGenerator] ✅ Longitud OK: ${wordCount}/${MAX_WORDS} palabras`);
+    }
 
     return script;
   }

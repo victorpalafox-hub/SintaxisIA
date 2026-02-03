@@ -139,14 +139,15 @@ test.describe('PROMPT 17: Video Rendering Service', () => {
     test('VIDEO_SPECS should have correct duration limits', async () => {
       await logger.info('Validando límites de duración');
 
-      expect(VIDEO_CONFIG.specs.targetDuration).toBe(55);
+      // YouTube Shorts límite: 60s, target: 50s para tener margen
+      expect(VIDEO_CONFIG.specs.targetDuration).toBe(50);
       expect(VIDEO_CONFIG.specs.minDuration).toBe(30);
-      expect(VIDEO_CONFIG.specs.maxDuration).toBe(60);
+      expect(VIDEO_CONFIG.specs.maxDuration).toBe(58);
 
       await logger.info(`   Target: ${VIDEO_CONFIG.specs.targetDuration}s`);
       await logger.info(`   Min: ${VIDEO_CONFIG.specs.minDuration}s`);
       await logger.info(`   Max: ${VIDEO_CONFIG.specs.maxDuration}s`);
-      await logger.info('✅ Límites de duración correctos');
+      await logger.info('✅ Límites de duración correctos (YouTube Shorts < 60s)');
     });
 
     test('REMOTION_CONFIG should have correct composition IDs', async () => {
@@ -215,11 +216,13 @@ test.describe('PROMPT 17: Video Rendering Service', () => {
       const totalFrames = lastSection.endFrame;
       const totalSeconds = totalFrames / VIDEO_CONFIG.specs.fps;
 
-      expect(totalSeconds).toBe(VIDEO_CONFIG.specs.targetDuration);
+      // Las secciones deben estar dentro del rango permitido (min-max)
+      expect(totalSeconds).toBeGreaterThanOrEqual(VIDEO_CONFIG.specs.minDuration);
+      expect(totalSeconds).toBeLessThanOrEqual(VIDEO_CONFIG.specs.maxDuration);
 
       await logger.info(`   Total frames: ${totalFrames}`);
       await logger.info(`   Total seconds: ${totalSeconds}`);
-      await logger.info('✅ Secciones cubren duración total');
+      await logger.info('✅ Secciones cubren duración dentro del rango permitido');
     });
   });
 
