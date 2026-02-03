@@ -130,10 +130,12 @@ export class TTSService {
       );
     }
 
-    // 4. Verificar API key
+    // 4. Verificar API key (detectar si es mock o real)
     const apiKey = config.api.elevenLabsApiKey;
-    if (!apiKey) {
-      logger.warn(`[TTS] ELEVENLABS_API_KEY no configurada, usando fallback`);
+    const isMockKey = !apiKey || apiKey === 'ci-test-mock-key' || apiKey === 'mock-voice-id';
+
+    if (isMockKey) {
+      logger.warn(`[TTS] ELEVENLABS_API_KEY no configurada o es mock, usando fallback`);
       if (this.options.enableFallback) {
         return this.generateWithFallback(text, textHash, outputFileName);
       }
@@ -340,16 +342,24 @@ export class TTSService {
 
       if (
         errorMsg.includes('not found') ||
-        errorMsg.includes('not recognized')
+        errorMsg.includes('not recognized') ||
+        errorMsg.includes('no se reconoce')
       ) {
-        logger.warn(`[TTS] edge-tts no instalado, instalando...`);
+        logger.warn(`[TTS] edge-tts no instalado, intentando instalar...`);
         try {
           await execAsync('pip install edge-tts');
           await execAsync(command, { timeout: 120000 });
         } catch (installError) {
+          // Si falla, dar instrucciones claras
           throw new Error(
-            `No se pudo instalar edge-tts: ${installError}. ` +
-              `Instala manualmente con: pip install edge-tts`
+            `Edge-TTS no está disponible y no se pudo instalar automáticamente.\n` +
+            `\nOpciones para solucionar:\n` +
+            `1. Configurar ELEVENLABS_API_KEY en .env (recomendado)\n` +
+            `2. Instalar Edge-TTS manualmente:\n` +
+            `   - Windows: pip install edge-tts\n` +
+            `   - Si pip no está en PATH: python -m pip install edge-tts\n` +
+            `3. Verificar que Python está instalado y en el PATH\n` +
+            `\nError original: ${installError}`
           );
         }
       } else {
