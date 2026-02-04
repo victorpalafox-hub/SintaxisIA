@@ -7,11 +7,12 @@
  * Timing:
  * - Hero: 8s (hook fuerte + imagen específica)
  * - Content: 37s (explicación completa + imagen contextual)
- * - Outro: 10s (branding + logo claro)
+ * - Outro: 5s (branding + logo claro) - Reducido en Prompt 19.4
  *
  * @author Sintaxis IA
- * @version 2.0.0
+ * @version 2.1.0
  * @since Prompt 13
+ * @updated Prompt 19.4 - Duración OutroScene reducida de 10s a 5s
  */
 
 // =============================================================================
@@ -266,7 +267,7 @@ export interface ContentSceneProps {
 /**
  * Props para OutroScene
  *
- * Escena de branding (45-55s)
+ * Escena de branding (45-50s) - Actualizado Prompt 19.4
  * - Logo "Sintaxis IA" grande y centrado
  * - CTA claro ("Síguenos para más noticias IA")
  * - SIN hashtags visibles

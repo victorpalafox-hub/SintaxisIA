@@ -2,21 +2,22 @@
  * @fileoverview AINewsShort - Composicion Principal Optimizada
  *
  * Composición de video optimizada para 1 NOTICIA COMPLETA.
- * Duración: 55 segundos default (configurable)
+ * Duración: 50 segundos default (configurable) - Reducido en Prompt 19.4
  *
  * Timing:
  * - Hero: 0-8s (hook fuerte)
  * - Content: 8-45s (explicación completa)
- * - Outro: 45-55s (branding claro)
+ * - Outro: 45-50s (branding claro) - Reducido de 10s a 5s en Prompt 19.4
  *
  * Imágenes: 3 totales
  * 1. Hero (0-8s): Logo empresa específico
  * 2. Context (8-45s): Screenshot/demo con parallax
- * 3. Outro (45-55s): Logo "Sintaxis IA" hardcoded
+ * 3. Outro (45-50s): Logo "Sintaxis IA" hardcoded
  *
  * @author Sintaxis IA
- * @version 2.0.0
+ * @version 2.1.0
  * @since Prompt 13
+ * @updated Prompt 19.4 - Duración OutroScene reducida de 10s a 5s
  */
 
 import React from 'react';
@@ -73,7 +74,7 @@ const DEFAULT_AUDIO: VideoProps['audio'] = {
  * AI NEWS SHORT - Composición Principal Optimizada
  *
  * Video short de noticias de IA optimizado para UNA noticia completa.
- * Usa timing de 8s + 37s + 10s = 55s (default).
+ * Usa timing de 8s + 37s + 5s = 50s (default). Reducido en Prompt 19.4.
  *
  * @example
  * <AINewsShort
@@ -109,8 +110,8 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
   // FPS del video (default: 30)
   const fps = config?.fps ?? 30;
 
-  // Duración total en segundos (default: 55s)
-  const duration = config?.duration ?? 55;
+  // Duración total en segundos (default: 50s) - Reducido en Prompt 19.4
+  const duration = config?.duration ?? 50;
 
   // Activar efectos mejorados (default: true)
   const enhancedEffects = config?.enhancedEffects ?? true;
@@ -128,8 +129,8 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
   // Content: 37 segundos (explicación completa)
   const contentSceneDuration = 37 * fps;    // 1110 frames
 
-  // Outro: 10 segundos (branding claro)
-  const outroSceneDuration = 10 * fps;      // 300 frames
+  // Outro: 5 segundos (branding claro) - Reducido de 10s en Prompt 19.4
+  const outroSceneDuration = 5 * fps;       // 150 frames
 
   // Puntos de inicio de cada escena
   const heroStart = 0;
@@ -198,12 +199,13 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
       </Sequence>
 
       {/* ==========================================
-          OUTRO SCENE - Branding (45-55s)
+          OUTRO SCENE - Branding (45-50s) - Prompt 19.4
           ==========================================
           Cierre memorable con:
           - Logo "Sintaxis IA" con glow
           - CTA claro
           - SIN hashtags visibles
+          - Duración reducida de 10s a 5s para eliminar silencio
       */}
       <Sequence
         from={outroStart}

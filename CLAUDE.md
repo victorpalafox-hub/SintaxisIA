@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 554 tests (550 passing, 4 skipped)
+**Test Status**: 570 tests (566 passing, 4 skipped)
 
 **Last Updated**: 2026-02-03 (Prompt 19.2.6 - Eliminar Bullet Points)
 
@@ -81,7 +81,9 @@ npm run check
 - Sequential Text: `test:sequential-text` (41) | `test:prompt19.2` (alias)
 - Image Preload: `test:image-preload` (26) | `test:prompt19.3` (alias)
 - No Bullet Points: `test:no-bullet-points` (21) | `test:prompt19.2.6` (alias)
-- **Total**: 554 tests (550 passing, 4 skipped)
+- Large Text: `test:large-text` (25) | `test:prompt19.2.7` (alias)
+- Outro Duration: `test:outro-duration` (16) | `test:prompt19.4` (alias)
+- **Total**: 570 tests (566 passing, 4 skipped)
 
 Ver `README.md` para lista completa de scripts.
 
@@ -292,8 +294,8 @@ test.describe('Prompt [N] - Nombre Feature', () => {
 ## Video Specs
 
 - 1080x1920 (9:16), 30 FPS
-- **Composición Producción** (`AINewsShort`): 55s, 1 noticia con efectos dinámicos
-  - Timing: Hero 8s + Content 37s + Outro 10s
+- **Composición Producción** (`AINewsShort`): 50s, 1 noticia con efectos dinámicos
+  - Timing: Hero 8s + Content 37s + Outro 5s (Prompt 19.4)
   - Efectos: zoom, blur-to-focus, parallax, glow pulsante
   - 3 imágenes: hero (logo), context (screenshot), outro (hardcoded)
   - ContentScene: Texto secuencial con fade in/out (Prompt 19.2)
@@ -439,7 +441,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 |---|---------|-------|-------------|
 | 11 | News Scoring "Carnita" | 33 | Scoring 0-97 pts, umbral 75 |
 | 12 | Image Search Multi-Provider | 23 | Clearbit → Logo.dev → Google → Unsplash |
-| 13 | Video Optimizado (1 noticia) | 22 | 55s: Hero 8s + Content 37s + Outro 10s |
+| 13 | Video Optimizado (1 noticia) | 22 | 50s: Hero 8s + Content 37s + Outro 5s (Prompt 19.4) |
 | 13.1 | SafeImage CORS Fix | 7 | Fallback UI Avatars para preview |
 | 13.2 | Cleanup Composiciones | 8 | Eliminadas SintaxisIA* (obsoletas) |
 | 14 | Orchestrator + Calendario | 16 | Pipeline 9 pasos, publica cada 2 días |
@@ -460,6 +462,8 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | 19.3 | Image Preload & Transition Fix | 26 | Transiciones suaves 30 frames, imageAnimation config |
 | 19.3.1 | ELEVENLABS Optional Fallback | - | TTS usa Edge-TTS si API key no está definida |
 | 19.2.6 | No Bullet Points | 21 | Elimina bullet points de ContentScene, solo texto secuencial |
+| 19.2.7 | Large Text | 25 | fontSize 72px, maxCharsPerPhrase 60, contentTextStyle centralizado |
+| 19.4 | Outro Duration Sync | 16 | Reducido de 10s a 5s, elimina silencio final |
 
 ### Archivos Clave por Feature
 
@@ -487,9 +491,9 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | Gemini | `generateScript()` + Alex Torres Persona | 4/6 marcadores compliance |
 | ElevenLabs | `generateAudio()` + fallback Edge-TTS | 10k chars/mes |
 | YouTube | `uploadVideo()` + OAuth2 | 6 videos/día (quota 10k units) |
-| Video | 55s total: Hero 8s + Content 37s + Outro 10s | 1080x1920, 30fps |
+| Video | 50s total: Hero 8s + Content 37s + Outro 5s | 1080x1920, 30fps |
 | Output Manager | `saveAllOutputs()` + TikTok copy | slug max 50 chars |
-| Sequential Text | `splitIntoReadablePhrases()` + `getPhraseTiming()` | 100 chars/frase, fade 15 frames |
+| Sequential Text | `splitIntoReadablePhrases()` + `getPhraseTiming()` | 60 chars/frase, fade 15 frames |
 
 ## Pipeline de Publicación
 

@@ -103,7 +103,13 @@
     "test:prompt19.3": "playwright test tests/specs/prompt19.3-image-preload.spec.ts",
 
     "test:no-bullet-points": "playwright test tests/specs/prompt19.2.6-no-bullet-points.spec.ts",
-    "test:prompt19.2.6": "playwright test tests/specs/prompt19.2.6-no-bullet-points.spec.ts"
+    "test:prompt19.2.6": "playwright test tests/specs/prompt19.2.6-no-bullet-points.spec.ts",
+
+    "test:large-text": "playwright test tests/specs/prompt19.2.7-large-text.spec.ts",
+    "test:prompt19.2.7": "playwright test tests/specs/prompt19.2.7-large-text.spec.ts",
+
+    "test:outro-duration": "playwright test tests/specs/prompt19.4-outro-duration.spec.ts",
+    "test:prompt19.4": "playwright test tests/specs/prompt19.4-outro-duration.spec.ts"
   },
   "keywords": [
     "youtube",

@@ -149,12 +149,12 @@ export const VIDEO_SECTIONS = {
     endFrame: 1410,
     durationSeconds: 5,
   },
-  /** Outro con CTA (47-55s = 1410-1650 frames) */
+  /** Outro con CTA (45-50s = 1350-1500 frames) - Actualizado Prompt 19.4 */
   outro: {
     name: 'outro',
-    startFrame: 1410,
-    endFrame: 1650,
-    durationSeconds: 8,
+    startFrame: 1350,   // Corregido: Hero(8s)+Content(37s) = 45s = 1350 frames
+    endFrame: 1500,     // Corregido: 45s + 5s = 50s = 1500 frames
+    durationSeconds: 5, // Reducido de 8s en Prompt 19.4
   },
 };
 

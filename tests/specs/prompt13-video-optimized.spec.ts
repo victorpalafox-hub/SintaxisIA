@@ -123,7 +123,7 @@ test.describe('PROMPT 13: Video Optimizado para 1 Noticia', () => {
   // ===========================================================================
 
   test.describe('Suite 2: Timing de Escenas', () => {
-    test('should have optimized timing (8s + 37s + 10s)', async () => {
+    test('should have optimized timing (8s + 37s + 5s) - Prompt 19.4', async () => {
       await logger.info('Validando timing de escenas en AINewsShort');
 
       const compositionPath = path.join(REMOTION_SRC, 'compositions', 'AINewsShort.tsx');
@@ -132,7 +132,8 @@ test.describe('PROMPT 13: Video Optimizado para 1 Noticia', () => {
       // Buscar definiciones de timing
       const hasHeroTiming = content.includes('8 * fps');
       const hasContentTiming = content.includes('37 * fps');
-      const hasOutroTiming = content.includes('10 * fps');
+      // Actualizado de 10 a 5 en Prompt 19.4
+      const hasOutroTiming = content.includes('5 * fps');
 
       expect(hasHeroTiming).toBeTruthy();
       expect(hasContentTiming).toBeTruthy();
@@ -144,26 +145,26 @@ test.describe('PROMPT 13: Video Optimizado para 1 Noticia', () => {
         details: {
           hero: hasHeroTiming ? '8s' : 'missing',
           content: hasContentTiming ? '37s' : 'missing',
-          outro: hasOutroTiming ? '10s' : 'missing',
+          outro: hasOutroTiming ? '5s' : 'missing', // Actualizado Prompt 19.4
         },
       });
     });
 
-    test('should have 55 seconds default duration', async () => {
-      await logger.info('Validando duración default de 55 segundos');
+    test('should have 50 seconds default duration - Prompt 19.4', async () => {
+      await logger.info('Validando duración default de 50 segundos');
 
       const compositionPath = path.join(REMOTION_SRC, 'compositions', 'AINewsShort.tsx');
       const content = fs.readFileSync(compositionPath, 'utf-8');
 
-      // Buscar duración default
-      const hasDuration55 = content.includes('duration ?? 55') || content.includes('duration: 55');
+      // Buscar duración default (actualizado de 55 a 50 en Prompt 19.4)
+      const hasDuration50 = content.includes('duration ?? 50') || content.includes('duration: 50');
 
-      expect(hasDuration55).toBeTruthy();
+      expect(hasDuration50).toBeTruthy();
 
       await logger.logValidationResults({
         validator: 'DurationValidation',
-        passed: hasDuration55,
-        details: { defaultDuration: '55 seconds' },
+        passed: hasDuration50,
+        details: { defaultDuration: '50 seconds (Prompt 19.4)' },
       });
     });
   });

@@ -3,7 +3,8 @@
  *
  * Escena de cierre con branding fuerte y CTA claro.
  *
- * Duración: 10 segundos (300 frames a 30fps)
+ * Duración: 5 segundos (150 frames a 30fps)
+ * Reducida de 10s en Prompt 19.4 para eliminar silencio al final
  *
  * Elementos:
  * - Logo "Sintaxis IA" grande y centrado
@@ -14,8 +15,9 @@
  * Aunque se reciben en props, solo son metadata para YouTube.
  *
  * @author Sintaxis IA
- * @version 2.0.0
+ * @version 2.1.0
  * @since Prompt 13
+ * @updated Prompt 19.4 - Duración reducida de 10s a 5s
  */
 
 import React from 'react';
