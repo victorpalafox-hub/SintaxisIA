@@ -7,7 +7,10 @@
  * @author Sintaxis IA
  * @version 1.0.0
  * @since Prompt 17
+ * @updated Prompt 19.1.7 - Agregado dynamicScenes para imágenes dinámicas
  */
+
+import type { SceneImage } from './image.types';
 
 // =============================================================================
 // REQUEST/RESPONSE TYPES
@@ -43,6 +46,8 @@ export interface VideoRenderRequest {
   company?: string;
   /** Tipo de noticia */
   newsType?: string;
+  /** Imágenes dinámicas por segmento (Prompt 19.1) */
+  dynamicScenes?: SceneImage[];
 }
 
 /**

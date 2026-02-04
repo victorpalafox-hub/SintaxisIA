@@ -381,6 +381,7 @@ export async function runPipeline(
         cta: generatedScript.cta,
         company: news.company,
         newsType: news.type,
+        dynamicScenes: dynamicImages?.scenes || [], // Prompt 19.1.7: Imágenes dinámicas
       });
 
       if (!renderResult.success) {

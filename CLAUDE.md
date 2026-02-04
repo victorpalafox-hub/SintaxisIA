@@ -181,7 +181,7 @@ if (isShortTimeout(timeout)) { /* manejar error */ }
 
 ```bash
 npm run check          # TypeScript sin errores
-npm test              # Tests pasando (533 tests)
+npm test              # Tests pasando (604 tests, 4 skipped)
 npm run security:check # Sin vulnerabilidades críticas
 ```
 

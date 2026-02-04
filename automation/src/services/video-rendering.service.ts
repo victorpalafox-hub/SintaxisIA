@@ -587,6 +587,8 @@ class VideoRenderingService {
   /**
    * Genera el archivo props.json en formato VideoProps para Remotion
    * Este formato coincide con lo que espera AINewsShort.tsx
+   *
+   * @updated Prompt 19.1.7 - Agregado dynamicScenes para imágenes dinámicas
    */
   private generateVideoProps(
     request: VideoRenderRequest,
@@ -608,6 +610,8 @@ class VideoRenderingService {
       images: {
         hero: assets.heroImage,
         context: assets.contextImage,
+        // Prompt 19.1.7: Imágenes dinámicas por segmento
+        dynamicScenes: request.dynamicScenes || [],
       },
       topics: request.topic ? [request.topic, request.company || ''].filter(Boolean) : [],
       hashtags: ['#IA', '#AI', '#Tech'],
