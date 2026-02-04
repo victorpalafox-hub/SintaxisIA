@@ -20,6 +20,7 @@
  * @updated Prompt 19.2.6 - Bullet points eliminados
  * @updated Prompt 19.2.7 - Aumentar tamaño de texto (72px)
  * @updated Prompt 19.8 - Animaciones dinámicas: parallax/zoom full-duration, per-phrase slide, glow pulse
+ * @updated Prompt 19.10 - Glow intensificado: multi-layer textShadow, alpha aumentado
  */
 
 import React, { useMemo } from 'react';
@@ -278,7 +279,7 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
               opacity: imageOpacity,
               borderRadius: 16,
               overflow: 'hidden',
-              boxShadow: `0 20px 60px rgba(0, 0, 0, 0.5), 0 0 ${imageGlow}px ${colors.primary}30`,
+              boxShadow: `0 20px 60px rgba(0, 0, 0, 0.5), 0 0 ${imageGlow}px ${colors.primary}50`,
             }}
           >
             <SafeImage
@@ -306,7 +307,8 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
             textAlign: 'center',
             lineHeight: contentTextStyle.lineHeight,
             // Prompt 19.8: Glow pulse sutil en texto
-            textShadow: `0 0 ${textGlow}px ${colors.primary}40, 0 2px 4px rgba(0, 0, 0, 0.6)`,
+            // Prompt 19.10: Multi-layer glow para identidad cyberpunk
+            textShadow: `0 0 ${textGlow}px ${colors.primary}50, 0 0 ${textGlow * 2}px ${colors.primary}25, 0 2px 4px rgba(0, 0, 0, 0.6)`,
             // Más ancho si no hay imagen (centralizado en themes.ts Prompt 19.2.7)
             maxWidth: contextImage
               ? contentTextStyle.maxWidthWithImage

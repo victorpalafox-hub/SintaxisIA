@@ -249,12 +249,12 @@ export const contentAnimation = {
   parallaxKeyframes: [0, -15, -8, -20] as readonly number[],
   /** Rango de zoom sutil [inicio, fin] */
   zoomRange: [1.0, 1.05] as readonly [number, number],
-  /** Intensidad máxima del glow de texto (px) */
-  textGlowMax: 10,
+  /** Intensidad máxima del glow de texto (px) - aumentado Prompt 19.10 */
+  textGlowMax: 15,
   /** Ciclo del glow de texto (frames, 4s @ 30fps) */
   textGlowCycle: 120,
-  /** Intensidad máxima del glow de imagen (px) */
-  imageGlowMax: 8,
+  /** Intensidad máxima del glow de imagen (px) - aumentado Prompt 19.10 */
+  imageGlowMax: 12,
   /** Ciclo del glow de imagen (frames, 6s @ 30fps) */
   imageGlowCycle: 180,
   /** Distancia de slide-up por frase (px) */
@@ -280,8 +280,8 @@ export const outroAnimation = {
   springDamping: 80,
   /** Stiffness del spring del logo */
   springStiffness: 150,
-  /** Intensidad máxima del glow del logo (px) */
-  glowMax: 40,
+  /** Intensidad máxima del glow del logo (px) - aumentado Prompt 19.10 */
+  glowMax: 60,
   /** Ciclo del glow pulsante (frames, 3s @ 30fps) */
   glowCycle: 90,
   /** Frames para fade-out al final de la escena */
@@ -290,6 +290,33 @@ export const outroAnimation = {
   ctaDelayFrames: 20,
   /** Duración del fade-in del CTA (frames) */
   ctaFadeDuration: 30,
+};
+
+// ==========================================
+// CONFIGURACIÓN DE ANIMACIONES HERO (Prompt 19.10)
+// ==========================================
+
+/**
+ * Configuración de animaciones para HeroScene
+ *
+ * Centraliza magic numbers de spring, glow y escalado
+ * siguiendo el patrón de contentAnimation/outroAnimation.
+ *
+ * @since Prompt 19.10
+ */
+export const heroAnimation = {
+  /** Damping del spring principal */
+  springDamping: 100,
+  /** Stiffness del spring principal */
+  springStiffness: 200,
+  /** Mass del spring */
+  springMass: 0.5,
+  /** Keyframes del glow [frames] - intensificados Prompt 19.10 */
+  glowKeyframes: [30, 60, 90, 120] as readonly number[],
+  /** Valores del glow [px] - intensificados Prompt 19.10 */
+  glowValues: [0, 30, 15, 22] as readonly number[],
+  /** Multiplicador de glow para imagen (boxShadow) */
+  imageGlowMultiplier: 2,
 };
 
 // ==========================================

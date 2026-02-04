@@ -19,6 +19,7 @@
  * @since Prompt 13
  * @updated Prompt 19.4 - Duración reducida de 10s a 5s
  * @updated Prompt 19.9 - Fade-out final, glow cíclico, Easing, textShadow, config centralizada
+ * @updated Prompt 19.10 - Glow intensificado: multi-layer boxShadow, brand name mejorado
  */
 
 import React from 'react';
@@ -165,9 +166,10 @@ export const OutroScene: React.FC<OutroSceneProps> = ({
             fontWeight: 900,
             fontSize: 64,
             color: colors.background.darker,
-            // Box shadow con glow dinámico
+            // Box shadow multi-capa con glow dinámico (Prompt 19.10)
             boxShadow: `
               0 0 ${glowIntensity}px ${colors.primary},
+              0 0 ${glowIntensity * 2}px ${colors.primary}40,
               0 20px 60px rgba(0, 0, 0, 0.6)
             `,
             letterSpacing: 2,
@@ -186,7 +188,7 @@ export const OutroScene: React.FC<OutroSceneProps> = ({
             color: colors.text.primary,
             textAlign: 'center',
             letterSpacing: 1,
-            textShadow: `0 0 ${glowIntensity * 0.5}px ${colors.primary}, 0 4px 8px rgba(0, 0, 0, 0.8)`,
+            textShadow: `0 0 ${glowIntensity * 0.7}px ${colors.primary}, 0 4px 8px rgba(0, 0, 0, 0.8)`,
           }}
         >
           SINTAXIS IA

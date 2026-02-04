@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 721 tests (719 passing, 2 skipped)
+**Test Status**: 734 tests (732 passing, 2 skipped)
 
-**Last Updated**: 2026-02-04 (Prompt 19.9 - OutroScene Mejorado)
+**Last Updated**: 2026-02-04 (Prompt 19.10 - Glow Intenso)
 
 ## Prerequisites
 
@@ -90,7 +90,8 @@ npm run check
 - Audio Sync: `test:audio-sync` (29) | `test:prompt19.7` (alias)
 - Dynamic Animations: `test:dynamic-animations` (16) | `test:prompt19.8` (alias)
 - Outro Scene: `test:outro-scene` (13) | `test:prompt19.9` (alias)
-- **Total**: 721 tests (719 passing, 2 skipped)
+- Glow Intense: `test:glow-intense` (13) | `test:prompt19.10` (alias)
+- **Total**: 734 tests (732 passing, 2 skipped)
 
 Ver `README.md` para lista completa de scripts.
 
@@ -478,6 +479,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | 19.7 | Audio Sync (Whisper) | 29 | WhisperService para timestamps de audio, sincronización precisa texto-voz |
 | 19.8 | Dynamic Animations | 16 | Parallax/zoom full-duration, per-phrase slide-up, glow pulse texto/imagen |
 | 19.9 | OutroScene Mejorado | 13 | Fade-out final, glow cíclico, Easing, textShadow, outroAnimation config |
+| 19.10 | Glow Intenso | 13 | heroAnimation config, multi-layer textShadow/boxShadow, glow +50% en todas las escenas |
 
 ### Archivos Clave por Feature
 
@@ -501,6 +503,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | Audio Sync | `automation/src/services/whisper.service.ts`, `automation/src/services/tts.service.ts` (addWhisperTimestamps), `remotion-app/src/utils/phrase-timing.ts` (timestamps reales) |
 | Dynamic Animations | `remotion-app/src/components/scenes/ContentScene.tsx` (parallax/zoom/glow/slide), `remotion-app/src/styles/themes.ts` (contentAnimation config) |
 | OutroScene Mejorado | `remotion-app/src/components/scenes/OutroScene.tsx` (fade-out/glow cíclico/Easing/textShadow), `remotion-app/src/styles/themes.ts` (outroAnimation config) |
+| Glow Intenso | `remotion-app/src/styles/themes.ts` (heroAnimation config, glow values +50%), `remotion-app/src/components/scenes/HeroScene.tsx` (multi-layer glow, config centralizada), `ContentScene.tsx` / `OutroScene.tsx` (multi-layer, alpha aumentado) |
 
 ### Quick Reference
 

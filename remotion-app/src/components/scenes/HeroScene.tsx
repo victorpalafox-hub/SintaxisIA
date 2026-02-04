@@ -13,8 +13,9 @@
  * Objetivo: Capturar atención en primeros 2 segundos
  *
  * @author Sintaxis IA
- * @version 2.0.0
+ * @version 2.1.0
  * @since Prompt 13
+ * @updated Prompt 19.10 - Glow intensificado, multi-layer, config centralizada (heroAnimation)
  */
 
 import React from 'react';
@@ -26,7 +27,7 @@ import {
   useVideoConfig,
   Easing,
 } from 'remotion';
-import { colors, spacing } from '../../styles/themes';
+import { colors, spacing, heroAnimation } from '../../styles/themes';
 import { SafeImage } from '../elements/SafeImage';
 import type { HeroSceneProps } from '../../types/video.types';
 
@@ -59,14 +60,14 @@ export const HeroScene: React.FC<HeroSceneProps> = ({
   // ANIMACION SPRING (rebote natural)
   // ==========================================
 
-  // Spring para animaciones suaves con rebote sutil
+  // Spring para animaciones suaves con rebote sutil (config centralizada Prompt 19.10)
   const animation = spring({
     frame,
     fps,
     config: {
-      damping: 100,   // Alto damping = menos rebote
-      stiffness: 200, // Alta rigidez = más rápido
-      mass: 0.5,      // Baja masa = más reactivo
+      damping: heroAnimation.springDamping,
+      stiffness: heroAnimation.springStiffness,
+      mass: heroAnimation.springMass,
     },
   });
 
@@ -116,12 +117,12 @@ export const HeroScene: React.FC<HeroSceneProps> = ({
   // Fade in del título sincronizado con animation
   const titleOpacity = interpolate(animation, [0, 1], [0, 1]);
 
-  // Glow pulsante que crece, hace pico, y estabiliza
-  // Frame 30: empieza | Frame 60: pico | Frame 90-120: estabiliza
+  // Glow pulsante intensificado (Prompt 19.10)
+  // Frame 30: empieza | Frame 60: pico 30px | Frame 90-120: estabiliza
   const glowIntensity = interpolate(
     frame,
-    [30, 60, 90, 120],
-    [0, 20, 10, 15],
+    heroAnimation.glowKeyframes,
+    heroAnimation.glowValues,
     {
       extrapolateRight: 'clamp',
     }
@@ -160,10 +161,11 @@ export const HeroScene: React.FC<HeroSceneProps> = ({
             filter: `blur(${imageBlur}px)`,
             borderRadius: 24,
             overflow: 'hidden',
-            // Sombra con glow del color primario
+            // Sombra con glow multi-capa (Prompt 19.10)
             boxShadow: `
               0 20px 60px rgba(0, 0, 0, 0.5),
-              0 0 ${glowIntensity * 2}px ${colors.primary}
+              0 0 ${glowIntensity * heroAnimation.imageGlowMultiplier}px ${colors.primary},
+              0 0 ${glowIntensity * heroAnimation.imageGlowMultiplier * 2}px ${colors.primary}40
             `,
           }}
         >
@@ -190,9 +192,11 @@ export const HeroScene: React.FC<HeroSceneProps> = ({
             fontSize: 72,
             color: colors.text.primary,
             textAlign: 'center',
-            // Text shadow con glow dinámico
+            // Text shadow multi-capa para identidad cyberpunk (Prompt 19.10)
             textShadow: `
               0 0 ${glowIntensity}px ${colors.primary},
+              0 0 ${glowIntensity * 2}px ${colors.primary}60,
+              0 0 ${glowIntensity * 3}px ${colors.primary}30,
               0 4px 8px rgba(0, 0, 0, 0.8)
             `,
             lineHeight: 1.2,
