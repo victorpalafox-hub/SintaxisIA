@@ -207,8 +207,8 @@ export const textAnimation = {
   fadeInFrames: 15,
   /** Frames para fade out de cada frase (0.5s @ 30fps) */
   fadeOutFrames: 15,
-  /** Máximo de caracteres por frase */
-  maxCharsPerPhrase: 100,
+  /** Máximo de caracteres por frase (reducido de 100 en Prompt 19.2.7) */
+  maxCharsPerPhrase: 60,
   /** Mínimo de palabras para considerar frase completa */
   minWordsPerPhrase: 3,
 };
@@ -230,6 +230,43 @@ export const imageAnimation = {
   fadeOutFrames: 15,
   /** Frames de overlap en crossfade entre imágenes */
   crossfadeFrames: 20,
+};
+
+// ==========================================
+// CONFIGURACIÓN DE TIPOGRAFÍA CONTENT (Prompt 19.2.7)
+// ==========================================
+
+/**
+ * Configuración de estilos de texto para ContentScene
+ *
+ * Centraliza la tipografía del texto descriptivo que aparece
+ * secuencialmente durante la escena de contenido.
+ *
+ * Aumentado de 32px a 72px para mejor legibilidad en YouTube Shorts.
+ *
+ * @since Prompt 19.2.7
+ */
+export const contentTextStyle = {
+  /** Familia tipográfica (consistente con HeroScene) */
+  fontFamily: 'Inter, Roboto, Arial, sans-serif',
+  /** Peso de fuente (600 = semi-bold para mejor legibilidad) */
+  fontWeight: 600,
+  /** Tamaño de fuente en pixels (aumentado de 32 a 72) */
+  fontSize: 72,
+  /** Altura de línea (reducido de 1.6 a 1.4 para texto más compacto) */
+  lineHeight: 1.4,
+  /** Ancho máximo con imagen */
+  maxWidthWithImage: 900,
+  /** Ancho máximo sin imagen */
+  maxWidthWithoutImage: 1000,
+  /** Padding horizontal */
+  paddingHorizontal: 60,
+  /** Altura mínima del contenedor (calculado para 3 líneas) */
+  minHeight: 350,
+  /** Margen inferior con imagen */
+  marginBottomWithImage: 60,
+  /** Margen inferior sin imagen */
+  marginBottomWithoutImage: 80,
 };
 
 // Colección de todos los temas disponibles

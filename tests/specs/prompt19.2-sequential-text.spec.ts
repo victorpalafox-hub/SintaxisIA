@@ -341,11 +341,12 @@ test.describe('Prompt 19.2 - Themes Configuration', () => {
     expect(content).toMatch(/fadeOutFrames:\s*15/);
   });
 
-  test('textAnimation.maxCharsPerPhrase = 100', async () => {
+  test('textAnimation.maxCharsPerPhrase = 60 (actualizado Prompt 19.2.7)', async () => {
     const filePath = path.join(STYLES_PATH, 'themes.ts');
     const content = fs.readFileSync(filePath, 'utf-8');
 
-    expect(content).toMatch(/maxCharsPerPhrase:\s*100/);
+    // Actualizado de 100 a 60 en Prompt 19.2.7 para texto más grande
+    expect(content).toMatch(/maxCharsPerPhrase:\s*60/);
   });
 
   test('textAnimation.minWordsPerPhrase = 3', async () => {

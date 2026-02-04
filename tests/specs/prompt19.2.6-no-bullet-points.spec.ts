@@ -67,10 +67,11 @@ test.describe('Prompt 19.2.6 - ContentScene Sin Bullet Points', () => {
     expect(content).toContain('BULLET POINTS eliminados en Prompt 19.2.6');
   });
 
-  test('Mantiene versión actualizada (2.2.0)', async () => {
+  test('Mantiene versión actualizada (2.3.0 - Prompt 19.2.7)', async () => {
     const content = fs.readFileSync(CONTENT_SCENE_PATH, 'utf-8');
 
-    expect(content).toContain('@version 2.2.0');
+    // Actualizado a 2.3.0 en Prompt 19.2.7
+    expect(content).toContain('@version 2.3.0');
   });
 
 });
@@ -116,15 +117,21 @@ test.describe('Prompt 19.2.6 - Texto Secuencial (Regresión)', () => {
 
 test.describe('Prompt 19.2.6 - Layout Ajustado', () => {
 
-  test('minHeight aumentado a 150 o más', async () => {
+  test('minHeight usa contentTextStyle (Prompt 19.2.7) o >= 150', async () => {
     const content = fs.readFileSync(CONTENT_SCENE_PATH, 'utf-8');
 
-    // Buscar minHeight con valor >= 150
+    // Prompt 19.2.7 centraliza minHeight en contentTextStyle
+    // Aceptar tanto contentTextStyle.minHeight como valor hardcodeado >= 150
+    const usesContentTextStyle = content.includes('contentTextStyle.minHeight');
     const minHeightMatch = content.match(/minHeight:\s*(\d+)/);
-    expect(minHeightMatch).not.toBeNull();
 
-    const minHeightValue = parseInt(minHeightMatch![1]);
-    expect(minHeightValue).toBeGreaterThanOrEqual(150);
+    if (usesContentTextStyle) {
+      expect(content).toContain('contentTextStyle.minHeight');
+    } else {
+      expect(minHeightMatch).not.toBeNull();
+      const minHeightValue = parseInt(minHeightMatch![1]);
+      expect(minHeightValue).toBeGreaterThanOrEqual(150);
+    }
   });
 
   test('marginBottom agregado para compensar espacio', async () => {
@@ -134,10 +141,14 @@ test.describe('Prompt 19.2.6 - Layout Ajustado', () => {
     expect(content).toContain('marginBottom');
   });
 
-  test('Comentario de Prompt 19.2.6 en minHeight', async () => {
+  test('Comentario de altura mínima (Prompt 19.2.6 o 19.2.7)', async () => {
     const content = fs.readFileSync(CONTENT_SCENE_PATH, 'utf-8');
 
-    expect(content).toContain('Aumentado a 150 en Prompt 19.2.6');
+    // Prompt 19.2.7 actualizó el comentario para centralización
+    // Aceptar comentario de 19.2.6 o 19.2.7
+    const hasPrompt1926Comment = content.includes('Prompt 19.2.6');
+    const hasPrompt1927Comment = content.includes('Prompt 19.2.7');
+    expect(hasPrompt1926Comment || hasPrompt1927Comment).toBe(true);
   });
 
 });

@@ -69,8 +69,9 @@ const SENTENCE_ENDINGS = /[.!?]+/;
 
 /**
  * Valores por defecto
+ * Actualizado en Prompt 19.2.7: Reducido de 100 a 60 para texto más grande
  */
-const DEFAULT_MAX_CHARS = 100;
+const DEFAULT_MAX_CHARS = 60;
 const DEFAULT_MIN_WORDS = 3;
 
 // =============================================================================

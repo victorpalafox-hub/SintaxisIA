@@ -14,10 +14,11 @@
  * Layout flexible: con imagen o sin imagen
  *
  * @author Sintaxis IA
- * @version 2.2.0
+ * @version 2.3.0
  * @since Prompt 13
  * @updated Prompt 19.2 - Texto secuencial
  * @updated Prompt 19.2.6 - Bullet points eliminados
+ * @updated Prompt 19.2.7 - Aumentar tamaño de texto (72px)
  */
 
 import React, { useMemo } from 'react';
@@ -27,7 +28,7 @@ import {
   useCurrentFrame,
   Easing,
 } from 'remotion';
-import { colors, spacing, textAnimation, imageAnimation } from '../../styles/themes';
+import { colors, spacing, textAnimation, imageAnimation, contentTextStyle } from '../../styles/themes';
 import { ProgressBar } from '../ui/ProgressBar';
 import { SafeImage } from '../elements/SafeImage';
 import { splitIntoReadablePhrases, getPhraseTiming } from '../../utils';
@@ -257,28 +258,31 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
           </div>
         )}
 
-        {/* DESCRIPCION - Texto Secuencial (Prompt 19.2) */}
+        {/* DESCRIPCION - Texto Secuencial (Prompt 19.2, actualizado 19.2.7) */}
         <div
           style={{
             transform: `translateY(${textY}px)`,
             opacity: descriptionOpacity,
-            fontFamily: 'Inter, Roboto, Arial, sans-serif',
-            fontWeight: 500,
-            fontSize: 32,
+            fontFamily: contentTextStyle.fontFamily,
+            fontWeight: contentTextStyle.fontWeight,
+            fontSize: contentTextStyle.fontSize,
             color: colors.text.secondary,
             textAlign: 'center',
-            lineHeight: 1.6,
-            // Más ancho si no hay imagen
-            maxWidth: contextImage ? 900 : 1000,
-            padding: '0 40px',
-            // Altura mínima para evitar saltos de layout
-            // Aumentado a 150 en Prompt 19.2.6 al eliminar bullet points
-            minHeight: 150,
+            lineHeight: contentTextStyle.lineHeight,
+            // Más ancho si no hay imagen (centralizado en themes.ts Prompt 19.2.7)
+            maxWidth: contextImage
+              ? contentTextStyle.maxWidthWithImage
+              : contentTextStyle.maxWidthWithoutImage,
+            padding: `0 ${contentTextStyle.paddingHorizontal}px`,
+            // Altura mínima calculada para 3 líneas (Prompt 19.2.7)
+            minHeight: contentTextStyle.minHeight,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            // Espacio extra para compensar bullet points eliminados (Prompt 19.2.6)
-            marginBottom: contextImage ? 40 : 60,
+            // Margen inferior (Prompt 19.2.7)
+            marginBottom: contextImage
+              ? contentTextStyle.marginBottomWithImage
+              : contentTextStyle.marginBottomWithoutImage,
           }}
         >
           {/* Mostrar frase actual o descripción completa como fallback */}
