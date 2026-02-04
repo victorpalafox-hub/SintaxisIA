@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Test Status**: 604 tests (600 passing, 4 skipped)
 
-**Last Updated**: 2026-02-03 (Prompt 19.1.6 - Eliminar Sufijos Genéricos en Queries)
+**Last Updated**: 2026-02-04 (Fix CI/CD tests + Edge-TTS fallback)
 
 ## Prerequisites
 
