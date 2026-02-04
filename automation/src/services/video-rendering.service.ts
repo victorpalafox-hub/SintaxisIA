@@ -323,16 +323,32 @@ class VideoRenderingService {
     }
 
     // Preparar imagen hero
+    // Prompt 19.6: Agregar logging para diagnóstico de descarga
     const heroFileName = `hero_${request.videoId}.jpg`;
     const heroDestPath = path.join(publicDir, heroFileName);
+    let heroDownloadSuccess = false;
 
     if (request.imagePath.startsWith('http')) {
-      await this.downloadFile(request.imagePath, heroDestPath);
+      try {
+        await this.downloadFile(request.imagePath, heroDestPath);
+        heroDownloadSuccess = fs.existsSync(heroDestPath);
+        if (heroDownloadSuccess) {
+          console.log(`   ✅ Hero image downloaded: ${heroFileName}`);
+        } else {
+          console.log(`   ⚠️  Hero download completed but file not found: ${heroDestPath}`);
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.log(`   ⚠️  Hero download failed: ${errorMessage}`);
+        console.log(`   ℹ️  Will use URL fallback in props.json`);
+      }
     } else if (fs.existsSync(request.imagePath)) {
       fs.copyFileSync(request.imagePath, heroDestPath);
+      heroDownloadSuccess = true;
+      console.log(`   ✅ Hero image copied: ${heroFileName}`);
     } else {
-      // Usar placeholder si no hay imagen
-      console.log('   ⚠️  Imagen no encontrada, usando placeholder');
+      // Usar URL original como fallback
+      console.log('   ⚠️  Imagen no encontrada localmente, usando URL como fallback');
     }
 
     // Imagen de outro (hardcoded logo Sintaxis IA)
@@ -589,6 +605,7 @@ class VideoRenderingService {
    * Este formato coincide con lo que espera AINewsShort.tsx
    *
    * @updated Prompt 19.1.7 - Agregado dynamicScenes para imágenes dinámicas
+   * @updated Prompt 19.6 - Fallback a URL si archivo local no existe
    */
   private generateVideoProps(
     request: VideoRenderRequest,
@@ -599,6 +616,17 @@ class VideoRenderingService {
     // pero competían con el texto secuencial implementado en Prompt 19.2.
     // Ahora solo se muestra texto secuencial sin bullet points adicionales.
 
+    // Prompt 19.6: Verificar si archivo hero existe, si no usar URL original
+    // Esto evita el placeholder cyan "AI" cuando la descarga falló
+    const heroFilePath = path.join(VIDEO_CONFIG.paths.publicAssets, assets.heroImage);
+    const heroExists = fs.existsSync(heroFilePath);
+    const heroValue = heroExists ? assets.heroImage : request.imagePath;
+    const contextValue = heroExists ? assets.contextImage : request.imagePath;
+
+    if (!heroExists && request.imagePath) {
+      console.log(`   ℹ️  Using URL fallback for hero image: ${request.imagePath.substring(0, 50)}...`);
+    }
+
     return {
       news: {
         title: request.title,
@@ -608,8 +636,8 @@ class VideoRenderingService {
         publishedAt: new Date().toISOString().split('T')[0],
       },
       images: {
-        hero: assets.heroImage,
-        context: assets.contextImage,
+        hero: heroValue,
+        context: contextValue,
         // Prompt 19.1.7: Imágenes dinámicas por segmento
         dynamicScenes: request.dynamicScenes || [],
       },

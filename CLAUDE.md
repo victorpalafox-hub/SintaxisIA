@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 653 tests (651 passing, 2 skipped)
+**Test Status**: 663 tests (661 passing, 2 skipped)
 
-**Last Updated**: 2026-02-04 (Prompt 19.5 - Visual Queries)
+**Last Updated**: 2026-02-04 (Prompt 19.6 - HeroScene Image Fallback)
 
 ## Prerequisites
 
@@ -86,7 +86,8 @@ npm run check
 - SafeImage Preload: `test:safeimage-preload` (17) | `test:prompt19.3.2` (alias)
 - Specific Queries: `test:specific-queries` (17) | `test:prompt19.1.6` (alias)
 - Visual Queries: `test:visual-queries` (24) | `test:prompt19.5` (alias)
-- **Total**: 653 tests (651 passing, 2 skipped)
+- Hero Image Fallback: `test:hero-image-fallback` (10) | `test:prompt19.6` (alias)
+- **Total**: 663 tests (661 passing, 2 skipped)
 
 Ver `README.md` para lista completa de scripts.
 
@@ -470,6 +471,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | 19.3.2 | SafeImage Preload | 17 | delayRender + continueRender, elimina glitches de imagen |
 | 19.1.6 | Specific Queries | 17 | Elimina sufijos genéricos, integra Clearbit/Logo.dev para logos |
 | 19.5 | Visual Queries | 24 | Extrae conceptos visuales del texto para queries específicas de imágenes |
+| 19.6 | Hero Image Fallback | 10 | Fallback a URL si archivo local no existe, elimina placeholder cyan "AI" |
 
 ### Archivos Clave por Feature
 
@@ -489,6 +491,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | Sequential Text | `remotion-app/src/utils/text-splitter.ts`, `remotion-app/src/utils/phrase-timing.ts`, `remotion-app/src/styles/themes.ts` (textAnimation) |
 | Image Transitions | `remotion-app/src/styles/themes.ts` (imageAnimation), `remotion-app/src/components/elements/SafeImage.tsx` (delayRender preload) |
 | Visual Queries | `automation/src/services/scene-segmenter.service.ts` (VISUAL_PATTERNS, extractVisualConcepts) |
+| Hero Image Fallback | `automation/src/services/video-rendering.service.ts` (generateVideoProps con fallback a URL) |
 
 ### Quick Reference
 

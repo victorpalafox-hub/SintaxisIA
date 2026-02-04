@@ -118,7 +118,10 @@
     "test:prompt19.1.6": "playwright test tests/specs/prompt19.1.6-specific-queries.spec.ts",
 
     "test:visual-queries": "playwright test tests/specs/prompt19.5-visual-queries.spec.ts",
-    "test:prompt19.5": "playwright test tests/specs/prompt19.5-visual-queries.spec.ts"
+    "test:prompt19.5": "playwright test tests/specs/prompt19.5-visual-queries.spec.ts",
+
+    "test:hero-image-fallback": "playwright test tests/specs/prompt19.6-hero-image-fallback.spec.ts",
+    "test:prompt19.6": "playwright test tests/specs/prompt19.6-hero-image-fallback.spec.ts"
   },
   "keywords": [
     "youtube",
