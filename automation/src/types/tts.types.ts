@@ -196,3 +196,58 @@ export interface WordTiming {
   /** Frame de fin */
   endFrame: number;
 }
+
+// =============================================================================
+// INTERFACES DE TIMESTAMPS (Prompt 19.7 - Whisper Integration)
+// =============================================================================
+
+/**
+ * Timestamp de una palabra individual del audio
+ * Generado por Whisper speech-to-text para sincronización precisa
+ *
+ * @since Prompt 19.7
+ */
+export interface WordTimestamp {
+  /** La palabra transcrita */
+  word: string;
+
+  /** Segundo de inicio en el audio */
+  startSeconds: number;
+
+  /** Segundo de fin en el audio */
+  endSeconds: number;
+}
+
+/**
+ * Timestamp de una frase (agrupación de palabras)
+ * Agrupa palabras en frases de ~60 caracteres para mostrar en pantalla
+ *
+ * @since Prompt 19.7
+ */
+export interface PhraseTimestamp {
+  /** Texto completo de la frase */
+  text: string;
+
+  /** Segundo de inicio de la frase */
+  startSeconds: number;
+
+  /** Segundo de fin de la frase */
+  endSeconds: number;
+
+  /** Palabras individuales con sus timestamps */
+  words: WordTimestamp[];
+}
+
+/**
+ * Respuesta extendida de TTS con timestamps de Whisper
+ * Incluye timestamps opcionales si OPENAI_API_KEY está configurada
+ *
+ * @since Prompt 19.7
+ */
+export interface TTSResponseWithTimestamps extends TTSResponse {
+  /** Timestamps por palabra (de Whisper) */
+  wordTimestamps?: WordTimestamp[];
+
+  /** Timestamps por frase (agrupados) */
+  phraseTimestamps?: PhraseTimestamp[];
+}

@@ -5,8 +5,9 @@
  * Maneja transiciones suaves con fade in/out entre frases.
  *
  * @author Sintaxis IA
- * @version 1.0.0
+ * @version 1.1.0
  * @since Prompt 19.2
+ * @updated Prompt 19.7 - Soporte para timestamps reales de Whisper
  */
 
 import { interpolate } from 'remotion';
@@ -14,6 +15,21 @@ import { interpolate } from 'remotion';
 // =============================================================================
 // TIPOS
 // =============================================================================
+
+/**
+ * Timestamp de una frase (de Whisper speech-to-text)
+ * Replicado aquí para evitar imports cross-package
+ *
+ * @since Prompt 19.7
+ */
+export interface PhraseTimestamp {
+  /** Texto de la frase */
+  text: string;
+  /** Segundo de inicio */
+  startSeconds: number;
+  /** Segundo de fin */
+  endSeconds: number;
+}
 
 /**
  * Resultado del cálculo de timing
@@ -33,12 +49,17 @@ export interface PhraseTiming {
 
 /**
  * Configuración de timing
+ * @updated Prompt 19.7 - Agregado phraseTimestamps y fps
  */
 export interface TimingConfig {
   /** Frames para fade in (default: 15 = 0.5s @ 30fps) */
   fadeInFrames?: number;
   /** Frames para fade out (default: 15 = 0.5s @ 30fps) */
   fadeOutFrames?: number;
+  /** Timestamps de frases de Whisper (Prompt 19.7) */
+  phraseTimestamps?: PhraseTimestamp[];
+  /** FPS del video para conversión segundos→frames (default: 30) */
+  fps?: number;
 }
 
 // =============================================================================
@@ -55,8 +76,8 @@ const DEFAULT_FADE_OUT_FRAMES = 15;  // 0.5s @ 30fps
 /**
  * Calcula el timing y opacity de la frase actual
  *
- * Distribuye los frames equitativamente entre las frases
- * y calcula transiciones suaves con fade in/out.
+ * Si hay phraseTimestamps (de Whisper), usa timing real del audio.
+ * Si no, distribuye los frames equitativamente entre las frases (fallback).
  *
  * @param currentFrame - Frame actual de la escena (relativo al inicio)
  * @param totalFrames - Duración total de la escena en frames
@@ -64,12 +85,22 @@ const DEFAULT_FADE_OUT_FRAMES = 15;  // 0.5s @ 30fps
  * @param config - Configuración de transiciones
  * @returns Timing calculado con índice y opacity
  *
+ * @updated Prompt 19.7 - Soporte para timestamps reales de Whisper
+ *
  * @example
  * ```typescript
- * // ContentScene de 37s (1110 frames) con 3 frases
+ * // Con timestamps de Whisper (sincronización precisa)
+ * const timing = getPhraseTiming(500, 1110, 3, {
+ *   fadeInFrames: 15,
+ *   phraseTimestamps: [
+ *     { text: 'Primera frase', startSeconds: 0, endSeconds: 3.5 },
+ *     { text: 'Segunda frase', startSeconds: 3.5, endSeconds: 8.0 },
+ *   ],
+ *   fps: 30,
+ * });
+ *
+ * // Sin timestamps (distribución uniforme - fallback)
  * const timing = getPhraseTiming(500, 1110, 3, { fadeInFrames: 15 });
- * // timing.currentPhraseIndex = 1 (segunda frase)
- * // timing.opacity = 1 (en medio de la frase, sin transición)
  * ```
  */
 export function getPhraseTiming(
@@ -81,6 +112,8 @@ export function getPhraseTiming(
   const {
     fadeInFrames = DEFAULT_FADE_IN_FRAMES,
     fadeOutFrames = DEFAULT_FADE_OUT_FRAMES,
+    phraseTimestamps,
+    fps = 30,
   } = config;
 
   // Validaciones
@@ -104,19 +137,38 @@ export function getPhraseTiming(
     };
   }
 
-  // Distribuir frames equitativamente entre frases
-  const framesPerPhrase = totalFrames / phraseCount;
+  let currentPhraseIndex: number;
+  let phraseStartFrame: number;
+  let phraseEndFrame: number;
 
-  // Calcular índice de frase actual
-  const rawIndex = currentFrame / framesPerPhrase;
-  const currentPhraseIndex = Math.min(
-    Math.max(0, Math.floor(rawIndex)),
-    phraseCount - 1
-  );
+  // Prompt 19.7: Usar timestamps reales de Whisper si están disponibles
+  if (phraseTimestamps && phraseTimestamps.length > 0) {
+    // Convertir frame actual a segundos
+    const currentSecond = currentFrame / fps;
 
-  // Calcular frames de inicio y fin de la frase actual
-  const phraseStartFrame = Math.round(currentPhraseIndex * framesPerPhrase);
-  const phraseEndFrame = Math.round((currentPhraseIndex + 1) * framesPerPhrase);
+    // Encontrar qué frase corresponde al tiempo actual
+    currentPhraseIndex = findPhraseIndexByTime(phraseTimestamps, currentSecond);
+
+    // Obtener timestamps de la frase actual
+    const timestamp = phraseTimestamps[currentPhraseIndex];
+    phraseStartFrame = Math.round(timestamp.startSeconds * fps);
+    phraseEndFrame = Math.round(timestamp.endSeconds * fps);
+
+  } else {
+    // Fallback: Distribución uniforme (comportamiento original)
+    const framesPerPhrase = totalFrames / phraseCount;
+
+    // Calcular índice de frase actual
+    const rawIndex = currentFrame / framesPerPhrase;
+    currentPhraseIndex = Math.min(
+      Math.max(0, Math.floor(rawIndex)),
+      phraseCount - 1
+    );
+
+    // Calcular frames de inicio y fin de la frase actual
+    phraseStartFrame = Math.round(currentPhraseIndex * framesPerPhrase);
+    phraseEndFrame = Math.round((currentPhraseIndex + 1) * framesPerPhrase);
+  }
 
   // Frame relativo dentro de la frase actual
   const relativeFrame = currentFrame - phraseStartFrame;
@@ -142,6 +194,43 @@ export function getPhraseTiming(
     phraseStartFrame,
     phraseEndFrame,
   };
+}
+
+/**
+ * Encuentra el índice de la frase que corresponde a un tiempo dado
+ *
+ * @param timestamps - Array de timestamps de frases
+ * @param currentSecond - Tiempo actual en segundos
+ * @returns Índice de la frase (0-based)
+ *
+ * @since Prompt 19.7
+ */
+function findPhraseIndexByTime(
+  timestamps: PhraseTimestamp[],
+  currentSecond: number
+): number {
+  // Buscar la frase cuyo rango contiene el tiempo actual
+  for (let i = 0; i < timestamps.length; i++) {
+    const ts = timestamps[i];
+
+    // Si estamos dentro del rango de esta frase
+    if (currentSecond >= ts.startSeconds && currentSecond < ts.endSeconds) {
+      return i;
+    }
+
+    // Si es la última frase y estamos después de su inicio
+    if (i === timestamps.length - 1 && currentSecond >= ts.startSeconds) {
+      return i;
+    }
+  }
+
+  // Fallback: si estamos antes de todo, mostrar primera frase
+  if (currentSecond < timestamps[0].startSeconds) {
+    return 0;
+  }
+
+  // Fallback: si estamos después de todo, mostrar última frase
+  return timestamps.length - 1;
 }
 
 // =============================================================================

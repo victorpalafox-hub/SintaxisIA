@@ -56,6 +56,38 @@ export interface DynamicImages {
 }
 
 // =============================================================================
+// TIPOS DE AUDIO SYNC (Prompt 19.7)
+// =============================================================================
+
+/**
+ * Timestamp de una frase de audio
+ * Generado por Whisper speech-to-text para sincronización precisa
+ *
+ * @since Prompt 19.7
+ */
+export interface PhraseTimestamp {
+  /** Texto de la frase */
+  text: string;
+  /** Segundo de inicio en el audio */
+  startSeconds: number;
+  /** Segundo de fin en el audio */
+  endSeconds: number;
+}
+
+/**
+ * Datos de sincronización de audio
+ * Permite mostrar texto sincronizado con el audio de narración
+ *
+ * @since Prompt 19.7
+ */
+export interface AudioSync {
+  /** Timestamps de frases (de Whisper) */
+  phraseTimestamps: PhraseTimestamp[];
+  /** Duración total del audio en segundos */
+  audioDuration: number;
+}
+
+// =============================================================================
 // TIPOS DE NOTICIAS
 // =============================================================================
 
@@ -262,6 +294,12 @@ export interface ContentSceneProps {
   fps: number;
   /** Activar efectos dinámicos (parallax, zoom) @default true */
   dynamicEffects?: boolean;
+  /**
+   * Datos de sincronización de audio (Prompt 19.7)
+   * Si existe, el texto se sincroniza con timestamps reales de Whisper
+   * Si no existe, el texto se distribuye uniformemente
+   */
+  audioSync?: AudioSync;
 }
 
 /**

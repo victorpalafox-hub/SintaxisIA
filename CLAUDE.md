@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 663 tests (661 passing, 2 skipped)
+**Test Status**: 692 tests (690 passing, 2 skipped)
 
-**Last Updated**: 2026-02-04 (Prompt 19.6 - HeroScene Image Fallback)
+**Last Updated**: 2026-02-04 (Prompt 19.7 - Audio Sync con Whisper)
 
 ## Prerequisites
 
@@ -87,7 +87,8 @@ npm run check
 - Specific Queries: `test:specific-queries` (17) | `test:prompt19.1.6` (alias)
 - Visual Queries: `test:visual-queries` (24) | `test:prompt19.5` (alias)
 - Hero Image Fallback: `test:hero-image-fallback` (10) | `test:prompt19.6` (alias)
-- **Total**: 663 tests (661 passing, 2 skipped)
+- Audio Sync: `test:audio-sync` (29) | `test:prompt19.7` (alias)
+- **Total**: 692 tests (690 passing, 2 skipped)
 
 Ver `README.md` para lista completa de scripts.
 
@@ -472,6 +473,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | 19.1.6 | Specific Queries | 17 | Elimina sufijos genéricos, integra Clearbit/Logo.dev para logos |
 | 19.5 | Visual Queries | 24 | Extrae conceptos visuales del texto para queries específicas de imágenes |
 | 19.6 | Hero Image Fallback | 10 | Fallback a URL si archivo local no existe, elimina placeholder cyan "AI" |
+| 19.7 | Audio Sync (Whisper) | 29 | WhisperService para timestamps de audio, sincronización precisa texto-voz |
 
 ### Archivos Clave por Feature
 
@@ -492,6 +494,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | Image Transitions | `remotion-app/src/styles/themes.ts` (imageAnimation), `remotion-app/src/components/elements/SafeImage.tsx` (delayRender preload) |
 | Visual Queries | `automation/src/services/scene-segmenter.service.ts` (VISUAL_PATTERNS, extractVisualConcepts) |
 | Hero Image Fallback | `automation/src/services/video-rendering.service.ts` (generateVideoProps con fallback a URL) |
+| Audio Sync | `automation/src/services/whisper.service.ts`, `automation/src/services/tts.service.ts` (addWhisperTimestamps), `remotion-app/src/utils/phrase-timing.ts` (timestamps reales) |
 
 ### Quick Reference
 
@@ -504,6 +507,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | Video | 50s total: Hero 8s + Content 37s + Outro 5s | 1080x1920, 30fps |
 | Output Manager | `saveAllOutputs()` + TikTok copy | slug max 50 chars |
 | Sequential Text | `splitIntoReadablePhrases()` + `getPhraseTiming()` | 60 chars/frase, fade 15 frames |
+| Whisper | `whisperService.transcribe()` + `groupIntoPhrases()` | Opcional (OPENAI_API_KEY), ~$0.006/min |
 
 ## Pipeline de Publicación
 

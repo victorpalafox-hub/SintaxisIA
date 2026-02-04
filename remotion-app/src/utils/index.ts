@@ -19,4 +19,5 @@ export {
   getPhraseTimingDebug,
   type PhraseTiming,
   type TimingConfig,
+  type PhraseTimestamp,
 } from './phrase-timing';

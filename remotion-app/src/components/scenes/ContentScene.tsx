@@ -64,6 +64,7 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
   totalDuration,
   fps,
   dynamicEffects = true,
+  audioSync,
 }) => {
   const frame = useCurrentFrame();
 
@@ -167,6 +168,7 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
   );
 
   // Calcular frase actual y opacity para transiciones
+  // Prompt 19.7: Usa timestamps de Whisper si están disponibles para sincronización precisa
   const phraseTiming = getPhraseTiming(
     frame,
     sceneDurationFrames,
@@ -174,6 +176,9 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
     {
       fadeInFrames: textAnimation.fadeInFrames,
       fadeOutFrames: textAnimation.fadeOutFrames,
+      // Prompt 19.7: Timestamps de audio para sincronización real
+      phraseTimestamps: audioSync?.phraseTimestamps,
+      fps,
     }
   );
 

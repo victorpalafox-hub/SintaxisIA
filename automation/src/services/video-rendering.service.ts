@@ -606,6 +606,7 @@ class VideoRenderingService {
    *
    * @updated Prompt 19.1.7 - Agregado dynamicScenes para imágenes dinámicas
    * @updated Prompt 19.6 - Fallback a URL si archivo local no existe
+   * @updated Prompt 19.7 - Agregado audioSync para sincronización precisa
    */
   private generateVideoProps(
     request: VideoRenderRequest,
@@ -625,6 +626,18 @@ class VideoRenderingService {
 
     if (!heroExists && request.imagePath) {
       console.log(`   ℹ️  Using URL fallback for hero image: ${request.imagePath.substring(0, 50)}...`);
+    }
+
+    // Prompt 19.7: Preparar audioSync si hay timestamps disponibles
+    const audioSync = request.phraseTimestamps && request.phraseTimestamps.length > 0
+      ? {
+          phraseTimestamps: request.phraseTimestamps,
+          audioDuration: request.audioDuration,
+        }
+      : undefined;
+
+    if (audioSync) {
+      console.log(`   ✅ Audio sync enabled: ${request.phraseTimestamps!.length} phrase timestamps`);
     }
 
     return {
@@ -650,6 +663,8 @@ class VideoRenderingService {
           volume: 1.0,
         },
       },
+      // Prompt 19.7: Timestamps de sincronización (opcional)
+      audioSync,
       config: {
         duration: Math.ceil(request.audioDuration) + 5, // Audio + 5s buffer
         fps: VIDEO_CONFIG.specs.fps,

@@ -11,6 +11,7 @@
  */
 
 import type { SceneImage } from './image.types';
+import type { PhraseTimestamp } from './tts.types';
 
 // =============================================================================
 // REQUEST/RESPONSE TYPES
@@ -48,6 +49,8 @@ export interface VideoRenderRequest {
   newsType?: string;
   /** Imágenes dinámicas por segmento (Prompt 19.1) */
   dynamicScenes?: SceneImage[];
+  /** Timestamps de frases para sincronización (Prompt 19.7) */
+  phraseTimestamps?: PhraseTimestamp[];
 }
 
 /**

@@ -32,7 +32,10 @@ import type {
   TTSServiceOptions,
   AudioResult,
   WordTiming,
+  WordTimestamp,
+  PhraseTimestamp,
 } from '../types/tts.types';
+import { whisperService } from './whisper.service';
 
 const execAsync = promisify(exec);
 
@@ -113,7 +116,8 @@ export class TTSService {
     // 2. Forzar fallback si esta configurado (para testing)
     if (this.options.forceFallback) {
       logger.info(`[TTS] Fallback forzado, usando Edge-TTS`);
-      return this.generateWithFallback(text, textHash, outputFileName);
+      const fallbackResponse = await this.generateWithFallback(text, textHash, outputFileName);
+      return this.addWhisperTimestamps(fallbackResponse);
     }
 
     // 3. Verificar cuota antes de llamar a ElevenLabs
@@ -121,7 +125,8 @@ export class TTSService {
 
     if (quota.exceeded) {
       logger.warn(`[TTS] Cuota ElevenLabs excedida, usando fallback`);
-      return this.generateWithFallback(text, textHash, outputFileName);
+      const fallbackResponse = await this.generateWithFallback(text, textHash, outputFileName);
+      return this.addWhisperTimestamps(fallbackResponse);
     }
 
     if (quota.nearLimit) {
@@ -137,7 +142,8 @@ export class TTSService {
     if (isMockKey) {
       logger.warn(`[TTS] ELEVENLABS_API_KEY no configurada o es mock, usando fallback`);
       if (this.options.enableFallback) {
-        return this.generateWithFallback(text, textHash, outputFileName);
+        const fallbackResponse = await this.generateWithFallback(text, textHash, outputFileName);
+        return this.addWhisperTimestamps(fallbackResponse);
       }
       throw new Error('ELEVENLABS_API_KEY no configurada en .env');
     }
@@ -151,16 +157,71 @@ export class TTSService {
       );
       await this.updateQuota(text.length);
       await this.saveToCache(textHash, response);
-      return response;
+
+      // Prompt 19.7: Generar timestamps con Whisper (si está disponible)
+      const enhancedResponse = await this.addWhisperTimestamps(response);
+      return enhancedResponse;
     } catch (error) {
       logger.error(`[TTS] Error con ElevenLabs: ${error}`);
 
       if (this.options.enableFallback) {
         logger.info(`[TTS] Intentando con fallback (Edge-TTS)`);
-        return this.generateWithFallback(text, textHash, outputFileName);
+        const fallbackResponse = await this.generateWithFallback(text, textHash, outputFileName);
+
+        // Prompt 19.7: Generar timestamps con Whisper para fallback también
+        const enhancedFallback = await this.addWhisperTimestamps(fallbackResponse);
+        return enhancedFallback;
       }
 
       throw error;
+    }
+  }
+
+  /**
+   * Agrega timestamps de Whisper a una respuesta TTS
+   *
+   * Si OPENAI_API_KEY está configurada, transcribe el audio generado
+   * para obtener timestamps precisos por palabra y frase.
+   *
+   * @param response - Respuesta TTS original
+   * @returns Respuesta con timestamps agregados (si disponibles)
+   *
+   * @since Prompt 19.7
+   */
+  private async addWhisperTimestamps(
+    response: TTSResponse
+  ): Promise<TTSResponse & { wordTimestamps?: WordTimestamp[]; phraseTimestamps?: PhraseTimestamp[] }> {
+    // Si Whisper no está disponible, retornar respuesta original
+    if (!whisperService.isAvailable()) {
+      logger.info(`[TTS] Whisper no disponible - timestamps omitidos`);
+      return response;
+    }
+
+    try {
+      // Transcribir audio para obtener timestamps por palabra
+      const wordTimestamps = await whisperService.transcribe(response.audioPath);
+
+      if (!wordTimestamps || wordTimestamps.length === 0) {
+        logger.warn(`[TTS] Whisper no retornó timestamps`);
+        return response;
+      }
+
+      // Agrupar palabras en frases
+      const phraseTimestamps = whisperService.groupIntoPhrases(wordTimestamps);
+
+      logger.success(
+        `[TTS] Timestamps generados: ${wordTimestamps.length} palabras, ${phraseTimestamps.length} frases`
+      );
+
+      return {
+        ...response,
+        wordTimestamps,
+        phraseTimestamps,
+      };
+    } catch (error) {
+      logger.error(`[TTS] Error obteniendo timestamps de Whisper: ${error}`);
+      // No fallar si Whisper falla, solo retornar respuesta original
+      return response;
     }
   }
 
