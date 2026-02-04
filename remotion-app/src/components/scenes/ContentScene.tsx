@@ -19,6 +19,7 @@
  * @updated Prompt 19.2 - Texto secuencial
  * @updated Prompt 19.2.6 - Bullet points eliminados
  * @updated Prompt 19.2.7 - Aumentar tamaño de texto (72px)
+ * @updated Prompt 19.8 - Animaciones dinámicas: parallax/zoom full-duration, per-phrase slide, glow pulse
  */
 
 import React, { useMemo } from 'react';
@@ -28,7 +29,7 @@ import {
   useCurrentFrame,
   Easing,
 } from 'remotion';
-import { colors, spacing, textAnimation, imageAnimation, contentTextStyle } from '../../styles/themes';
+import { colors, spacing, textAnimation, imageAnimation, contentTextStyle, contentAnimation } from '../../styles/themes';
 import { ProgressBar } from '../ui/ProgressBar';
 import { SafeImage } from '../elements/SafeImage';
 import { splitIntoReadablePhrases, getPhraseTiming } from '../../utils';
@@ -119,32 +120,50 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
   // Imagen actual a mostrar
   const contextImage = getCurrentImage();
 
-  // Parallax: movimiento vertical sutil de 20px hacia arriba
-  // Durante 10 segundos (300 frames a 30fps)
+  // Duración de ContentScene en frames (necesario antes de usarlo en animaciones)
+  const sceneDurationFrames = 37 * fps;
+
+  // ==========================================
+  // EFECTOS DINÁMICOS DE IMAGEN (Prompt 19.8)
+  // ==========================================
+
+  // Parallax: movimiento vertical orgánico durante toda la escena
+  // Multi-point keyframe: sube, baja un poco, vuelve a subir (movimiento natural)
   const parallaxY = dynamicEffects && contextImage
     ? interpolate(
         frame,
-        [0, 300],
-        [0, -20],
+        [0, sceneDurationFrames * 0.33, sceneDurationFrames * 0.66, sceneDurationFrames],
+        contentAnimation.parallaxKeyframes,
         {
           extrapolateRight: 'clamp',
-          easing: Easing.bezier(0.33, 1, 0.68, 1), // Ease out
+          easing: Easing.bezier(0.33, 1, 0.68, 1),
         }
       )
     : 0;
 
-  // Zoom in muy sutil (1.0 -> 1.05) para dar vida a la imagen
+  // Zoom in sutil (1.0 → 1.05) durante toda la escena
   const imageScale = dynamicEffects && contextImage
     ? interpolate(
         frame,
-        [0, 300],
-        [1.0, 1.05],
+        [0, sceneDurationFrames],
+        contentAnimation.zoomRange,
         {
           extrapolateRight: 'clamp',
-          easing: Easing.linear,
+          easing: Easing.inOut(Easing.ease),
         }
       )
     : 1.0;
+
+  // Glow pulse en contenedor de imagen (Prompt 19.8)
+  // Ciclo sutil cada 6 segundos, consistente con HeroScene
+  const imageGlow = dynamicEffects && contextImage
+    ? interpolate(
+        frame % contentAnimation.imageGlowCycle,
+        [0, contentAnimation.imageGlowCycle / 2, contentAnimation.imageGlowCycle],
+        [0, contentAnimation.imageGlowMax, 0],
+        { extrapolateRight: 'clamp' }
+      )
+    : 0;
 
   // Fade in de imagen (Prompt 19.3 - transición más suave)
   const imageOpacity = contextImage
@@ -154,9 +173,6 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
   // ==========================================
   // TEXTO SECUENCIAL (Prompt 19.2)
   // ==========================================
-
-  // Duración de ContentScene: 37 segundos
-  const sceneDurationFrames = 37 * fps;
 
   // Dividir descripción en frases legibles
   const phrases = useMemo(
@@ -186,21 +202,25 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
   const currentPhrase = phrases[phraseTiming.currentPhraseIndex];
 
   // ==========================================
-  // EFECTOS DE TEXTO
+  // EFECTOS DE TEXTO (Prompt 19.8)
   // ==========================================
 
-  // Slide up sutil del texto (30px -> 0px) - solo al inicio de la escena
-  const textY = interpolate(
-    frame,
-    [10, 40],
-    [30, 0],
-    {
-      extrapolateRight: 'clamp',
-      easing: Easing.bezier(0.16, 1, 0.3, 1),
-    }
-  );
+  // Per-phrase slide-up: cada frase entra con su propio slide-up
+  // Usa phraseStartFrame de getPhraseTiming() para animar relativo a cada frase
+  const phraseRelativeFrame = frame - phraseTiming.phraseStartFrame;
+  const phraseTextY = dynamicEffects
+    ? interpolate(
+        phraseRelativeFrame,
+        [0, contentAnimation.phraseSlideFrames],
+        [contentAnimation.phraseSlideDistance, 0],
+        {
+          extrapolateRight: 'clamp',
+          easing: Easing.bezier(0.16, 1, 0.3, 1),
+        }
+      )
+    : 0;
 
-  // Opacity combinada: fade inicial de escena + transición de frase
+  // Opacity de entrada inicial de escena (fade in los primeros 40 frames)
   const baseOpacity = interpolate(
     frame,
     [10, 40],
@@ -213,6 +233,17 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
 
   // Opacity final: combina fade de escena con transición de frase
   const descriptionOpacity = baseOpacity * phraseTiming.opacity;
+
+  // Glow pulse en texto (Prompt 19.8)
+  // Ciclo sutil cada 4 segundos, consistente con estética HeroScene
+  const textGlow = dynamicEffects
+    ? interpolate(
+        frame % contentAnimation.textGlowCycle,
+        [0, contentAnimation.textGlowCycle / 2, contentAnimation.textGlowCycle],
+        [3, contentAnimation.textGlowMax, 3],
+        { extrapolateRight: 'clamp' }
+      )
+    : 0;
 
   // ==========================================
   // RENDER
@@ -247,7 +278,7 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
               opacity: imageOpacity,
               borderRadius: 16,
               overflow: 'hidden',
-              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+              boxShadow: `0 20px 60px rgba(0, 0, 0, 0.5), 0 0 ${imageGlow}px ${colors.primary}30`,
             }}
           >
             <SafeImage
@@ -266,7 +297,7 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
         {/* DESCRIPCION - Texto Secuencial (Prompt 19.2, actualizado 19.2.7) */}
         <div
           style={{
-            transform: `translateY(${textY}px)`,
+            transform: `translateY(${phraseTextY}px)`,
             opacity: descriptionOpacity,
             fontFamily: contentTextStyle.fontFamily,
             fontWeight: contentTextStyle.fontWeight,
@@ -274,6 +305,8 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
             color: colors.text.secondary,
             textAlign: 'center',
             lineHeight: contentTextStyle.lineHeight,
+            // Prompt 19.8: Glow pulse sutil en texto
+            textShadow: `0 0 ${textGlow}px ${colors.primary}40, 0 2px 4px rgba(0, 0, 0, 0.6)`,
             // Más ancho si no hay imagen (centralizado en themes.ts Prompt 19.2.7)
             maxWidth: contextImage
               ? contentTextStyle.maxWidthWithImage

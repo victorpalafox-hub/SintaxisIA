@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 692 tests (690 passing, 2 skipped)
+**Test Status**: 708 tests (706 passing, 2 skipped)
 
-**Last Updated**: 2026-02-04 (Prompt 19.7 - Audio Sync con Whisper)
+**Last Updated**: 2026-02-04 (Prompt 19.8 - Dynamic Animations)
 
 ## Prerequisites
 
@@ -88,7 +88,8 @@ npm run check
 - Visual Queries: `test:visual-queries` (24) | `test:prompt19.5` (alias)
 - Hero Image Fallback: `test:hero-image-fallback` (10) | `test:prompt19.6` (alias)
 - Audio Sync: `test:audio-sync` (29) | `test:prompt19.7` (alias)
-- **Total**: 692 tests (690 passing, 2 skipped)
+- Dynamic Animations: `test:dynamic-animations` (16) | `test:prompt19.8` (alias)
+- **Total**: 708 tests (706 passing, 2 skipped)
 
 Ver `README.md` para lista completa de scripts.
 
@@ -474,6 +475,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | 19.5 | Visual Queries | 24 | Extrae conceptos visuales del texto para queries específicas de imágenes |
 | 19.6 | Hero Image Fallback | 10 | Fallback a URL si archivo local no existe, elimina placeholder cyan "AI" |
 | 19.7 | Audio Sync (Whisper) | 29 | WhisperService para timestamps de audio, sincronización precisa texto-voz |
+| 19.8 | Dynamic Animations | 16 | Parallax/zoom full-duration, per-phrase slide-up, glow pulse texto/imagen |
 
 ### Archivos Clave por Feature
 
@@ -495,6 +497,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | Visual Queries | `automation/src/services/scene-segmenter.service.ts` (VISUAL_PATTERNS, extractVisualConcepts) |
 | Hero Image Fallback | `automation/src/services/video-rendering.service.ts` (generateVideoProps con fallback a URL) |
 | Audio Sync | `automation/src/services/whisper.service.ts`, `automation/src/services/tts.service.ts` (addWhisperTimestamps), `remotion-app/src/utils/phrase-timing.ts` (timestamps reales) |
+| Dynamic Animations | `remotion-app/src/components/scenes/ContentScene.tsx` (parallax/zoom/glow/slide), `remotion-app/src/styles/themes.ts` (contentAnimation config) |
 
 ### Quick Reference
 
@@ -508,6 +511,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | Output Manager | `saveAllOutputs()` + TikTok copy | slug max 50 chars |
 | Sequential Text | `splitIntoReadablePhrases()` + `getPhraseTiming()` | 60 chars/frase, fade 15 frames |
 | Whisper | `whisperService.transcribe()` + `groupIntoPhrases()` | Opcional (OPENAI_API_KEY), ~$0.006/min |
+| ContentAnimation | parallax + zoom + glow + per-phrase slide | Full 37s duration, config en themes.ts |
 
 ## Pipeline de Publicación
 

@@ -233,6 +233,37 @@ export const imageAnimation = {
 };
 
 // ==========================================
+// CONFIGURACIÓN DE ANIMACIONES CONTENT (Prompt 19.8)
+// ==========================================
+
+/**
+ * Configuración de animaciones dinámicas para ContentScene
+ *
+ * Centraliza magic numbers de parallax, zoom, glow y
+ * animaciones por frase para evitar hardcoding.
+ *
+ * @since Prompt 19.8
+ */
+export const contentAnimation = {
+  /** Keyframes multi-point para parallax orgánico (px) */
+  parallaxKeyframes: [0, -15, -8, -20] as readonly number[],
+  /** Rango de zoom sutil [inicio, fin] */
+  zoomRange: [1.0, 1.05] as readonly [number, number],
+  /** Intensidad máxima del glow de texto (px) */
+  textGlowMax: 10,
+  /** Ciclo del glow de texto (frames, 4s @ 30fps) */
+  textGlowCycle: 120,
+  /** Intensidad máxima del glow de imagen (px) */
+  imageGlowMax: 8,
+  /** Ciclo del glow de imagen (frames, 6s @ 30fps) */
+  imageGlowCycle: 180,
+  /** Distancia de slide-up por frase (px) */
+  phraseSlideDistance: 15,
+  /** Frames para slide-up de cada frase */
+  phraseSlideFrames: 20,
+};
+
+// ==========================================
 // CONFIGURACIÓN DE TIPOGRAFÍA CONTENT (Prompt 19.2.7)
 // ==========================================
 
