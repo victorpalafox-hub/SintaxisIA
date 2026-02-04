@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 587 tests (583 passing, 4 skipped)
+**Test Status**: 604 tests (600 passing, 4 skipped)
 
-**Last Updated**: 2026-02-03 (Prompt 19.2.6 - Eliminar Bullet Points)
+**Last Updated**: 2026-02-03 (Prompt 19.1.6 - Eliminar Sufijos Genéricos en Queries)
 
 ## Prerequisites
 
@@ -84,7 +84,8 @@ npm run check
 - Large Text: `test:large-text` (25) | `test:prompt19.2.7` (alias)
 - Outro Duration: `test:outro-duration` (16) | `test:prompt19.4` (alias)
 - SafeImage Preload: `test:safeimage-preload` (17) | `test:prompt19.3.2` (alias)
-- **Total**: 587 tests (583 passing, 4 skipped)
+- Specific Queries: `test:specific-queries` (17) | `test:prompt19.1.6` (alias)
+- **Total**: 604 tests (600 passing, 4 skipped)
 
 Ver `README.md` para lista completa de scripts.
 
@@ -466,6 +467,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | 19.2.7 | Large Text | 25 | fontSize 72px, maxCharsPerPhrase 60, contentTextStyle centralizado |
 | 19.4 | Outro Duration Sync | 16 | Reducido de 10s a 5s, elimina silencio final |
 | 19.3.2 | SafeImage Preload | 17 | delayRender + continueRender, elimina glitches de imagen |
+| 19.1.6 | Specific Queries | 17 | Elimina sufijos genéricos, integra Clearbit/Logo.dev para logos |
 
 ### Archivos Clave por Feature
 

@@ -155,11 +155,14 @@ export interface CacheStats {
 /**
  * Fuentes de imágenes disponibles para búsqueda por segmento
  * @since Prompt 19.1
+ * @updated Prompt 19.1.6 - Agregados 'clearbit' y 'logodev' para logos
  */
 export type SceneImageSource =
   | 'pexels'
   | 'unsplash'
   | 'google'
+  | 'clearbit'
+  | 'logodev'
   | 'fallback';
 
 /**

@@ -5,8 +5,9 @@
  * y extrae keywords relevantes para búsqueda de imágenes.
  *
  * @author Sintaxis IA
- * @version 1.0.0
+ * @version 1.1.0
  * @since Prompt 19.1
+ * @updated Prompt 19.1.6 - Eliminados sufijos genéricos, señal __LOGO__ para logos
  */
 
 import { logger } from '../../utils/logger';
@@ -243,41 +244,41 @@ export class SceneSegmenterService {
   }
 
   /**
-   * Genera query de búsqueda optimizada para imágenes
+   * Genera query de búsqueda específica para imágenes
+   *
+   * Estrategia por segmento:
+   * - Segmento 0: Señal especial __LOGO__ para usar cascade de logos (Clearbit/Logo.dev)
+   * - Otros segmentos: Keywords específicas (máx 3 palabras) sin sufijos genéricos
    *
    * @param keywords - Keywords extraídas
-   * @param segmentIndex - Índice del segmento (para variar queries)
+   * @param segmentIndex - Índice del segmento
    * @param company - Nombre de empresa
-   * @returns Query optimizada
+   * @returns Query específica o señal __LOGO__
+   *
+   * @updated Prompt 19.1.6 - Eliminados sufijos genéricos, integración con logo providers
    */
   private generateSearchQuery(
     keywords: string[],
     segmentIndex: number,
     company?: string
   ): string {
-    // Sufijos para variar las búsquedas por segmento
-    const suffixes = [
-      'technology innovation',
-      'digital concept',
-      'future tech',
-      'abstract technology',
-    ];
-
-    // Base: keywords principales
-    const baseQuery = keywords.slice(0, 3).join(' ');
-
-    // Agregar sufijo según segmento
-    const suffix = suffixes[segmentIndex % suffixes.length];
-
-    // Construir query final
-    let query = `${baseQuery} ${suffix}`;
-
-    // Si es el primer segmento y hay empresa, incluir "logo"
+    // Segmento 0: Señal especial para usar cascade de logos
+    // image-orchestration.service.ts detectará esto y usará Clearbit/Logo.dev
     if (segmentIndex === 0 && company) {
-      query = `${company} logo ${suffix}`;
+      return `__LOGO__:${company}`;
     }
 
-    return query.trim();
+    // Otros segmentos: Máximo 3 keywords (APIs de imágenes funcionan mejor con queries cortas)
+    // SIN sufijos genéricos - Prompt 19.1.6 eliminó el array suffixes[]
+    const queryKeywords = keywords.slice(0, Math.min(3, keywords.length));
+
+    // Si hay empresa y no está duplicada, incluirla al principio para contexto
+    if (company && !queryKeywords.some(k => k.toLowerCase() === company.toLowerCase())) {
+      queryKeywords.unshift(company.toLowerCase());
+      if (queryKeywords.length > 3) queryKeywords.pop();
+    }
+
+    return queryKeywords.join(' ');
   }
 }
 

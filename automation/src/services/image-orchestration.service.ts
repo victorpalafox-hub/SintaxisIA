@@ -5,20 +5,20 @@
  * Implementa rate limiting y fallbacks robustos.
  *
  * Cascade de proveedores:
- * 1. Pexels (portrait, alta calidad tech)
- * 2. Unsplash (fallback de calidad)
- * 3. Google Custom Search (si configurado)
- * 4. UI Avatars (fallback garantizado)
+ * 1. Para logos (__LOGO__): Clearbit → Logo.dev → Google → Pexels → UI Avatars
+ * 2. Para contenido: Pexels → Unsplash → Google → UI Avatars
  *
  * @author Sintaxis IA
- * @version 1.0.0
+ * @version 1.1.0
  * @since Prompt 19.1
+ * @updated Prompt 19.1.6 - Integración Clearbit/Logo.dev, eliminado sufijo 'technology'
  */
 
 import { logger } from '../../utils/logger';
 import { searchPexels, isPexelsConfigured } from '../image-providers/pexels-provider';
 import { searchUnsplash } from '../image-providers/unsplash-provider';
 import { searchGoogle } from '../image-providers/google-provider';
+import { searchClearbit, searchLogodev } from '../image-providers';
 import type { SceneSegment, SceneImage, SceneImageSource, DynamicImagesResult } from '../types/image.types';
 
 // =============================================================================
@@ -113,13 +113,25 @@ export class ImageOrchestrationService {
   /**
    * Busca imagen con cascade de proveedores
    *
+   * Detecta señal __LOGO__ para usar cascade especial de logos.
+   *
    * @param segment - Segmento a buscar
    * @returns Imagen encontrada (nunca falla, tiene fallback garantizado)
+   *
+   * @updated Prompt 19.1.6 - Detecta __LOGO__ para Clearbit/Logo.dev
    */
   private async searchWithFallback(segment: SceneSegment): Promise<SceneImage> {
     const { index, startSecond, endSecond, searchQuery, keywords } = segment;
 
-    // 1. Intentar Pexels (principal)
+    // PROMPT 19.1.6: Detectar señal de logo para segmento 0
+    // scene-segmenter genera "__LOGO__:company" para usar cascade de logos
+    if (searchQuery.startsWith('__LOGO__:')) {
+      const company = searchQuery.replace('__LOGO__:', '');
+      logger.info(`[ImageOrchestration] Detectada señal __LOGO__ para: ${company}`);
+      return this.searchLogoWithCascade(index, startSecond, endSecond, company, keywords);
+    }
+
+    // 1. Intentar Pexels (principal para contenido)
     if (isPexelsConfigured()) {
       const pexelsUrl = await searchPexels(searchQuery, 'portrait');
       if (pexelsUrl) {
@@ -139,8 +151,8 @@ export class ImageOrchestrationService {
       return this.createSceneImage(index, startSecond, endSecond, googleUrl, searchQuery, 'google');
     }
 
-    // 4. Intentar con query simplificada
-    const simplifiedQuery = keywords.slice(0, 2).join(' ') + ' technology';
+    // 4. Intentar con query simplificada (SIN sufijo genérico - Prompt 19.1.6)
+    const simplifiedQuery = keywords.slice(0, 2).join(' ');
     if (isPexelsConfigured()) {
       const pexelsSimple = await searchPexels(simplifiedQuery, 'portrait');
       if (pexelsSimple) {
@@ -151,6 +163,68 @@ export class ImageOrchestrationService {
     // 5. Fallback garantizado: UI Avatars
     const fallbackUrl = this.generateFallbackImage(keywords, index);
     return this.createSceneImage(index, startSecond, endSecond, fallbackUrl, searchQuery, 'fallback');
+  }
+
+  /**
+   * Cascade especial para logos de empresas
+   *
+   * Integrado de image-searcher-v2.ts para aprovechar Clearbit y Logo.dev
+   * que son mejores para logos que Pexels (fotos de stock).
+   *
+   * Cascade: Clearbit → Logo.dev → Google → Pexels → UI Avatars
+   *
+   * @param index - Índice del segmento
+   * @param startSecond - Segundo de inicio
+   * @param endSecond - Segundo de fin
+   * @param company - Nombre de la empresa
+   * @param keywords - Keywords para fallback
+   * @returns Imagen de logo
+   *
+   * @since Prompt 19.1.6
+   */
+  private async searchLogoWithCascade(
+    index: number,
+    startSecond: number,
+    endSecond: number,
+    company: string,
+    keywords: string[]
+  ): Promise<SceneImage> {
+    const logoQuery = `${company} logo`;
+
+    // 1. Clearbit (mejor para logos de empresas conocidas)
+    logger.info(`[ImageOrchestration] Intentando Clearbit para: ${company}`);
+    const clearbitUrl = await searchClearbit(company);
+    if (clearbitUrl) {
+      return this.createSceneImage(index, startSecond, endSecond, clearbitUrl, logoQuery, 'clearbit');
+    }
+
+    // 2. Logo.dev (alternativa para logos)
+    logger.info(`[ImageOrchestration] Intentando Logo.dev para: ${company}`);
+    const logodevUrl = await searchLogodev(company);
+    if (logodevUrl) {
+      return this.createSceneImage(index, startSecond, endSecond, logodevUrl, logoQuery, 'logodev');
+    }
+
+    // 3. Google con query de logo
+    logger.info(`[ImageOrchestration] Intentando Google para: ${logoQuery}`);
+    const googleUrl = await searchGoogle(`${company} logo high quality`, 'logo');
+    if (googleUrl) {
+      return this.createSceneImage(index, startSecond, endSecond, googleUrl, logoQuery, 'google');
+    }
+
+    // 4. Pexels como alternativa (busca por nombre de empresa)
+    if (isPexelsConfigured()) {
+      logger.info(`[ImageOrchestration] Intentando Pexels para: ${company}`);
+      const pexelsUrl = await searchPexels(company, 'portrait');
+      if (pexelsUrl) {
+        return this.createSceneImage(index, startSecond, endSecond, pexelsUrl, company, 'pexels');
+      }
+    }
+
+    // 5. UI Avatars (fallback garantizado)
+    logger.info(`[ImageOrchestration] Usando fallback UI Avatars para: ${company}`);
+    const fallbackUrl = this.generateFallbackImage([company, ...keywords], index);
+    return this.createSceneImage(index, startSecond, endSecond, fallbackUrl, logoQuery, 'fallback');
   }
 
   /**
