@@ -127,7 +127,10 @@
     "test:prompt19.7": "playwright test tests/specs/prompt19.7-audio-sync.spec.ts",
 
     "test:dynamic-animations": "playwright test tests/specs/prompt19.8-dynamic-animations.spec.ts",
-    "test:prompt19.8": "playwright test tests/specs/prompt19.8-dynamic-animations.spec.ts"
+    "test:prompt19.8": "playwright test tests/specs/prompt19.8-dynamic-animations.spec.ts",
+
+    "test:outro-scene": "playwright test tests/specs/prompt19.9-outro-scene.spec.ts",
+    "test:prompt19.9": "playwright test tests/specs/prompt19.9-outro-scene.spec.ts"
   },
   "keywords": [
     "youtube",

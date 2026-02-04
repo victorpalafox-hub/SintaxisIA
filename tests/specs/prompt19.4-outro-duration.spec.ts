@@ -121,11 +121,11 @@ test.describe('Prompt 19.4 - video.config.ts Sincronizado', () => {
 
 test.describe('Prompt 19.4 - Documentación Actualizada', () => {
 
-  test('OutroScene.tsx versión 2.1.0', async () => {
-    logger.logTestStart('OutroScene.tsx versión 2.1.0');
+  test('OutroScene.tsx versión 2.2.0', async () => {
+    logger.logTestStart('OutroScene.tsx versión 2.2.0');
     const content = fs.readFileSync(OUTRO_SCENE_PATH, 'utf-8');
-    expect(content).toContain('@version 2.1.0');
-    logger.logTestEnd('OutroScene.tsx versión 2.1.0', 'passed', 0);
+    expect(content).toContain('@version 2.2.0');
+    logger.logTestEnd('OutroScene.tsx versión 2.2.0', 'passed', 0);
   });
 
   test('OutroScene.tsx @updated Prompt 19.4', async () => {

@@ -15,9 +15,10 @@
  * Aunque se reciben en props, solo son metadata para YouTube.
  *
  * @author Sintaxis IA
- * @version 2.1.0
+ * @version 2.2.0
  * @since Prompt 13
  * @updated Prompt 19.4 - Duración reducida de 10s a 5s
+ * @updated Prompt 19.9 - Fade-out final, glow cíclico, Easing, textShadow, config centralizada
  */
 
 import React from 'react';
@@ -27,8 +28,9 @@ import {
   useCurrentFrame,
   spring,
   useVideoConfig,
+  Easing,
 } from 'remotion';
-import { colors, spacing } from '../../styles/themes';
+import { colors, spacing, outroAnimation } from '../../styles/themes';
 import type { OutroSceneProps } from '../../types/video.types';
 
 /**
@@ -55,55 +57,73 @@ export const OutroScene: React.FC<OutroSceneProps> = ({
   const frame = useCurrentFrame();
   const { fps: videoFps } = useVideoConfig();
 
+  // Duración de OutroScene en frames
+  const durationInFrames = 5 * fps;
+
   // ==========================================
-  // ANIMACIONES DE ENTRADA
+  // ANIMACIONES DE ENTRADA (Prompt 19.9: Easing)
   // ==========================================
 
-  // Cross fade desde Content Scene
+  // Cross fade desde Content Scene (con easing suave)
   const sceneOpacity = interpolate(
     frame,
     [0, 20],
     [0, 1],
-    { extrapolateRight: 'clamp' }
+    {
+      extrapolateRight: 'clamp',
+      easing: Easing.bezier(0.16, 1, 0.3, 1),
+    }
   );
+
+  // Fade-out suave en último segundo (Prompt 19.9)
+  const fadeOut = interpolate(
+    frame,
+    [durationInFrames - outroAnimation.fadeOutFrames, durationInFrames],
+    [1, 0],
+    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+  );
+
+  // Opacidad final: fade-in * fade-out
+  const finalOpacity = sceneOpacity * fadeOut;
 
   // Logo zoom in con spring bounce
   const logoAnimation = spring({
     frame,
     fps: videoFps,
     config: {
-      damping: 80,    // Menos rebote que hero
-      stiffness: 150,
+      damping: outroAnimation.springDamping,
+      stiffness: outroAnimation.springStiffness,
     },
   });
 
   const logoScale = interpolate(logoAnimation, [0, 1], [0.8, 1]);
 
   // ==========================================
-  // EFECTOS DE GLOW
+  // EFECTOS DE GLOW (Prompt 19.9: cíclico full-duration)
   // ==========================================
 
-  // Glow pulsante del logo con patrón irregular
-  // Frame 0->30: 0->40, 30->60: 40->20, 60->90: 20->40, 90->120: 40->30
+  // Glow pulsante cíclico del logo (patrón Prompt 19.8)
+  // Ciclo cada 3 segundos, cubre toda la duración de la escena
   const glowIntensity = interpolate(
-    frame,
-    [0, 30, 60, 90, 120],
-    [0, 40, 20, 40, 30],
-    {
-      extrapolateRight: 'clamp',
-    }
+    frame % outroAnimation.glowCycle,
+    [0, outroAnimation.glowCycle / 2, outroAnimation.glowCycle],
+    [20, outroAnimation.glowMax, 20],
+    { extrapolateRight: 'clamp' }
   );
 
   // ==========================================
-  // ANIMACION CTA
+  // ANIMACION CTA (Prompt 19.9: Easing + config)
   // ==========================================
 
-  // CTA fade in (empieza frame 20)
+  // CTA fade in con easing suave
   const ctaOpacity = interpolate(
     frame,
-    [20, 50],
+    [outroAnimation.ctaDelayFrames, outroAnimation.ctaDelayFrames + outroAnimation.ctaFadeDuration],
     [0, 1],
-    { extrapolateRight: 'clamp' }
+    {
+      extrapolateRight: 'clamp',
+      easing: Easing.inOut(Easing.ease),
+    }
   );
 
   // ==========================================
@@ -116,7 +136,7 @@ export const OutroScene: React.FC<OutroSceneProps> = ({
         background: `linear-gradient(180deg,
           ${colors.background.gradient.start} 0%,
           ${colors.background.darker} 100%)`,
-        opacity: sceneOpacity,
+        opacity: finalOpacity,
       }}
     >
       {/* Contenedor centrado */}
@@ -156,7 +176,7 @@ export const OutroScene: React.FC<OutroSceneProps> = ({
           SI
         </div>
 
-        {/* NOMBRE COMPLETO */}
+        {/* NOMBRE COMPLETO (Prompt 19.9: textShadow con glow) */}
         <div
           style={{
             opacity: ctaOpacity,
@@ -166,6 +186,7 @@ export const OutroScene: React.FC<OutroSceneProps> = ({
             color: colors.text.primary,
             textAlign: 'center',
             letterSpacing: 1,
+            textShadow: `0 0 ${glowIntensity * 0.5}px ${colors.primary}, 0 4px 8px rgba(0, 0, 0, 0.8)`,
           }}
         >
           SINTAXIS IA

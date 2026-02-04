@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 708 tests (706 passing, 2 skipped)
+**Test Status**: 721 tests (719 passing, 2 skipped)
 
-**Last Updated**: 2026-02-04 (Prompt 19.8 - Dynamic Animations)
+**Last Updated**: 2026-02-04 (Prompt 19.9 - OutroScene Mejorado)
 
 ## Prerequisites
 
@@ -89,7 +89,8 @@ npm run check
 - Hero Image Fallback: `test:hero-image-fallback` (10) | `test:prompt19.6` (alias)
 - Audio Sync: `test:audio-sync` (29) | `test:prompt19.7` (alias)
 - Dynamic Animations: `test:dynamic-animations` (16) | `test:prompt19.8` (alias)
-- **Total**: 708 tests (706 passing, 2 skipped)
+- Outro Scene: `test:outro-scene` (13) | `test:prompt19.9` (alias)
+- **Total**: 721 tests (719 passing, 2 skipped)
 
 Ver `README.md` para lista completa de scripts.
 
@@ -476,6 +477,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | 19.6 | Hero Image Fallback | 10 | Fallback a URL si archivo local no existe, elimina placeholder cyan "AI" |
 | 19.7 | Audio Sync (Whisper) | 29 | WhisperService para timestamps de audio, sincronización precisa texto-voz |
 | 19.8 | Dynamic Animations | 16 | Parallax/zoom full-duration, per-phrase slide-up, glow pulse texto/imagen |
+| 19.9 | OutroScene Mejorado | 13 | Fade-out final, glow cíclico, Easing, textShadow, outroAnimation config |
 
 ### Archivos Clave por Feature
 
@@ -498,6 +500,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | Hero Image Fallback | `automation/src/services/video-rendering.service.ts` (generateVideoProps con fallback a URL) |
 | Audio Sync | `automation/src/services/whisper.service.ts`, `automation/src/services/tts.service.ts` (addWhisperTimestamps), `remotion-app/src/utils/phrase-timing.ts` (timestamps reales) |
 | Dynamic Animations | `remotion-app/src/components/scenes/ContentScene.tsx` (parallax/zoom/glow/slide), `remotion-app/src/styles/themes.ts` (contentAnimation config) |
+| OutroScene Mejorado | `remotion-app/src/components/scenes/OutroScene.tsx` (fade-out/glow cíclico/Easing/textShadow), `remotion-app/src/styles/themes.ts` (outroAnimation config) |
 
 ### Quick Reference
 
@@ -512,6 +515,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | Sequential Text | `splitIntoReadablePhrases()` + `getPhraseTiming()` | 60 chars/frase, fade 15 frames |
 | Whisper | `whisperService.transcribe()` + `groupIntoPhrases()` | Opcional (OPENAI_API_KEY), ~$0.006/min |
 | ContentAnimation | parallax + zoom + glow + per-phrase slide | Full 37s duration, config en themes.ts |
+| OutroAnimation | fade-out + glow cíclico + Easing + textShadow | 5s, spring + config en themes.ts |
 
 ## Pipeline de Publicación
 

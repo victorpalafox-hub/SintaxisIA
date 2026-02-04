@@ -264,6 +264,35 @@ export const contentAnimation = {
 };
 
 // ==========================================
+// CONFIGURACIÓN DE ANIMACIONES OUTRO (Prompt 19.9)
+// ==========================================
+
+/**
+ * Configuración de animaciones para OutroScene
+ *
+ * Centraliza magic numbers de spring, glow, fade y CTA
+ * siguiendo el patrón de contentAnimation (Prompt 19.8).
+ *
+ * @since Prompt 19.9
+ */
+export const outroAnimation = {
+  /** Damping del spring del logo (menos rebote que hero) */
+  springDamping: 80,
+  /** Stiffness del spring del logo */
+  springStiffness: 150,
+  /** Intensidad máxima del glow del logo (px) */
+  glowMax: 40,
+  /** Ciclo del glow pulsante (frames, 3s @ 30fps) */
+  glowCycle: 90,
+  /** Frames para fade-out al final de la escena */
+  fadeOutFrames: 30,
+  /** Frame donde empieza el CTA */
+  ctaDelayFrames: 20,
+  /** Duración del fade-in del CTA (frames) */
+  ctaFadeDuration: 30,
+};
+
+// ==========================================
 // CONFIGURACIÓN DE TIPOGRAFÍA CONTENT (Prompt 19.2.7)
 // ==========================================
 
