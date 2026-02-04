@@ -155,8 +155,8 @@ test.describe('Prompt 19.3 - SafeImage Preload', () => {
     const filePath = path.join(ELEMENTS_PATH, 'SafeImage.tsx');
     const content = fs.readFileSync(filePath, 'utf-8');
 
-    expect(content).toContain("import { Img }");
-    expect(content).toContain("from 'remotion'");
+    // Prompt 19.3.2: Verificar que importa Img de remotion (puede tener más imports como delayRender)
+    expect(content).toMatch(/import\s*{[^}]*Img[^}]*}\s*from\s*['"]remotion['"]/);
   });
 
   test('SafeImage tiene fallback a UI Avatars', async () => {
@@ -170,7 +170,8 @@ test.describe('Prompt 19.3 - SafeImage Preload', () => {
     const filePath = path.join(ELEMENTS_PATH, 'SafeImage.tsx');
     const content = fs.readFileSync(filePath, 'utf-8');
 
-    expect(content).toContain('onError');
+    // Prompt 19.3.2: Error handling via img.onerror en useEffect (preload nativo)
+    expect(content).toContain('.onerror');
   });
 
   test('SafeImage genera placeholder dinámico', async () => {
@@ -196,11 +197,14 @@ test.describe('Prompt 19.3 - Anti-Patterns Evitados', () => {
     expect(content).not.toMatch(/transition:\s*['"]opacity/);
   });
 
-  test('NO usa CSS transition en SafeImage', async () => {
+  test('SafeImage usa transition minimal para reveal post-preload', async () => {
     const filePath = path.join(ELEMENTS_PATH, 'SafeImage.tsx');
     const content = fs.readFileSync(filePath, 'utf-8');
 
-    expect(content).not.toMatch(/transition:\s*['"]opacity/);
+    // Prompt 19.3.2: SafeImage USA transition minimal de opacity (0.1s)
+    // para evitar flash blanco después del preload.
+    // Esta es una excepción válida - NO es animación de Remotion.
+    expect(content).toMatch(/transition:\s*['"]opacity\s+0\.1s/);
   });
 
   test('NO importa theme como objeto unificado', async () => {
