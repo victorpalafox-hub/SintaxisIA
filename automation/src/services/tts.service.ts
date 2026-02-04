@@ -331,35 +331,35 @@ export class TTSService {
       .replace(/`/g, '\\`')
       .replace(/\$/g, '\\$');
 
-    // Edge-TTS command
-    const command = `edge-tts --voice "${edgeTts.voice}" --rate "${edgeTts.rate}" --pitch "${edgeTts.pitch}" --text "${escapedText}" --write-media "${audioPath}"`;
+    // Edge-TTS command - intentar ambas formas (directa y via python -m)
+    const edgeTtsArgs = `--voice "${edgeTts.voice}" --rate "${edgeTts.rate}" --pitch "${edgeTts.pitch}" --text "${escapedText}" --write-media "${audioPath}"`;
+    const commandDirect = `edge-tts ${edgeTtsArgs}`;
+    const commandPython = `python -m edge_tts ${edgeTtsArgs}`;
 
     try {
-      await execAsync(command, { timeout: 120000 });
+      // Intentar primero el comando directo
+      await execAsync(commandDirect, { timeout: 120000 });
     } catch (error) {
-      // Intentar instalar edge-tts si no existe
       const errorMsg = error instanceof Error ? error.message : String(error);
 
+      // Si el comando directo falla, intentar via python -m
       if (
         errorMsg.includes('not found') ||
         errorMsg.includes('not recognized') ||
         errorMsg.includes('no se reconoce')
       ) {
-        logger.warn(`[TTS] edge-tts no instalado, intentando instalar...`);
+        logger.info(`[TTS] edge-tts no está en PATH, intentando con python -m edge_tts...`);
         try {
-          await execAsync('pip install edge-tts');
-          await execAsync(command, { timeout: 120000 });
-        } catch (installError) {
-          // Si falla, dar instrucciones claras
+          await execAsync(commandPython, { timeout: 120000 });
+        } catch (pythonError) {
+          // Si ambos fallan, dar instrucciones claras
           throw new Error(
-            `Edge-TTS no está disponible y no se pudo instalar automáticamente.\n` +
+            `Edge-TTS no está disponible.\n` +
             `\nOpciones para solucionar:\n` +
             `1. Configurar ELEVENLABS_API_KEY en .env (recomendado)\n` +
-            `2. Instalar Edge-TTS manualmente:\n` +
-            `   - Windows: pip install edge-tts\n` +
-            `   - Si pip no está en PATH: python -m pip install edge-tts\n` +
+            `2. Instalar Edge-TTS: python -m pip install edge-tts\n` +
             `3. Verificar que Python está instalado y en el PATH\n` +
-            `\nError original: ${installError}`
+            `\nError: ${pythonError}`
           );
         }
       } else {

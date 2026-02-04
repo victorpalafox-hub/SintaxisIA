@@ -51,6 +51,8 @@ Thumbs.db
 # ===================================
 tests/logs/*.log
 tests/logs/*.log.gz
+tests/logs/*.json
+tests/logs/.*-audit.json
 tests/logs/test-summary.json
 !tests/logs/.gitkeep
 tests/reports/
@@ -70,6 +72,13 @@ automation/cache/images/*
 # ===================================
 automation/temp/videos/*
 !automation/temp/videos/.gitkeep
+
+# ===================================
+# REMOTION GENERATED FILES
+# ===================================
+remotion-app/props.json
+remotion-app/public/data.json
+remotion-app/public/hero_*.jpg
 
 # ===================================
 # CLAUDE CODE
