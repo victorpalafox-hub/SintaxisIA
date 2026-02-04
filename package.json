@@ -115,7 +115,10 @@
     "test:prompt19.3.2": "playwright test tests/specs/prompt19.3.2-safeimage-preload.spec.ts",
 
     "test:specific-queries": "playwright test tests/specs/prompt19.1.6-specific-queries.spec.ts",
-    "test:prompt19.1.6": "playwright test tests/specs/prompt19.1.6-specific-queries.spec.ts"
+    "test:prompt19.1.6": "playwright test tests/specs/prompt19.1.6-specific-queries.spec.ts",
+
+    "test:visual-queries": "playwright test tests/specs/prompt19.5-visual-queries.spec.ts",
+    "test:prompt19.5": "playwright test tests/specs/prompt19.5-visual-queries.spec.ts"
   },
   "keywords": [
     "youtube",

@@ -70,6 +70,65 @@ const TECH_KEYWORDS = new Set([
   'meta', 'apple', 'nvidia', 'amazon', 'tesla',
 ]);
 
+/**
+ * Patrones para extraer conceptos visuales del texto
+ * Cada patrón mapea a una query específica para búsqueda de imágenes
+ *
+ * @since Prompt 19.5 - Visual Queries
+ */
+const VISUAL_PATTERNS: Array<{ pattern: RegExp; query: string }> = [
+  // Mundos y entornos virtuales
+  { pattern: /mundos?\s+virtuales?/i, query: 'virtual world 3d environment' },
+  { pattern: /entornos?\s+3d|3d\s+interactivos?/i, query: '3d interactive environment' },
+  { pattern: /realidad\s+virtual|vr\s+headset/i, query: 'virtual reality headset' },
+  { pattern: /metaverso|metaverse/i, query: 'metaverse digital world' },
+
+  // Robots y automatización
+  { pattern: /robots?\s+(humanoides?|autonomos?)/i, query: 'humanoid robot technology' },
+  { pattern: /automatizacion\s+industrial/i, query: 'industrial automation robot' },
+  { pattern: /drones?\s+(autonomos?|inteligentes?)/i, query: 'autonomous drone technology' },
+
+  // IA y machine learning (visuales)
+  { pattern: /redes?\s+neuronales?/i, query: 'neural network visualization' },
+  { pattern: /cerebro\s+(artificial|digital)/i, query: 'artificial brain technology' },
+  { pattern: /deep\s+learning|aprendizaje\s+profundo/i, query: 'deep learning neural network' },
+
+  // Hologramas y visualización
+  { pattern: /holograma|holografico/i, query: 'hologram technology display' },
+  { pattern: /interfaz\s+(futurista|holografica)/i, query: 'futuristic holographic interface' },
+
+  // Chips y hardware
+  { pattern: /chips?\s+(neuronales?|cuanticos?)/i, query: 'neural chip processor' },
+  { pattern: /procesador|cpu\s+avanzado/i, query: 'advanced processor technology' },
+  { pattern: /gpu|tarjeta\s+grafica/i, query: 'gpu graphics card technology' },
+
+  // Datos y visualización
+  { pattern: /big\s+data|datos\s+masivos/i, query: 'big data visualization' },
+  { pattern: /flujo\s+de\s+datos/i, query: 'data stream visualization' },
+  { pattern: /nube|cloud\s+computing/i, query: 'cloud computing technology' },
+
+  // Vehículos y transporte
+  { pattern: /vehiculos?\s+autonomos?|coches?\s+autonomos?/i, query: 'autonomous vehicle self driving car' },
+  { pattern: /tesla\s+(model|cybertruck)/i, query: 'tesla electric vehicle' },
+
+  // Espacial
+  { pattern: /satelites?\s+(ia|inteligentes?)/i, query: 'satellite space technology' },
+  { pattern: /exploracion\s+espacial/i, query: 'space exploration technology' },
+
+  // Medicina y salud
+  { pattern: /diagnostico\s+(ia|medico)/i, query: 'medical ai diagnosis technology' },
+  { pattern: /cirugia\s+robotica/i, query: 'robotic surgery medical' },
+
+  // Seguridad y vigilancia
+  { pattern: /reconocimiento\s+facial/i, query: 'facial recognition technology' },
+  { pattern: /ciberseguridad|seguridad\s+digital/i, query: 'cybersecurity digital protection' },
+
+  // Generación de contenido
+  { pattern: /generacion\s+de\s+imagenes/i, query: 'ai image generation' },
+  { pattern: /texto\s+a\s+(imagen|video)/i, query: 'text to image ai generation' },
+  { pattern: /video\s+generado|sintesis\s+de\s+video/i, query: 'ai video synthesis generation' },
+];
+
 // =============================================================================
 // SERVICIO PRINCIPAL
 // =============================================================================
@@ -121,8 +180,8 @@ export class SceneSegmenterService {
       // Extraer keywords del texto
       const keywords = this.extractKeywords(text, company);
 
-      // Generar query de búsqueda
-      const searchQuery = this.generateSearchQuery(keywords, i, company);
+      // Generar query de búsqueda (Prompt 19.5: ahora incluye texto para conceptos visuales)
+      const searchQuery = this.generateSearchQuery(keywords, i, company, text);
 
       segments.push({
         index: i,
@@ -244,23 +303,58 @@ export class SceneSegmenterService {
   }
 
   /**
+   * Extrae conceptos visuales del texto usando patrones predefinidos
+   *
+   * Busca frases como "mundos virtuales", "robots humanoides", etc.
+   * y retorna queries específicas para búsqueda de imágenes.
+   *
+   * @param text - Texto a analizar
+   * @returns Array de queries visuales encontradas (máx 2)
+   *
+   * @since Prompt 19.5 - Visual Queries
+   */
+  private extractVisualConcepts(text: string): string[] {
+    const concepts: string[] = [];
+
+    for (const { pattern, query } of VISUAL_PATTERNS) {
+      if (pattern.test(text)) {
+        // Evitar duplicados
+        if (!concepts.includes(query)) {
+          concepts.push(query);
+        }
+        // Máximo 2 conceptos visuales por segmento
+        if (concepts.length >= 2) break;
+      }
+    }
+
+    if (concepts.length > 0) {
+      logger.info(`[SceneSegmenter] Conceptos visuales encontrados: ${concepts.join(', ')}`);
+    }
+
+    return concepts;
+  }
+
+  /**
    * Genera query de búsqueda específica para imágenes
    *
    * Estrategia por segmento:
    * - Segmento 0: Señal especial __LOGO__ para usar cascade de logos (Clearbit/Logo.dev)
-   * - Otros segmentos: Keywords específicas (máx 3 palabras) sin sufijos genéricos
+   * - Otros segmentos: Prioriza conceptos visuales, fallback a keywords
    *
    * @param keywords - Keywords extraídas
    * @param segmentIndex - Índice del segmento
    * @param company - Nombre de empresa
+   * @param fullText - Texto completo del segmento (para extraer conceptos visuales)
    * @returns Query específica o señal __LOGO__
    *
    * @updated Prompt 19.1.6 - Eliminados sufijos genéricos, integración con logo providers
+   * @updated Prompt 19.5 - Prioriza conceptos visuales sobre keywords genéricas
    */
   private generateSearchQuery(
     keywords: string[],
     segmentIndex: number,
-    company?: string
+    company?: string,
+    fullText?: string
   ): string {
     // Segmento 0: Señal especial para usar cascade de logos
     // image-orchestration.service.ts detectará esto y usará Clearbit/Logo.dev
@@ -268,8 +362,17 @@ export class SceneSegmenterService {
       return `__LOGO__:${company}`;
     }
 
-    // Otros segmentos: Máximo 3 keywords (APIs de imágenes funcionan mejor con queries cortas)
-    // SIN sufijos genéricos - Prompt 19.1.6 eliminó el array suffixes[]
+    // Prompt 19.5: Priorizar conceptos visuales sobre keywords genéricas
+    if (fullText) {
+      const visualConcepts = this.extractVisualConcepts(fullText);
+      if (visualConcepts.length > 0) {
+        // Usar el primer concepto visual encontrado (ya es una query específica)
+        return visualConcepts[0];
+      }
+    }
+
+    // Fallback: Usar keywords si no hay conceptos visuales
+    // Máximo 3 keywords (APIs de imágenes funcionan mejor con queries cortas)
     const queryKeywords = keywords.slice(0, Math.min(3, keywords.length));
 
     // Si hay empresa y no está duplicada, incluirla al principio para contexto
