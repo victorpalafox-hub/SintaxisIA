@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 570 tests (566 passing, 4 skipped)
+**Test Status**: 587 tests (583 passing, 4 skipped)
 
 **Last Updated**: 2026-02-03 (Prompt 19.2.6 - Eliminar Bullet Points)
 
@@ -83,7 +83,8 @@ npm run check
 - No Bullet Points: `test:no-bullet-points` (21) | `test:prompt19.2.6` (alias)
 - Large Text: `test:large-text` (25) | `test:prompt19.2.7` (alias)
 - Outro Duration: `test:outro-duration` (16) | `test:prompt19.4` (alias)
-- **Total**: 570 tests (566 passing, 4 skipped)
+- SafeImage Preload: `test:safeimage-preload` (17) | `test:prompt19.3.2` (alias)
+- **Total**: 587 tests (583 passing, 4 skipped)
 
 Ver `README.md` para lista completa de scripts.
 
@@ -464,6 +465,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | 19.2.6 | No Bullet Points | 21 | Elimina bullet points de ContentScene, solo texto secuencial |
 | 19.2.7 | Large Text | 25 | fontSize 72px, maxCharsPerPhrase 60, contentTextStyle centralizado |
 | 19.4 | Outro Duration Sync | 16 | Reducido de 10s a 5s, elimina silencio final |
+| 19.3.2 | SafeImage Preload | 17 | delayRender + continueRender, elimina glitches de imagen |
 
 ### Archivos Clave por Feature
 
@@ -481,7 +483,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | Output Manager | `automation/src/services/output-manager.service.ts`, `automation/src/config/output.config.ts` |
 | Dynamic Images | `automation/src/services/scene-segmenter.service.ts`, `automation/src/services/image-orchestration.service.ts`, `automation/src/image-providers/pexels-provider.ts` |
 | Sequential Text | `remotion-app/src/utils/text-splitter.ts`, `remotion-app/src/utils/phrase-timing.ts`, `remotion-app/src/styles/themes.ts` (textAnimation) |
-| Image Transitions | `remotion-app/src/styles/themes.ts` (imageAnimation), `remotion-app/src/components/elements/SafeImage.tsx` |
+| Image Transitions | `remotion-app/src/styles/themes.ts` (imageAnimation), `remotion-app/src/components/elements/SafeImage.tsx` (delayRender preload) |
 
 ### Quick Reference
 

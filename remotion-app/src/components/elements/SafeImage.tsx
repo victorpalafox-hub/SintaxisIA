@@ -1,19 +1,27 @@
 /**
- * @fileoverview SafeImage - Componente con Fallback Automatico
+ * @fileoverview SafeImage - Componente con Preload y Fallback
  *
- * Maneja errores de CORS y carga de imagenes externas.
- * Si la imagen principal falla, usa placeholder automaticamente.
+ * Maneja carga de imágenes externas con preload obligatorio.
+ * Usa delayRender() de Remotion para pausar render hasta carga completa.
  *
- * Problema resuelto: Error CORS con imagenes de Clearbit, etc. en Remotion Preview
- * Solucion: Fallback automatico a UI Avatars cuando hay error de carga
+ * Problema resuelto: Glitches visuales (flash blanco) al inicio de cada imagen
+ * Solución: Preload con useDelayRender que pausa Remotion hasta carga completa
  *
  * @author Sintaxis IA
- * @version 1.0.0
+ * @version 1.1.0
  * @since Prompt 13.1
+ * @updated Prompt 19.3.2 - Agregado preload con useDelayRender
  */
 
-import React, { useState } from 'react';
-import { Img } from 'remotion';
+import React, { useState, useEffect, useRef } from 'react';
+import { Img, delayRender, continueRender } from 'remotion';
+
+// =============================================================================
+// CONFIGURACIÓN
+// =============================================================================
+
+/** Timeout para carga de imagen (ms) - 8s para imágenes remotas */
+const IMAGE_LOAD_TIMEOUT = 8000;
 
 // =============================================================================
 // INTERFACES
@@ -39,19 +47,20 @@ interface SafeImageProps {
 // =============================================================================
 
 /**
- * SafeImage - Componente de imagen con manejo de errores
+ * SafeImage - Componente de imagen con preload obligatorio
  *
- * Caracteristicas:
- * - Fallback automatico si la imagen falla (CORS, 404, etc.)
- * - Genera placeholder dinamico basado en el URL original
- * - Compatible con Remotion (usa <Img> internamente)
- * - Estilo cyberpunk en placeholders (cyan/negro)
+ * Características:
+ * - Preload con delayRender (Remotion espera carga completa)
+ * - Fallback automático si imagen falla
+ * - Timeout de seguridad (8 segundos)
+ * - Opacity transition para transición suave
+ * - Compatible con imágenes externas (Pexels, etc)
  *
  * @example
- * // Uso basico
+ * // Uso básico
  * <SafeImage
- *   src="https://logo.clearbit.com/google.com"
- *   width={400}
+ *   src="https://images.pexels.com/photos/123456/..."
+ *   width={600}
  *   height={400}
  * />
  *
@@ -71,31 +80,87 @@ export const SafeImage: React.FC<SafeImageProps> = ({
   width = 400,
   height = 400,
 }) => {
-  // Estado para manejar el cambio de URL cuando hay error
-  const [imageSrc, setImageSrc] = useState(src);
-  const [hasError, setHasError] = useState(false);
+  // Estado del componente
+  const [imageSrc, setImageSrc] = useState<string>(src);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  // Generar placeholder si no hay fallback personalizado
+  // Refs para evitar múltiples llamadas a continueRender
+  const handleRef = useRef<number | null>(null);
+  const isCompleteRef = useRef(false);
+
+  // Generar fallback si no hay fallback personalizado
   const defaultFallback = generatePlaceholder(src, width, height);
   const finalFallback = fallbackSrc || defaultFallback;
 
   /**
-   * Manejador de error de carga de imagen
-   * Cambia al fallback cuando la imagen principal falla
+   * Effect: Preload de imagen ANTES de renderizar
+   * Usa delayRender para que Remotion espere la carga
    */
-  const handleError = () => {
-    if (!hasError) {
-      console.warn(`[SafeImage] Error loading image: ${src}, using fallback`);
-      setImageSrc(finalFallback);
-      setHasError(true);
-    }
-  };
+  useEffect(() => {
+    // Reset refs cuando cambia src
+    isCompleteRef.current = false;
+    setIsLoaded(false);
+
+    // Crear handle de delayRender
+    const handle = delayRender(`Loading image: ${src.substring(0, 50)}...`);
+    handleRef.current = handle;
+
+    const img = new Image();
+
+    /**
+     * Función para completar el render (solo una vez)
+     * Evita múltiples llamadas a continueRender
+     */
+    const complete = (success: boolean, finalSrc: string) => {
+      if (isCompleteRef.current) return;
+      isCompleteRef.current = true;
+
+      setImageSrc(finalSrc);
+      setIsLoaded(true);
+      continueRender(handle);
+
+      if (!success) {
+        console.warn(`[SafeImage] Using fallback for: ${src.substring(0, 50)}...`);
+      }
+    };
+
+    // onload: Imagen cargada correctamente
+    img.onload = () => complete(true, src);
+
+    // onerror: Imagen falló, usar fallback
+    img.onerror = () => complete(false, finalFallback);
+
+    // Timeout de seguridad para evitar bloqueo indefinido
+    const timeoutId = setTimeout(() => {
+      if (!isCompleteRef.current) {
+        console.warn(`[SafeImage] Timeout (${IMAGE_LOAD_TIMEOUT}ms): ${src.substring(0, 50)}...`);
+        complete(false, finalFallback);
+      }
+    }, IMAGE_LOAD_TIMEOUT);
+
+    // Iniciar carga de la imagen
+    img.src = src;
+
+    // Cleanup: Limpiar timeout y asegurar continueRender si unmount
+    return () => {
+      clearTimeout(timeoutId);
+      // Si el componente se desmonta antes de completar, continuar render
+      if (!isCompleteRef.current && handleRef.current !== null) {
+        isCompleteRef.current = true;
+        continueRender(handleRef.current);
+      }
+    };
+  }, [src, finalFallback]);
 
   return (
     <Img
       src={imageSrc}
-      onError={handleError}
-      style={style}
+      style={{
+        ...style,
+        // Ocultar hasta que esté cargado para evitar flash
+        opacity: isLoaded ? 1 : 0,
+        transition: 'opacity 0.1s ease-in',
+      }}
       alt={alt}
     />
   );
@@ -106,10 +171,12 @@ export const SafeImage: React.FC<SafeImageProps> = ({
 // =============================================================================
 
 /**
- * Genera placeholder dinamico basado en el URL original
+ * Genera placeholder dinámico basado en el URL original
  *
- * Extrae informacion del URL para crear un placeholder personalizado:
+ * Extrae información del URL para crear un placeholder personalizado:
  * - Clearbit: Extrae la inicial del dominio (google.com -> G)
+ * - Logo.dev: Extrae la inicial del dominio
+ * - Picsum: Usa "IMG" como default
  * - Otros: Usa "AI" como default
  *
  * @param originalSrc - URL original de la imagen
@@ -140,7 +207,7 @@ function generatePlaceholder(
       initial = match[1][0].toUpperCase();
     }
   }
-  // Detectar picsum (placeholder generico)
+  // Detectar picsum (placeholder genérico)
   else if (originalSrc.includes('picsum.photos')) {
     initial = 'IMG';
   }

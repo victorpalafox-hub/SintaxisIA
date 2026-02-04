@@ -109,7 +109,10 @@
     "test:prompt19.2.7": "playwright test tests/specs/prompt19.2.7-large-text.spec.ts",
 
     "test:outro-duration": "playwright test tests/specs/prompt19.4-outro-duration.spec.ts",
-    "test:prompt19.4": "playwright test tests/specs/prompt19.4-outro-duration.spec.ts"
+    "test:prompt19.4": "playwright test tests/specs/prompt19.4-outro-duration.spec.ts",
+
+    "test:safeimage-preload": "playwright test tests/specs/prompt19.3.2-safeimage-preload.spec.ts",
+    "test:prompt19.3.2": "playwright test tests/specs/prompt19.3.2-safeimage-preload.spec.ts"
   },
   "keywords": [
     "youtube",

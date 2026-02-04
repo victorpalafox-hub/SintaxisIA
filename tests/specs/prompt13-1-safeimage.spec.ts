@@ -92,18 +92,20 @@ test.describe('PROMPT 13.1: SafeImage Component', () => {
 
       const content = fs.readFileSync(safeImagePath, 'utf-8');
 
-      const hasOnError = content.includes('onError');
-      const hasHandleError = content.includes('handleError');
+      // Prompt 19.3.2: Acepta ambos patrones (onError en JSX o img.onerror en useEffect)
+      const hasOnError = content.includes('onError') || content.includes('img.onerror');
+      // Prompt 19.3.2: handleError o complete() como función de manejo
+      const hasErrorHandler = content.includes('handleError') || content.includes('complete(false');
       const hasFallbackSrc = content.includes('fallbackSrc');
 
       expect(hasOnError).toBeTruthy();
-      expect(hasHandleError).toBeTruthy();
+      expect(hasErrorHandler).toBeTruthy();
       expect(hasFallbackSrc).toBeTruthy();
 
       await logger.logValidationResults({
         validator: 'ErrorHandling',
-        passed: hasOnError && hasHandleError && hasFallbackSrc,
-        details: { hasOnError, hasHandleError, hasFallbackSrc },
+        passed: hasOnError && hasErrorHandler && hasFallbackSrc,
+        details: { hasOnError, hasErrorHandler, hasFallbackSrc },
       });
     });
 
