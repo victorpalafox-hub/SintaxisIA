@@ -522,6 +522,7 @@ output/
 | 23 | Smart Image Selector | 49 | `smart-query-generator.ts`, `smart-image.config.ts`, scoring en pexels, retry alternativas |
 | 24 | NewsData.io Integration | 44 | `newsdata.config.ts`, `news-enricher.service.ts`, PASO 2 real, 81 company aliases |
 | 25 | Audio Sync Fix + Hook Visual | 34 | Frame offset, phraseTimestamps pipeline, flash overlay, MAX_IMAGE_SEGMENTS=3 |
+| 25.2 | Fix texto fade-out prematuro | - | phraseEndFrame + fadeOutFrames buffer en phrase-timing.ts |
 
 ## Pendientes
 

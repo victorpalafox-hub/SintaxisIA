@@ -164,7 +164,10 @@ export function getPhraseTiming(
     const timestamp = phraseTimestamps[currentPhraseIndex];
     const sceneOffsetFrames = Math.round(sceneOffset * fps);
     phraseStartFrame = Math.round(timestamp.startSeconds * fps) - sceneOffsetFrames;
-    phraseEndFrame = Math.round(timestamp.endSeconds * fps) - sceneOffsetFrames;
+    // Prompt 25.2: Extender phraseEndFrame con buffer de fade-out para que el texto
+    // permanezca visible al 100% hasta que el audio termine, y LUEGO haga fade-out
+    const fadeOut = config.fadeOutFrames ?? 15;
+    phraseEndFrame = Math.round(timestamp.endSeconds * fps) - sceneOffsetFrames + fadeOut;
 
   } else {
     // Fallback: Distribución uniforme (comportamiento original)
