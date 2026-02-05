@@ -24,9 +24,12 @@ import { NewsType } from '../types/scoring.types';
  *
  * Cubre los principales términos de IA/ML para capturar
  * noticias relevantes del sector.
+ *
+ * NOTA: Free tier limita query a 100 caracteres máximo.
+ * "artificial intelligence OR AI OR machine learning OR GPT OR OpenAI" = 66 chars
  */
 export const NEWSDATA_QUERY =
-  'artificial intelligence OR AI OR machine learning OR GPT OR OpenAI OR deep learning OR neural network';
+  'artificial intelligence OR AI OR machine learning OR GPT OR OpenAI';
 
 /**
  * Límite de noticias a solicitar por defecto
@@ -39,10 +42,10 @@ export const DEFAULT_NEWS_LIMIT = 10;
 /**
  * Máximo de noticias a solicitar (safety check)
  *
- * Evita consumir toda la quota en una sola request.
- * Coincide con maxNewsToFetch del OrchestratorConfig.
+ * NewsData.io free tier limita `size` a 10 por request.
+ * Planes de pago permiten hasta 50.
  */
-export const MAX_NEWS_LIMIT = 50;
+export const MAX_NEWS_LIMIT = 10;
 
 // =============================================================================
 // PATRONES DE TIPO DE NOTICIA
