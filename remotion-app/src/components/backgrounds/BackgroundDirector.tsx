@@ -5,22 +5,26 @@
  * capa dentro de AINewsShort y permanece visible durante todo el video,
  * incluyendo los crossfades entre escenas.
  *
- * 6 capas visuales (orden natural de z-index):
+ * 7 capas visuales (orden natural de z-index):
  * 1. Base gradient con drift angular sutil
  * 2. Parallax blob primario (radial gradient + blur)
  * 3. Parallax blob secundario (velocidad diferente)
- * 4. GrainOverlay (textura SVG feTurbulence)
- * 5. LightSweep (barrido periódico)
- * 6. Vignette (oscurecimiento en bordes)
+ * 4. SubtleGrid (grid tech con drift)
+ * 5. GrainOverlay (textura SVG feTurbulence)
+ * 6. LightSweep (barrido periódico)
+ * 7. Vignette (oscurecimiento en bordes, reducido)
  *
  * La intensidad del parallax varía por sección:
  * - Hero (0-8s): 1.5x (más energía)
- * - Content (7-45s): 0.8x (calma)
- * - Outro (44-50s): 0.3x (limpio)
+ * - Content (7-45s): 1.0x (vida constante)
+ * - Outro (44-50s): 0.5x (calma)
+ *
+ * Prompt 20.1 - Fix double alpha, micro-zoom, SubtleGrid, transition boost
  *
  * @author Sintaxis IA
- * @version 1.0.0
+ * @version 2.0.0
  * @since Prompt 20
+ * @updated Prompt 20.1 - Background revival (fix visibilidad)
  */
 
 import React from 'react';
@@ -33,6 +37,7 @@ import {
 import { colors, backgroundAnimation } from '../../styles/themes';
 import { GrainOverlay } from './GrainOverlay';
 import { LightSweep } from './LightSweep';
+import { SubtleGrid } from './SubtleGrid';
 
 // ==========================================
 // CONSTANTES DE SECCIÓN (timing de escenas)
@@ -78,7 +83,7 @@ export const BackgroundDirector: React.FC = () => {
   // CAPA 1: BASE GRADIENT (drift angular)
   // ==========================================
 
-  // Ángulo que varía lentamente de 0° a 15° durante todo el video
+  // Ángulo que varía lentamente de 0° a 25° durante todo el video (Prompt 20.1: +67%)
   const gradientAngle = interpolate(
     frame,
     [0, durationInFrames],
@@ -90,24 +95,65 @@ export const BackgroundDirector: React.FC = () => {
   // CAPA 2: PARALLAX BLOB PRIMARIO
   // ==========================================
 
+  // Drift amplitude centralizado en config (Prompt 20.1: era 20/15 hardcoded)
+  const { blobDriftAmplitude } = backgroundAnimation;
+
   // Movimiento sinusoidal suave (posición relativa al viewport)
-  const blob1X = Math.sin(frame * backgroundAnimation.parallaxSpeed * sectionMultiplier) * 20;
-  const blob1Y = Math.cos(frame * backgroundAnimation.parallaxSpeed * sectionMultiplier * 0.7) * 15;
+  const blob1X = Math.sin(frame * backgroundAnimation.parallaxSpeed * sectionMultiplier) * blobDriftAmplitude.x;
+  const blob1Y = Math.cos(frame * backgroundAnimation.parallaxSpeed * sectionMultiplier * 0.7) * blobDriftAmplitude.y;
 
   // ==========================================
   // CAPA 3: PARALLAX BLOB SECUNDARIO
   // ==========================================
 
   // Velocidad diferente para efecto de profundidad
-  const blob2X = Math.sin(frame * backgroundAnimation.parallaxSpeedSecondary * sectionMultiplier + 2) * 15;
-  const blob2Y = Math.cos(frame * backgroundAnimation.parallaxSpeedSecondary * sectionMultiplier * 0.8 + 1) * 12;
+  const blob2X = Math.sin(frame * backgroundAnimation.parallaxSpeedSecondary * sectionMultiplier + 2) * (blobDriftAmplitude.x * 0.6);
+  const blob2Y = Math.cos(frame * backgroundAnimation.parallaxSpeedSecondary * sectionMultiplier * 0.8 + 1) * (blobDriftAmplitude.y * 0.67);
+
+  // ==========================================
+  // TRANSITION BOOST (punch en transición a outro)
+  // ==========================================
+
+  // +20% opacity durante 15 frames al llegar a OUTRO_START (Prompt 20.1)
+  const { transitionBoost } = backgroundAnimation;
+  const boostOpacity = interpolate(
+    frame,
+    [OUTRO_START - transitionBoost.durationFrames, OUTRO_START, OUTRO_START + transitionBoost.durationFrames],
+    [0, transitionBoost.amount, 0],
+    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+  );
+
+  // Opacidad de blobs con boost aplicado
+  const blob1Opacity = backgroundAnimation.blobPrimaryOpacity + boostOpacity;
+  const blob2Opacity = backgroundAnimation.blobSecondaryOpacity + boostOpacity;
+
+  // ==========================================
+  // MICRO-ZOOM SENOIDAL (Prompt 20.1)
+  // ==========================================
+
+  // Scale que oscila 1.0 → 1.03 en ciclos de 12s para efecto de "respiración"
+  const { microZoom } = backgroundAnimation;
+  const zoomScale = interpolate(
+    Math.sin((frame / microZoom.cycleDuration) * Math.PI * 2),
+    [-1, 1],
+    [microZoom.min, microZoom.max]
+  );
+
+  // ==========================================
+  // VIGNETTE ALPHA (desde config - Prompt 20.1)
+  // ==========================================
+
+  // Computar alpha hex desde vignetteStrength (0-1 → 00-FF)
+  const vignetteAlpha = Math.round(backgroundAnimation.vignetteStrength * 255)
+    .toString(16)
+    .padStart(2, '0');
 
   // ==========================================
   // RENDER
   // ==========================================
 
   return (
-    <AbsoluteFill>
+    <AbsoluteFill style={{ transform: `scale(${zoomScale})` }}>
       {/* CAPA 1: Base gradient con drift angular */}
       <AbsoluteFill
         style={{
@@ -118,7 +164,7 @@ export const BackgroundDirector: React.FC = () => {
         }}
       />
 
-      {/* CAPA 2: Parallax blob primario */}
+      {/* CAPA 2: Parallax blob primario - SIN doble alpha (Prompt 20.1) */}
       <AbsoluteFill style={{ pointerEvents: 'none' }}>
         <div
           style={{
@@ -128,15 +174,15 @@ export const BackgroundDirector: React.FC = () => {
             width: '60%',
             height: '60%',
             borderRadius: '50%',
-            background: `radial-gradient(circle, ${colors.primary}18 0%, transparent 70%)`,
+            background: `radial-gradient(circle, ${colors.primary} 0%, transparent 70%)`,
             filter: `blur(${backgroundAnimation.blobBlur}px)`,
-            opacity: backgroundAnimation.blobPrimaryOpacity,
+            opacity: blob1Opacity,
             transform: `translate(${blob1X}%, ${blob1Y}%)`,
           }}
         />
       </AbsoluteFill>
 
-      {/* CAPA 3: Parallax blob secundario */}
+      {/* CAPA 3: Parallax blob secundario - SIN doble alpha (Prompt 20.1) */}
       <AbsoluteFill style={{ pointerEvents: 'none' }}>
         <div
           style={{
@@ -146,25 +192,28 @@ export const BackgroundDirector: React.FC = () => {
             width: '40%',
             height: '40%',
             borderRadius: '50%',
-            background: `radial-gradient(circle, ${colors.secondary}15 0%, transparent 70%)`,
+            background: `radial-gradient(circle, ${colors.secondary} 0%, transparent 70%)`,
             filter: `blur(${backgroundAnimation.blobBlur}px)`,
-            opacity: backgroundAnimation.blobSecondaryOpacity,
+            opacity: blob2Opacity,
             transform: `translate(${blob2X}%, ${blob2Y}%)`,
           }}
         />
       </AbsoluteFill>
 
-      {/* CAPA 4: Grain overlay */}
+      {/* CAPA 4: Subtle grid (Prompt 20.1) */}
+      <SubtleGrid />
+
+      {/* CAPA 5: Grain overlay */}
       <GrainOverlay />
 
-      {/* CAPA 5: Light sweep periódico */}
+      {/* CAPA 6: Light sweep periódico */}
       <LightSweep />
 
-      {/* CAPA 6: Vignette */}
+      {/* CAPA 7: Vignette - reducido (Prompt 20.1: 55% centro, 55% alpha bordes) */}
       <AbsoluteFill
         style={{
           pointerEvents: 'none',
-          background: `radial-gradient(ellipse at center, transparent 40%, ${colors.background.darker}B3 100%)`,
+          background: `radial-gradient(ellipse at center, transparent ${backgroundAnimation.vignetteTransparentStop}%, ${colors.background.darker}${vignetteAlpha} 100%)`,
         }}
       />
     </AbsoluteFill>

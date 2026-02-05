@@ -7,14 +7,18 @@
  * Solo renderiza el div durante los frames del barrido activo
  * para optimizar performance.
  *
+ * Prompt 20.1: Usa color accent del tema con blend mode screen.
+ * Gradiente concentrado (35%/50%/65%) para efecto más premium.
+ *
  * @author Sintaxis IA
- * @version 1.0.0
+ * @version 2.0.0
  * @since Prompt 20
+ * @updated Prompt 20.1 - Fix double alpha, color temático, blend mode
  */
 
 import React from 'react';
 import { AbsoluteFill, interpolate, useCurrentFrame } from 'remotion';
-import { lightSweep as lightSweepConfig } from '../../styles/themes';
+import { lightSweep as lightSweepConfig, colors } from '../../styles/themes';
 
 /**
  * LightSweep - Barrido de luz diagonal periódico
@@ -52,8 +56,17 @@ export const LightSweep: React.FC = () => {
     { extrapolateRight: 'clamp' }
   );
 
+  // Color del barrido: accent del tema o blanco (Prompt 20.1)
+  const sweepColor = lightSweepConfig.colorSource === 'accent'
+    ? colors.accent
+    : '#FFFFFF';
+
   return (
-    <AbsoluteFill style={{ pointerEvents: 'none', overflow: 'hidden' }}>
+    <AbsoluteFill style={{
+      pointerEvents: 'none',
+      overflow: 'hidden',
+      mixBlendMode: lightSweepConfig.blendMode,
+    }}>
       <div
         style={{
           position: 'absolute',
@@ -62,7 +75,7 @@ export const LightSweep: React.FC = () => {
           width: '100%',
           height: '100%',
           transform: `translateX(${translateX}%)`,
-          background: `linear-gradient(${lightSweepConfig.angle}deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)`,
+          background: `linear-gradient(${lightSweepConfig.angle}deg, transparent 35%, ${sweepColor} 50%, transparent 65%)`,
           opacity,
         }}
       />

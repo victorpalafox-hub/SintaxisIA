@@ -192,7 +192,7 @@ test.describe('Prompt 20 - BackgroundDirector Components', () => {
     logger.info('[PASS] LightSweep.tsx con barrido periódico');
   });
 
-  test('BackgroundDirector debe tener 6 capas visuales', () => {
+  test('BackgroundDirector debe tener 7 capas visuales', () => {
     const content = readFile(BG_DIRECTOR_PATH);
     // Gradient base
     expect(content).toContain('linear-gradient');
@@ -201,13 +201,15 @@ test.describe('Prompt 20 - BackgroundDirector Components', () => {
     expect(content).toContain('blobPrimaryOpacity');
     // Blob secundario
     expect(content).toContain('blobSecondaryOpacity');
+    // SubtleGrid (Prompt 20.1)
+    expect(content).toContain('<SubtleGrid');
     // Grain
     expect(content).toContain('<GrainOverlay');
     // Light sweep
     expect(content).toContain('<LightSweep');
-    // Vignette
-    expect(content).toContain('transparent 40%');
-    logger.info('[PASS] BackgroundDirector tiene 6 capas visuales');
+    // Vignette (Prompt 20.1: usa config en vez de hardcoded)
+    expect(content).toContain('vignetteTransparentStop');
+    logger.info('[PASS] BackgroundDirector tiene 7 capas visuales');
   });
 
   test('BackgroundDirector debe ajustar parallax por sección', () => {
@@ -363,5 +365,119 @@ test.describe('Prompt 20 - Dead Code Eliminado', () => {
     const effectsDir = path.join(REMOTION_SRC, 'components/effects');
     expect(fs.existsSync(effectsDir)).toBe(false);
     logger.info('[PASS] Directorio effects/ eliminado');
+  });
+});
+
+// =============================================================================
+// TESTS: PROMPT 20.1 - BACKGROUND VISIBILITY FIX
+// =============================================================================
+
+test.describe('Prompt 20.1 - Background Visibility Fix', () => {
+  const logger = new TestLogger({ testName: 'Prompt20.1-BgFix' });
+
+  test('BackgroundDirector NO debe tener doble alpha en blobs', () => {
+    const content = readFile(BG_DIRECTOR_PATH);
+    // NO debe tener hex alpha suffix después de colors.primary/secondary en radial-gradient
+    // Ejemplo de lo que NO debe existir: ${colors.primary}18 o ${colors.secondary}15
+    expect(content).not.toMatch(/colors\.primary\}[0-9a-fA-F]{2}\s/);
+    expect(content).not.toMatch(/colors\.secondary\}[0-9a-fA-F]{2}\s/);
+    logger.info('[PASS] Sin doble alpha en blobs');
+  });
+
+  test('BackgroundDirector debe usar blobDriftAmplitude desde config', () => {
+    const content = readFile(BG_DIRECTOR_PATH);
+    expect(content).toContain('blobDriftAmplitude');
+    logger.info('[PASS] Drift amplitude desde config');
+  });
+
+  test('BackgroundDirector debe tener micro-zoom wrapper', () => {
+    const content = readFile(BG_DIRECTOR_PATH);
+    expect(content).toContain('microZoom');
+    expect(content).toContain('zoomScale');
+    logger.info('[PASS] Micro-zoom implementado');
+  });
+
+  test('BackgroundDirector debe tener transition boost en outro', () => {
+    const content = readFile(BG_DIRECTOR_PATH);
+    expect(content).toContain('transitionBoost');
+    expect(content).toContain('boostOpacity');
+    logger.info('[PASS] Transition boost implementado');
+  });
+
+  test('backgroundAnimation debe tener microZoom config', () => {
+    const content = readFile(THEMES_PATH);
+    expect(content).toContain('microZoom');
+    expect(content).toContain('cycleDuration');
+    logger.info('[PASS] microZoom config en themes.ts');
+  });
+
+  test('backgroundAnimation NO debe tener grainScale (dead config)', () => {
+    const content = readFile(THEMES_PATH);
+    expect(content).not.toContain('grainScale');
+    logger.info('[PASS] grainScale eliminado');
+  });
+
+  test('backgroundAnimation debe tener vignetteTransparentStop', () => {
+    const content = readFile(THEMES_PATH);
+    expect(content).toContain('vignetteTransparentStop');
+    logger.info('[PASS] vignetteTransparentStop en config');
+  });
+
+  test('backgroundAnimation debe tener blobDriftAmplitude', () => {
+    const content = readFile(THEMES_PATH);
+    expect(content).toContain('blobDriftAmplitude');
+    logger.info('[PASS] blobDriftAmplitude en config');
+  });
+
+  test('backgroundAnimation debe tener transitionBoost', () => {
+    const content = readFile(THEMES_PATH);
+    expect(content).toContain('transitionBoost');
+    logger.info('[PASS] transitionBoost en config');
+  });
+
+  test('debe existir SubtleGrid.tsx', () => {
+    const subtleGridPath = path.join(REMOTION_SRC, 'components/backgrounds/SubtleGrid.tsx');
+    expect(fs.existsSync(subtleGridPath)).toBe(true);
+    const content = readFile(subtleGridPath);
+    expect(content).toContain('export const SubtleGrid');
+    expect(content).toContain('subtleGrid');
+    expect(content).toContain('repeating-linear-gradient');
+    logger.info('[PASS] SubtleGrid.tsx existe');
+  });
+
+  test('debe exportar subtleGrid config desde themes.ts', () => {
+    const content = readFile(THEMES_PATH);
+    expect(content).toContain('export const subtleGrid');
+    expect(content).toContain('cellSize');
+    expect(content).toContain('driftSpeed');
+    logger.info('[PASS] subtleGrid config exportada');
+  });
+
+  test('LightSweep debe usar color del tema', () => {
+    const content = readFile(LIGHT_SWEEP_PATH);
+    expect(content).toContain('colorSource');
+    expect(content).toContain('colors.accent');
+    logger.info('[PASS] LightSweep usa color del tema');
+  });
+
+  test('LightSweep debe usar mixBlendMode', () => {
+    const content = readFile(LIGHT_SWEEP_PATH);
+    expect(content).toContain('mixBlendMode');
+    expect(content).toContain('blendMode');
+    logger.info('[PASS] LightSweep con blend mode');
+  });
+
+  test('lightSweep config debe tener colorSource y blendMode', () => {
+    const content = readFile(THEMES_PATH);
+    expect(content).toContain('colorSource');
+    expect(content).toContain("blendMode: 'screen'");
+    logger.info('[PASS] lightSweep config con colorSource y blendMode');
+  });
+
+  test('LightSweep NO debe tener doble alpha en gradiente', () => {
+    const content = readFile(LIGHT_SWEEP_PATH);
+    // NO debe tener rgba con alpha interno en el gradiente
+    expect(content).not.toContain('rgba(255,255,255,0.15)');
+    logger.info('[PASS] LightSweep sin doble alpha');
   });
 });

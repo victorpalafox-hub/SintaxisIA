@@ -438,29 +438,43 @@ export const contentTextStyle = {
  * @since Prompt 20
  */
 export const backgroundAnimation = {
-  /** Rango de drift del ángulo del gradiente (grados) */
-  gradientAngleDrift: [0, 15] as readonly [number, number],
-  /** Velocidad de movimiento del blob primario */
-  parallaxSpeed: 0.005,
-  /** Velocidad de movimiento del blob secundario */
-  parallaxSpeedSecondary: 0.003,
-  /** Rango de opacidad del grain [mínima, máxima] */
-  grainOpacity: [0.03, 0.05] as readonly [number, number],
-  /** Tamaño de celda del noise para grain */
-  grainScale: 1.5,
-  /** Fuerza del efecto vignette (0-1) */
-  vignetteStrength: 0.7,
-  /** Opacidad del blob primario */
-  blobPrimaryOpacity: 0.08,
-  /** Opacidad del blob secundario */
-  blobSecondaryOpacity: 0.05,
-  /** Radio de blur de los blobs (px) */
-  blobBlur: 80,
-  /** Multiplicador de parallax por sección */
+  /** Rango de drift del ángulo del gradiente (grados) - Prompt 20.1: +67% */
+  gradientAngleDrift: [0, 25] as readonly [number, number],
+  /** Velocidad de movimiento del blob primario - Prompt 20.1: +20% */
+  parallaxSpeed: 0.006,
+  /** Velocidad de movimiento del blob secundario - Prompt 20.1: +33% */
+  parallaxSpeedSecondary: 0.004,
+  /** Rango de opacidad del grain [mínima, máxima] - Prompt 20.1: +40% */
+  grainOpacity: [0.04, 0.07] as readonly [number, number],
+  /** Fuerza del efecto vignette (0-1) - Prompt 20.1: reducido de 0.7 */
+  vignetteStrength: 0.55,
+  /** % desde centro donde empieza el vignette - Prompt 20.1: era 40% hardcoded */
+  vignetteTransparentStop: 55,
+  /** Opacidad del blob primario (SIN doble alpha) - Prompt 20.1: fix de 0.75% → 18% */
+  blobPrimaryOpacity: 0.18,
+  /** Opacidad del blob secundario (SIN doble alpha) - Prompt 20.1: fix de 0.41% → 12% */
+  blobSecondaryOpacity: 0.12,
+  /** Radio de blur de los blobs (px) - Prompt 20.1: más difuso, studio light */
+  blobBlur: 100,
+  /** Amplitud de drift de blobs en % - Prompt 20.1: centralizado (era 20/15 hardcoded) */
+  blobDriftAmplitude: { x: 25, y: 18 },
+  /** Multiplicador de parallax por sección - Prompt 20.1: content +25%, outro +67% */
   sectionMultiplier: {
     hero: 1.5,
-    content: 0.8,
-    outro: 0.3,
+    content: 1.0,
+    outro: 0.5,
+  },
+  /** Micro-zoom senoidal del wrapper completo - Prompt 20.1 */
+  microZoom: {
+    min: 1.0,
+    max: 1.03,
+    /** Duración de un ciclo completo en frames (12s @ 30fps) */
+    cycleDuration: 360,
+  },
+  /** Boost de opacidad en transición a outro (+20%) - Prompt 20.1 */
+  transitionBoost: {
+    amount: 0.2,
+    durationFrames: 15,
   },
 };
 
@@ -479,12 +493,44 @@ export const backgroundAnimation = {
 export const lightSweep = {
   /** Frames entre cada barrido (~8s @ 30fps) */
   intervalFrames: 240,
-  /** Duración del barrido en frames (~2s) */
-  durationFrames: 60,
-  /** Opacidad máxima del barrido (muy sutil) */
-  maxOpacity: 0.05,
+  /** Duración del barrido en frames (~1.4s) - Prompt 20.1: más corto = micro-event */
+  durationFrames: 42,
+  /** Opacidad máxima del barrido (SIN doble alpha) - Prompt 20.1: fix de 0.75% → 12% */
+  maxOpacity: 0.12,
   /** Ángulo del barrido (grados) */
   angle: 75,
+  /** Fuente de color: 'accent' usa tema, 'white' usa blanco - Prompt 20.1 */
+  colorSource: 'accent' as const,
+  /** Mix blend mode para mezcla aditiva - Prompt 20.1 */
+  blendMode: 'screen' as const,
+};
+
+// ==========================================
+// CONFIGURACIÓN DE SUBTLE GRID (Prompt 20.1)
+// ==========================================
+
+/**
+ * Grid sutil de fondo - Detalle editorial
+ *
+ * Cuadrícula fina de líneas con drift lento que agrega
+ * textura y sensación de profundidad tipo tech HUD.
+ * Usa repeating-linear-gradient (performance óptima).
+ *
+ * @since Prompt 20.1
+ */
+export const subtleGrid = {
+  /** Opacidad base del grid */
+  opacity: 0.06,
+  /** Tamaño de celda en px */
+  cellSize: 40,
+  /** Ancho de línea en px */
+  lineWidth: 1,
+  /** Velocidad de drift por frame (senoidal) */
+  driftSpeed: 0.003,
+  /** Amplitud total del drift en px */
+  driftAmplitude: 40,
+  /** Mix blend mode */
+  blendMode: 'overlay' as const,
 };
 
 // ==========================================
