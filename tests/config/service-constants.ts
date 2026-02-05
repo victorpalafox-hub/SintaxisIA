@@ -225,7 +225,7 @@ export const REMOTION_CONFIG = {
 
   /** Composiciones disponibles (actualizadas en Prompt 13.2) */
   COMPOSITIONS: {
-    /** Video completo de 55 segundos (1 noticia con efectos dinámicos) */
+    /** Video completo de 50 segundos (1 noticia con efectos dinámicos) */
     FULL: 'AINewsShort',
     /** Preview de 10 segundos para desarrollo rápido */
     PREVIEW: 'AINewsShort-Preview',

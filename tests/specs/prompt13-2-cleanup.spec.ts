@@ -2,7 +2,7 @@
  * @fileoverview Tests para Prompt 13.2: Limpieza de Composiciones
  *
  * Valida que solo existan las composiciones productivas:
- * - AINewsShort (55s) - Producción final
+ * - AINewsShort (50s) - Producción final
  * - AINewsShort-Preview (10s) - Desarrollo rápido
  *
  * Composiciones eliminadas (obsoletas):

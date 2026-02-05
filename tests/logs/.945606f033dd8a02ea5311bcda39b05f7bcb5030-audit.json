@@ -6,14 +6,29 @@
     "auditLog": "C:\\Users\\DELL\\Documents\\Proyectos\\SintaxisIA\\Videos short\\tests\\logs\\.945606f033dd8a02ea5311bcda39b05f7bcb5030-audit.json",
     "files": [
         {
-            "date": 1769556262884,
-            "name": "C:\\Users\\DELL\\Documents\\Proyectos\\SintaxisIA\\Videos short\\tests\\logs\\test-error-2026-01-27.log",
-            "hash": "15042b803967bd372925d6de59a4c0a087c26a2b69cbd2788d376252fb8f5a3d"
-        },
-        {
             "date": 1769628511485,
             "name": "C:\\Users\\DELL\\Documents\\Proyectos\\SintaxisIA\\Videos short\\tests\\logs\\test-error-2026-01-28.log",
             "hash": "4255b4aa345aacb27884009a13742f1cdff61421d04be4ed733731f13837ebfa"
+        },
+        {
+            "date": 1769700461428,
+            "name": "C:\\Users\\DELL\\Documents\\Proyectos\\SintaxisIA\\Videos short\\tests\\logs\\test-error-2026-01-29.log",
+            "hash": "712c859100d90c44a106a7c6bc79e2d838d1c3b02471162a6d6f2bc897b2b127"
+        },
+        {
+            "date": 1769793263041,
+            "name": "C:\\Users\\DELL\\Documents\\Proyectos\\SintaxisIA\\Videos short\\tests\\logs\\test-error-2026-01-30.log",
+            "hash": "776a067c483ab59e523fcba40cc89c647a6b8d404880888e1fb0d27c502711bd"
+        },
+        {
+            "date": 1770138542837,
+            "name": "C:\\Users\\DELL\\Documents\\Proyectos\\SintaxisIA\\Videos short\\tests\\logs\\test-error-2026-02-03.log",
+            "hash": "04c724525b2b934b4c3213aa4843ae505bd5c7bf204175d5f0941bcf6ddfc8fc"
+        },
+        {
+            "date": 1770228380429,
+            "name": "C:\\Users\\DELL\\Documents\\Proyectos\\SintaxisIA\\Videos short\\tests\\logs\\test-error-2026-02-04.log",
+            "hash": "2101e7f71a18fc061679f1989fb0ef120b2f06270d67c8743ffa00285d8600cd"
         }
     ],
     "hashType": "sha256"

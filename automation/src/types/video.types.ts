@@ -293,7 +293,7 @@ export interface SectionEffects {
  * Opciones de configuración del servicio de rendering
  */
 export interface VideoRenderOptions {
-  /** Usar composición de preview (10s) en lugar de full (55s) */
+  /** Usar composición de preview (10s) en lugar de full (50s) */
   usePreview?: boolean;
   /** Forzar re-renderizado aunque exista cache */
   forceRender?: boolean;

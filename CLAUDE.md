@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 771 tests (769 passing, 2 skipped)
+**Test Status**: 783 tests (781 passing, 2 skipped)
 
-**Last Updated**: 2026-02-04 (Prompt 19.11 - Smooth Transitions)
+**Last Updated**: 2026-02-04 (Prompt 19.12 - Duration Fix)
 
 ## Prerequisites
 
@@ -92,7 +92,8 @@ npm run check
 - Outro Scene: `test:outro-scene` (13) | `test:prompt19.9` (alias)
 - Glow Intense: `test:glow-intense` (13) | `test:prompt19.10` (alias)
 - Smooth Transitions: `test:smooth-transitions` (37) | `test:prompt19.11` (alias)
-- **Total**: 771 tests (769 passing, 2 skipped)
+- Duration Fix: `test:duration-fix` (12) | `test:prompt19.12` (alias)
+- **Total**: 783 tests (781 passing, 2 skipped)
 
 Ver `README.md` para lista completa de scripts.
 
@@ -188,7 +189,7 @@ if (isShortTimeout(timeout)) { /* manejar error */ }
 
 ```bash
 npm run check          # TypeScript sin errores
-npm test              # Tests pasando (604 tests, 4 skipped)
+npm test              # Tests pasando (783 tests, 2 skipped)
 npm run security:check # Sin vulnerabilidades críticas
 ```
 
@@ -482,6 +483,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | 19.9 | OutroScene Mejorado | 13 | Fade-out final, glow cíclico, Easing, textShadow, outroAnimation config |
 | 19.10 | Glow Intenso | 13 | heroAnimation config, multi-layer textShadow/boxShadow, glow +50% en todas las escenas |
 | 19.11 | Smooth Transitions | 37 | Crossfade 30 frames entre escenas, sceneTransition config, fade-out en Hero/Content |
+| 19.12 | Duration Fix | 12 | Composition 50s = Sequences 50s, elimina pantalla negra final |
 
 ### Archivos Clave por Feature
 
@@ -507,6 +509,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | OutroScene Mejorado | `remotion-app/src/components/scenes/OutroScene.tsx` (fade-out/glow cíclico/Easing/textShadow), `remotion-app/src/styles/themes.ts` (outroAnimation config) |
 | Glow Intenso | `remotion-app/src/styles/themes.ts` (heroAnimation config, glow values +50%), `remotion-app/src/components/scenes/HeroScene.tsx` (multi-layer glow, config centralizada), `ContentScene.tsx` / `OutroScene.tsx` (multi-layer, alpha aumentado) |
 | Smooth Transitions | `remotion-app/src/styles/themes.ts` (sceneTransition config), `remotion-app/src/compositions/AINewsShort.tsx` (Sequence overlap), `HeroScene.tsx` / `ContentScene.tsx` (fadeOut), `OutroScene.tsx` (useVideoConfig, fade-in 30f) |
+| Duration Fix | `remotion-app/src/Root.tsx` (50s composition), `remotion-app/src/theme.ts` (durationSeconds 50), `automation/src/services/video-rendering.service.ts` (duration fijo 50) |
 
 ### Quick Reference
 

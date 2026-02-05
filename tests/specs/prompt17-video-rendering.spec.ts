@@ -251,11 +251,11 @@ test.describe('PROMPT 17: Video Rendering Service', () => {
 
       expect(secondsToFrames(1, 30)).toBe(30);
       expect(secondsToFrames(10, 30)).toBe(300);
-      expect(secondsToFrames(55, 30)).toBe(1650);
+      expect(secondsToFrames(50, 30)).toBe(1500);
       expect(secondsToFrames(1, 60)).toBe(60);
 
       await logger.info('   1s @ 30fps = 30 frames ✓');
-      await logger.info('   55s @ 30fps = 1650 frames ✓');
+      await logger.info('   50s @ 30fps = 1500 frames ✓');
       await logger.info('✅ secondsToFrames() funciona correctamente');
     });
 
@@ -264,11 +264,11 @@ test.describe('PROMPT 17: Video Rendering Service', () => {
 
       expect(framesToSeconds(30, 30)).toBe(1);
       expect(framesToSeconds(300, 30)).toBe(10);
-      expect(framesToSeconds(1650, 30)).toBe(55);
+      expect(framesToSeconds(1500, 30)).toBe(50);
       expect(framesToSeconds(60, 60)).toBe(1);
 
       await logger.info('   30 frames @ 30fps = 1s ✓');
-      await logger.info('   1650 frames @ 30fps = 55s ✓');
+      await logger.info('   1500 frames @ 30fps = 50s ✓');
       await logger.info('✅ framesToSeconds() funciona correctamente');
     });
 

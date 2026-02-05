@@ -2,7 +2,7 @@
  * @fileoverview Tests para Prompt 13: Video Optimizado
  *
  * Valida la implementación del sistema de video optimizado para 1 noticia:
- * - Timing correcto (8s + 37s + 10s = 55s)
+ * - Timing correcto (8s + 37s + 5s = 50s)
  * - 3 imágenes por video (hero, context, outro hardcoded)
  * - Efectos dinámicos implementados (zoom, parallax, blur, glow)
  * - NO renderiza hashtags (solo metadata)

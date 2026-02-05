@@ -666,7 +666,7 @@ class VideoRenderingService {
       // Prompt 19.7: Timestamps de sincronización (opcional)
       audioSync,
       config: {
-        duration: Math.ceil(request.audioDuration) + 5, // Audio + 5s buffer
+        duration: 50, // Fijo: Hero 8s + Content 37s + Outro 5s = 50s
         fps: VIDEO_CONFIG.specs.fps,
         enhancedEffects: true,
       },

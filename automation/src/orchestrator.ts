@@ -251,8 +251,8 @@ export async function runPipeline(
       const { news } = topNewsStep.data as { news: NewsItem; score: NewsScore };
       const { generatedScript } = scriptStep.data as { generatedScript: GeneratedScript; fullScript: string };
 
-      // Estimar duración basada en el script (usaremos ~55s por defecto)
-      const estimatedDuration = generatedScript.duration || 55;
+      // Estimar duración basada en el script (usaremos ~50s por defecto)
+      const estimatedDuration = generatedScript.duration || 50;
 
       // Segmentar script y extraer keywords
       const segmenter = new SceneSegmenterService();

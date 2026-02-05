@@ -227,7 +227,7 @@ export interface VideoProps {
    * Configuración del video
    */
   config?: {
-    /** Duración total en segundos @default 55 */
+    /** Duración total en segundos @default 50 */
     duration?: number;
     /** Frames por segundo @default 30 */
     fps?: number;

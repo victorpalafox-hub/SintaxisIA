@@ -82,7 +82,7 @@ export const theme = {
     width: 1080,
     height: 1920,
     fps: 30,
-    durationSeconds: 60,
+    durationSeconds: 50,
     get durationFrames() {
       return this.durationSeconds * this.fps;
     },

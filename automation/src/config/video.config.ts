@@ -118,7 +118,7 @@ export const REMOTION_CONFIG = {
  * Configuración de secciones del video
  *
  * Define los frames de inicio y fin para cada sección
- * basado en 30 FPS y 55 segundos totales (1650 frames)
+ * basado en 30 FPS y 50 segundos totales (1500 frames)
  *
  * NOTA: Prompt 19.11 introduce crossfade de 30 frames entre escenas
  * en AINewsShort.tsx (Sequences con overlap). VIDEO_SECTIONS mantiene

@@ -12,7 +12,7 @@ import type { VideoProps } from './types/video.types';
  * Este es el punto de entrada para Remotion
  *
  * Composiciones disponibles (Prompt 13.2 - Limpieza):
- * - AINewsShort: Video optimizado de 55s (1 noticia con efectos)
+ * - AINewsShort: Video optimizado de 50s (1 noticia con efectos)
  * - AINewsShort-Preview: Preview de 10s para desarrollo rápido
  *
  * Composiciones eliminadas (obsoletas):
@@ -51,7 +51,7 @@ export const RemotionRoot: React.FC = () => {
       },
     },
     config: {
-      duration: 55,
+      duration: 50,
       fps: 30,
       enhancedEffects: true,
     },
@@ -64,11 +64,11 @@ export const RemotionRoot: React.FC = () => {
           Prompt 13: Video optimizado para 1 noticia
           ========================================== */}
 
-      {/* AINewsShort: Video optimizado de 55 segundos - PRODUCCION */}
+      {/* AINewsShort: Video optimizado de 50 segundos - PRODUCCION */}
       <Composition
         id="AINewsShort"
         component={AINewsShort}
-        durationInFrames={55 * video.fps}
+        durationInFrames={50 * video.fps}
         fps={video.fps}
         width={video.width}
         height={video.height}
