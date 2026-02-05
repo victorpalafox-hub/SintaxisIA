@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 734 tests (732 passing, 2 skipped)
+**Test Status**: 771 tests (769 passing, 2 skipped)
 
-**Last Updated**: 2026-02-04 (Prompt 19.10 - Glow Intenso)
+**Last Updated**: 2026-02-04 (Prompt 19.11 - Smooth Transitions)
 
 ## Prerequisites
 
@@ -91,7 +91,8 @@ npm run check
 - Dynamic Animations: `test:dynamic-animations` (16) | `test:prompt19.8` (alias)
 - Outro Scene: `test:outro-scene` (13) | `test:prompt19.9` (alias)
 - Glow Intense: `test:glow-intense` (13) | `test:prompt19.10` (alias)
-- **Total**: 734 tests (732 passing, 2 skipped)
+- Smooth Transitions: `test:smooth-transitions` (37) | `test:prompt19.11` (alias)
+- **Total**: 771 tests (769 passing, 2 skipped)
 
 Ver `README.md` para lista completa de scripts.
 
@@ -303,7 +304,7 @@ test.describe('Prompt [N] - Nombre Feature', () => {
 
 - 1080x1920 (9:16), 30 FPS
 - **Composición Producción** (`AINewsShort`): 50s, 1 noticia con efectos dinámicos
-  - Timing: Hero 8s + Content 37s + Outro 5s (Prompt 19.4)
+  - Timing: Hero 8s + Content 37s + Outro 5s (Prompt 19.4), crossfade 1s entre escenas (Prompt 19.11)
   - Efectos: zoom, blur-to-focus, parallax, glow pulsante
   - 3 imágenes: hero (logo), context (screenshot), outro (hardcoded)
   - ContentScene: Texto secuencial con fade in/out (Prompt 19.2)
@@ -480,6 +481,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | 19.8 | Dynamic Animations | 16 | Parallax/zoom full-duration, per-phrase slide-up, glow pulse texto/imagen |
 | 19.9 | OutroScene Mejorado | 13 | Fade-out final, glow cíclico, Easing, textShadow, outroAnimation config |
 | 19.10 | Glow Intenso | 13 | heroAnimation config, multi-layer textShadow/boxShadow, glow +50% en todas las escenas |
+| 19.11 | Smooth Transitions | 37 | Crossfade 30 frames entre escenas, sceneTransition config, fade-out en Hero/Content |
 
 ### Archivos Clave por Feature
 
@@ -504,6 +506,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | Dynamic Animations | `remotion-app/src/components/scenes/ContentScene.tsx` (parallax/zoom/glow/slide), `remotion-app/src/styles/themes.ts` (contentAnimation config) |
 | OutroScene Mejorado | `remotion-app/src/components/scenes/OutroScene.tsx` (fade-out/glow cíclico/Easing/textShadow), `remotion-app/src/styles/themes.ts` (outroAnimation config) |
 | Glow Intenso | `remotion-app/src/styles/themes.ts` (heroAnimation config, glow values +50%), `remotion-app/src/components/scenes/HeroScene.tsx` (multi-layer glow, config centralizada), `ContentScene.tsx` / `OutroScene.tsx` (multi-layer, alpha aumentado) |
+| Smooth Transitions | `remotion-app/src/styles/themes.ts` (sceneTransition config), `remotion-app/src/compositions/AINewsShort.tsx` (Sequence overlap), `HeroScene.tsx` / `ContentScene.tsx` (fadeOut), `OutroScene.tsx` (useVideoConfig, fade-in 30f) |
 
 ### Quick Reference
 
@@ -519,6 +522,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 | Whisper | `whisperService.transcribe()` + `groupIntoPhrases()` | Opcional (OPENAI_API_KEY), ~$0.006/min |
 | ContentAnimation | parallax + zoom + glow + per-phrase slide | Full 37s duration, config en themes.ts |
 | OutroAnimation | fade-out + glow cíclico + Easing + textShadow | 5s, spring + config en themes.ts |
+| SceneTransition | crossfade 30 frames entre Sequences | sceneTransition en themes.ts |
 
 ## Pipeline de Publicación
 

@@ -49,10 +49,10 @@ test.describe('Prompt 19.4 - AINewsShort.tsx Configuración', () => {
     logger.logTestEnd('duration default = 50', 'passed', 0);
   });
 
-  test('outroStart = heroSceneDuration + contentSceneDuration', async () => {
+  test('outroStart = contentStart + contentSceneDuration (Prompt 19.11 crossfade)', async () => {
     logger.logTestStart('outroStart calculation');
     const content = fs.readFileSync(AI_NEWS_SHORT_PATH, 'utf-8');
-    expect(content).toMatch(/outroStart\s*=\s*heroSceneDuration\s*\+\s*contentSceneDuration/);
+    expect(content).toMatch(/outroStart\s*=\s*contentStart\s*\+\s*contentSceneDuration/);
     logger.logTestEnd('outroStart calculation', 'passed', 0);
   });
 
@@ -172,8 +172,8 @@ test.describe('Prompt 19.4 - Regresión', () => {
     const content = fs.readFileSync(AI_NEWS_SHORT_PATH, 'utf-8');
     // Verificar que Content sigue siendo 37 segundos
     expect(content).toMatch(/contentSceneDuration\s*=\s*37\s*\*\s*fps/);
-    // Verificar comentario de timing
-    expect(content).toMatch(/Content:\s*8-45s/);
+    // Verificar comentario de timing (Prompt 19.11: crossfade cambia inicio a 7s)
+    expect(content).toMatch(/Content:\s*7-45s/);
     logger.logTestEnd('ContentScene 37s sin cambios', 'passed', 0);
   });
 

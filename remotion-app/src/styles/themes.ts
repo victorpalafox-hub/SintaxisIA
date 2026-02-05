@@ -320,6 +320,24 @@ export const heroAnimation = {
 };
 
 // ==========================================
+// CONFIGURACIÓN DE TRANSICIONES ENTRE ESCENAS (Prompt 19.11)
+// ==========================================
+
+/**
+ * Configuración de crossfade entre escenas (Hero -> Content -> Outro)
+ *
+ * Las Sequences de Remotion se solapan por crossfadeFrames,
+ * creando una transición suave donde una escena se desvanece
+ * mientras la siguiente aparece gradualmente.
+ *
+ * @since Prompt 19.11
+ */
+export const sceneTransition = {
+  /** Frames de overlap entre escenas adyacentes (1s @ 30fps) */
+  crossfadeFrames: 30,
+};
+
+// ==========================================
 // CONFIGURACIÓN DE TIPOGRAFÍA CONTENT (Prompt 19.2.7)
 // ==========================================
 

@@ -4,10 +4,10 @@
  * Composición de video optimizada para 1 NOTICIA COMPLETA.
  * Duración: 50 segundos default (configurable) - Reducido en Prompt 19.4
  *
- * Timing:
+ * Timing (con crossfade de 30 frames - Prompt 19.11):
  * - Hero: 0-8s (hook fuerte)
- * - Content: 8-45s (explicación completa)
- * - Outro: 45-50s (branding claro) - Reducido de 10s a 5s en Prompt 19.4
+ * - Content: 7-45s (crossfade de 1s con Hero, explicación completa)
+ * - Outro: 44-50s (crossfade de 1s con Content, branding claro)
  *
  * Imágenes: 3 totales
  * 1. Hero (0-8s): Logo empresa específico
@@ -18,6 +18,7 @@
  * @version 2.1.0
  * @since Prompt 13
  * @updated Prompt 19.4 - Duración OutroScene reducida de 10s a 5s
+ * @updated Prompt 19.11 - Crossfade entre escenas (30 frames overlap)
  */
 
 import React from 'react';
@@ -35,7 +36,7 @@ import { AudioMixer } from '../components/audio/AudioMixer';
 import type { VideoProps } from '../types/video.types';
 
 // Estilos
-import { colors } from '../styles/themes';
+import { colors, sceneTransition } from '../styles/themes';
 
 // =============================================================================
 // PROPS PARCIALES (para compatibilidad con Remotion Composition)
@@ -120,22 +121,28 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
   const durationInFrames = duration * fps;
 
   // ==========================================
-  // TIMING DE ESCENAS
+  // TIMING DE ESCENAS (Prompt 19.11: crossfade)
   // ==========================================
 
-  // Hero: 8 segundos (hook visual)
+  // Crossfade entre escenas (Prompt 19.11)
+  const crossfadeFrames = sceneTransition.crossfadeFrames; // 30 frames = 1s
+
+  // Duraciones base de cada escena (sin cambios)
   const heroSceneDuration = 8 * fps;        // 240 frames
-
-  // Content: 37 segundos (explicación completa)
   const contentSceneDuration = 37 * fps;    // 1110 frames
+  const outroSceneDuration = 5 * fps;       // 150 frames - Reducido de 10s en Prompt 19.4
 
-  // Outro: 5 segundos (branding claro) - Reducido de 10s en Prompt 19.4
-  const outroSceneDuration = 5 * fps;       // 150 frames
-
-  // Puntos de inicio de cada escena
+  // Puntos de inicio con overlap de crossfade (Prompt 19.11)
+  // Cada escena downstream empieza crossfadeFrames antes que la anterior termine
   const heroStart = 0;
-  const contentStart = heroSceneDuration;
-  const outroStart = heroSceneDuration + contentSceneDuration;
+  const contentStart = heroSceneDuration - crossfadeFrames;        // 210
+  const outroStart = contentStart + contentSceneDuration;          // 1320
+
+  // Duraciones de Sequence extendidas para crossfade (Prompt 19.11)
+  // Hero mantiene su duración original (no necesita extensión)
+  const heroDuration = heroSceneDuration;                          // 240
+  const contentDuration = contentSceneDuration + crossfadeFrames;  // 1140
+  const outroDuration = outroSceneDuration + crossfadeFrames;      // 180
 
   // ==========================================
   // RENDER
@@ -148,7 +155,7 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
       }}
     >
       {/* ==========================================
-          HERO SCENE - Hook Visual (0-8s)
+          HERO SCENE - Hook Visual (0-8s, fade-out crossfade)
           ==========================================
           Captura atención con:
           - Logo empresa con zoom dramático
@@ -157,7 +164,7 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
       */}
       <Sequence
         from={heroStart}
-        durationInFrames={heroSceneDuration}
+        durationInFrames={heroDuration}
         name="Hero"
       >
         <HeroScene
@@ -169,7 +176,7 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
       </Sequence>
 
       {/* ==========================================
-          CONTENT SCENE - Explicación Completa (8-45s)
+          CONTENT SCENE - Explicación Completa (7-45s, crossfade)
           ==========================================
           Muestra contenido con:
           - Imagen context con parallax (legacy)
@@ -180,7 +187,7 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
       */}
       <Sequence
         from={contentStart}
-        durationInFrames={contentSceneDuration}
+        durationInFrames={contentDuration}
         name="Content"
       >
         <ContentScene
@@ -199,7 +206,7 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
       </Sequence>
 
       {/* ==========================================
-          OUTRO SCENE - Branding (45-50s) - Prompt 19.4
+          OUTRO SCENE - Branding (44-50s, crossfade) - Prompt 19.4/19.11
           ==========================================
           Cierre memorable con:
           - Logo "Sintaxis IA" con glow
@@ -209,7 +216,7 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
       */}
       <Sequence
         from={outroStart}
-        durationInFrames={outroSceneDuration}
+        durationInFrames={outroDuration}
         name="Outro"
       >
         <OutroScene

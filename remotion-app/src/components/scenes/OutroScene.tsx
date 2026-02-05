@@ -20,6 +20,7 @@
  * @updated Prompt 19.4 - Duración reducida de 10s a 5s
  * @updated Prompt 19.9 - Fade-out final, glow cíclico, Easing, textShadow, config centralizada
  * @updated Prompt 19.10 - Glow intensificado: multi-layer boxShadow, brand name mejorado
+ * @updated Prompt 19.11 - Crossfade: useVideoConfig, fade-in sincronizado con sceneTransition
  */
 
 import React from 'react';
@@ -31,7 +32,7 @@ import {
   useVideoConfig,
   Easing,
 } from 'remotion';
-import { colors, spacing, outroAnimation } from '../../styles/themes';
+import { colors, spacing, outroAnimation, sceneTransition } from '../../styles/themes';
 import type { OutroSceneProps } from '../../types/video.types';
 
 /**
@@ -58,17 +59,17 @@ export const OutroScene: React.FC<OutroSceneProps> = ({
   const frame = useCurrentFrame();
   const { fps: videoFps } = useVideoConfig();
 
-  // Duración de OutroScene en frames
-  const durationInFrames = 5 * fps;
+  // Duración de OutroScene en frames (Prompt 19.11: usa Sequence duration con crossfade)
+  const { durationInFrames } = useVideoConfig();
 
   // ==========================================
   // ANIMACIONES DE ENTRADA (Prompt 19.9: Easing)
   // ==========================================
 
-  // Cross fade desde Content Scene (con easing suave)
+  // Crossfade desde ContentScene (Prompt 19.11: sincronizado con crossfadeFrames)
   const sceneOpacity = interpolate(
     frame,
-    [0, 20],
+    [0, sceneTransition.crossfadeFrames],
     [0, 1],
     {
       extrapolateRight: 'clamp',

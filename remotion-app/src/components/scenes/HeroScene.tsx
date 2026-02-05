@@ -16,6 +16,7 @@
  * @version 2.1.0
  * @since Prompt 13
  * @updated Prompt 19.10 - Glow intensificado, multi-layer, config centralizada (heroAnimation)
+ * @updated Prompt 19.11 - Fade-out para crossfade con ContentScene
  */
 
 import React from 'react';
@@ -27,7 +28,7 @@ import {
   useVideoConfig,
   Easing,
 } from 'remotion';
-import { colors, spacing, heroAnimation } from '../../styles/themes';
+import { colors, spacing, heroAnimation, sceneTransition } from '../../styles/themes';
 import { SafeImage } from '../elements/SafeImage';
 import type { HeroSceneProps } from '../../types/video.types';
 
@@ -129,6 +130,18 @@ export const HeroScene: React.FC<HeroSceneProps> = ({
   );
 
   // ==========================================
+  // FADE-OUT PARA CROSSFADE (Prompt 19.11)
+  // ==========================================
+
+  // Crossfade con ContentScene: desvanecimiento suave en los últimos N frames
+  const fadeOut = interpolate(
+    frame,
+    [durationInFrames - sceneTransition.crossfadeFrames, durationInFrames],
+    [1, 0],
+    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+  );
+
+  // ==========================================
   // RENDER
   // ==========================================
 
@@ -140,6 +153,8 @@ export const HeroScene: React.FC<HeroSceneProps> = ({
           ${colors.background.gradient.start} 0%,
           ${colors.background.gradient.middle} 50%,
           ${colors.background.gradient.end} 100%)`,
+        // Prompt 19.11: Fade-out para crossfade con ContentScene
+        opacity: fadeOut,
       }}
     >
       {/* Contenedor centrado con safe zones */}

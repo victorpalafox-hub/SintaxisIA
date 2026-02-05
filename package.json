@@ -133,7 +133,10 @@
     "test:prompt19.9": "playwright test tests/specs/prompt19.9-outro-scene.spec.ts",
 
     "test:glow-intense": "playwright test tests/specs/prompt19.10-glow-intense.spec.ts",
-    "test:prompt19.10": "playwright test tests/specs/prompt19.10-glow-intense.spec.ts"
+    "test:prompt19.10": "playwright test tests/specs/prompt19.10-glow-intense.spec.ts",
+
+    "test:smooth-transitions": "playwright test tests/specs/prompt19.11-smooth-transitions.spec.ts",
+    "test:prompt19.11": "playwright test tests/specs/prompt19.11-smooth-transitions.spec.ts"
   },
   "keywords": [
     "youtube",

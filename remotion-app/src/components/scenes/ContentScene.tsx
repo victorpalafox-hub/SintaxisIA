@@ -21,6 +21,7 @@
  * @updated Prompt 19.2.7 - Aumentar tamaño de texto (72px)
  * @updated Prompt 19.8 - Animaciones dinámicas: parallax/zoom full-duration, per-phrase slide, glow pulse
  * @updated Prompt 19.10 - Glow intensificado: multi-layer textShadow, alpha aumentado
+ * @updated Prompt 19.11 - Fade-out para crossfade con OutroScene
  */
 
 import React, { useMemo } from 'react';
@@ -28,9 +29,10 @@ import {
   AbsoluteFill,
   interpolate,
   useCurrentFrame,
+  useVideoConfig,
   Easing,
 } from 'remotion';
-import { colors, spacing, textAnimation, imageAnimation, contentTextStyle, contentAnimation } from '../../styles/themes';
+import { colors, spacing, textAnimation, imageAnimation, contentTextStyle, contentAnimation, sceneTransition } from '../../styles/themes';
 import { ProgressBar } from '../ui/ProgressBar';
 import { SafeImage } from '../elements/SafeImage';
 import { splitIntoReadablePhrases, getPhraseTiming } from '../../utils';
@@ -69,9 +71,10 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
   audioSync,
 }) => {
   const frame = useCurrentFrame();
+  const { durationInFrames } = useVideoConfig();
 
   // ==========================================
-  // EFECTOS DE ENTRADA
+  // EFECTOS DE ENTRADA Y SALIDA
   // ==========================================
 
   // Cross fade desde Hero Scene (primeros 30 frames)
@@ -81,6 +84,18 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
     [0, 1],
     { extrapolateRight: 'clamp' }
   );
+
+  // Fade-out para crossfade con OutroScene (Prompt 19.11)
+  // Los últimos crossfadeFrames se desvanecen suavemente
+  const fadeOut = interpolate(
+    frame,
+    [durationInFrames - sceneTransition.crossfadeFrames, durationInFrames],
+    [1, 0],
+    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+  );
+
+  // Opacidad final: fade-in * fade-out (Prompt 19.11)
+  const finalOpacity = sceneOpacity * fadeOut;
 
   // ==========================================
   // SELECCIÓN DE IMAGEN (Legacy vs Dinámico)
@@ -256,7 +271,7 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
         background: `linear-gradient(180deg,
           ${colors.background.gradient.start} 0%,
           ${colors.background.gradient.end} 100%)`,
-        opacity: sceneOpacity,
+        opacity: finalOpacity,
       }}
     >
       {/* Contenedor principal con espacio para barra de progreso */}

@@ -217,13 +217,14 @@ test.describe('Prompt 19.9 - TextShadow y Compatibilidad', () => {
     logger.info('Documentación actualizada');
   });
 
-  test('durationInFrames calculado correctamente (5 * fps)', async () => {
-    logger.info('Verificando cálculo de duración');
+  test('durationInFrames obtenido de useVideoConfig (Prompt 19.11 crossfade)', async () => {
+    logger.info('Verificando durationInFrames de useVideoConfig');
 
     const content = fs.readFileSync(OUTRO_SCENE_PATH, 'utf-8');
 
-    expect(content).toContain('const durationInFrames = 5 * fps');
+    // Prompt 19.11: OutroScene usa useVideoConfig() en vez de hardcoded 5 * fps
+    expect(content).toContain('const { durationInFrames } = useVideoConfig()');
 
-    logger.info('Duración calculada correctamente');
+    logger.info('durationInFrames de useVideoConfig');
   });
 });
