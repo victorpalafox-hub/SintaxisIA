@@ -25,8 +25,9 @@
  * ```
  *
  * @author Sintaxis IA
- * @version 2.0.0
+ * @version 2.1.0
  * @since Prompt 14, actualizado Prompt 19
+ * @updated Prompt 24 - Integración NewsData.io real + NewsEnricherService
  */
 
 import * as crypto from 'crypto';
@@ -60,7 +61,9 @@ import {
   VideoMetadata,
   OutputSummary,
 } from './types/orchestrator.types';
-import { NewsItem } from './types/news.types';
+import { NewsItem, normalizeNewsArticle } from './types/news.types';
+import { fetchAINews } from './newsAPI';
+import { NewsEnricherService } from './services/news-enricher.service';
 import { ImageSearchResult, DynamicImagesResult } from './types/image.types';
 import { NewsScore } from './types/scoring.types';
 import { GeneratedScript } from './types/script.types';
@@ -175,16 +178,30 @@ export async function runPipeline(
     // PASO 2: RECOLECTAR NOTICIAS
     // ==========================================
     const newsStep = await executeStep('collect_news', steps, async () => {
-      console.log('📰 PASO 2: Recolectando noticias...');
+      console.log('📰 PASO 2: Recolectando noticias de NewsData.io...');
 
-      // TODO: Implementar en Prompt 15 con NewsData.io API
-      // const news = await collectNews({ hoursBack: 48 });
+      let newsItems: NewsItem[];
 
-      // Mock por ahora - noticias de ejemplo
-      const mockNews: NewsItem[] = getMockNews();
+      // Dry-run puro: usar mock para no gastar API quota
+      // Dry-run real o producción: fetch real de NewsData.io
+      if (finalConfig.dryRun && !finalConfig.dryReal) {
+        console.log('   ⚠️  Modo dry-run: usando noticias mock');
+        newsItems = getMockNews();
+      } else {
+        // Fetch real de NewsData.io
+        const articles = await fetchAINews(finalConfig.maxNewsToFetch);
+        console.log(`   📡 Recibidas ${articles.length} noticias de NewsData.io`);
 
-      console.log(`   ✅ ${mockNews.length} noticias recolectadas (mock)`);
-      return mockNews;
+        // Normalizar: NewsArticle → NewsItem
+        newsItems = articles.map(normalizeNewsArticle);
+
+        // Enriquecer: detectar company, type, productName para scoring
+        const enricher = new NewsEnricherService();
+        newsItems = enricher.enrichAll(newsItems);
+      }
+
+      console.log(`   ✅ ${newsItems.length} noticias listas para scoring`);
+      return newsItems;
     });
 
     // ==========================================
@@ -680,9 +697,12 @@ async function executeStep<T>(
 // =============================================================================
 
 /**
- * Genera noticias mock para testing
+ * Genera noticias mock para testing y dry-run
  *
- * TODO: Reemplazar con NewsData.io API real en Prompt 16+
+ * Solo se usa en modo dry-run puro (dryRun=true, dryReal=false)
+ * para no gastar API quota de NewsData.io.
+ *
+ * @deprecated Solo para dry-run. Producción usa fetchAINews() (Prompt 24)
  */
 function getMockNews(): NewsItem[] {
   return [
@@ -746,27 +766,7 @@ function extractTopics(news: NewsItem): string[] {
   return topics.filter(Boolean);
 }
 
-/**
- * Extrae nombre de producto del título
- */
-function extractProductName(title: string): string | undefined {
-  // Patrones comunes: "presenta X", "lanza X", "anuncia X"
-  const patterns = [
-    /presenta\s+([A-Z][a-zA-Z0-9\s]+)/i,
-    /lanza\s+([A-Z][a-zA-Z0-9\s]+)/i,
-    /anuncia\s+([A-Z][a-zA-Z0-9\s]+)/i,
-    /launches?\s+([A-Z][a-zA-Z0-9\s]+)/i,
-  ];
-
-  for (const pattern of patterns) {
-    const match = title.match(pattern);
-    if (match?.[1]) {
-      return match[1].trim();
-    }
-  }
-
-  return undefined;
-}
+// extractProductName() eliminado en Prompt 24 - lógica movida a NewsEnricherService
 
 /**
  * Genera título para YouTube

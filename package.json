@@ -158,7 +158,10 @@
     "news:help": "cd automation && npm run news-manager:help",
 
     "test:smart-image": "playwright test tests/specs/prompt23-smart-image-selector.spec.ts",
-    "test:prompt23": "playwright test tests/specs/prompt23-smart-image-selector.spec.ts"
+    "test:prompt23": "playwright test tests/specs/prompt23-smart-image-selector.spec.ts",
+
+    "test:newsdata": "playwright test tests/specs/prompt24-newsdata-integration.spec.ts",
+    "test:prompt24": "playwright test tests/specs/prompt24-newsdata-integration.spec.ts"
   },
   "keywords": [
     "youtube",

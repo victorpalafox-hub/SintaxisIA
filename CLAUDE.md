@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 969 tests (967 passing, 2 skipped)
+**Test Status**: 1013 tests (1011 passing, 2 skipped)
 
-**Last Updated**: 2026-02-05 (Prompt 23 - Smart Image Selector)
+**Last Updated**: 2026-02-05 (Prompt 24 - NewsData.io Integration)
 
 ## Prerequisites
 
@@ -67,7 +67,7 @@ npm run check
 | CI validation | `npm run ci:validate` |
 | News Manager | `npm run news:history / news:stats / news:help` |
 
-**Test suites**: 969 tests en 41 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
+**Test suites**: 1013 tests en 42 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
 
 **Playwright config**: 4 workers local / 1 en CI, timeout 2min por test, retries solo en CI (2), reporters: HTML + JSON + JUnit.
 
@@ -164,7 +164,7 @@ if (isShortTimeout(timeout)) { /* manejar error */ }
 
 ```bash
 npm run check          # TypeScript sin errores
-npm test              # Tests pasando (969 tests, 2 skipped)
+npm test              # Tests pasando (1013 tests, 2 skipped)
 npm run security:check # Sin vulnerabilidades críticas
 ```
 
@@ -406,7 +406,7 @@ Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIF
 
 ### Orchestrator (11 pasos)
 1. `check_schedule` - Validar calendario (cada 2 días: Lun/Mié/Vie/Dom 14:00)
-2. `collect_news` - Obtener noticias (NewsData.io)
+2. `collect_news` - Obtener noticias reales (NewsData.io + NewsEnricher, mock en dry-run)
 3. `select_top` - Scoring Carnita (umbral 75 pts)
 4. `generate_script` - Gemini 2.5 Flash + Alex Torres Persona
 5. `search_images` - Multi-provider (hero, context, outro)
@@ -469,6 +469,7 @@ output/
 | SmartQuery | `translateKeywords()`, `generateQueries()` | 170+ ES→EN, max 3 kw/query, 2 alternativas |
 | ImageScoring | `searchPexelsWithScoring()`, `scoreCandidate()` | 5 candidatos, 4 criterios (100pts), umbral 20 |
 | News Manager CLI | `news-manager-cli.ts` (10 comandos: history/active/expired/search/view/unlock/cleanup/clear/stats/help) | Peer de cli.ts, ts-node directo para args |
+| NewsEnricher | `enrichAll()`, `detectCompany()`, `detectType()` | 81 aliases, 8 type patterns, PASO 2 real |
 
 ## Prompt History (Resumen)
 
@@ -517,6 +518,7 @@ output/
 | 21 | Anti-Duplicación de Noticias | 35 | `PublishedNewsTracker`, `selectTopNewsExcluding`, 3-layer dedup |
 | 22 | CLI News Manager | 42 | `automation/src/news-manager-cli.ts`, nuevos métodos tracker, TrackerStats |
 | 23 | Smart Image Selector | 49 | `smart-query-generator.ts`, `smart-image.config.ts`, scoring en pexels, retry alternativas |
+| 24 | NewsData.io Integration | 44 | `newsdata.config.ts`, `news-enricher.service.ts`, PASO 2 real, 81 company aliases |
 
 ## Pendientes
 
@@ -524,5 +526,5 @@ output/
 - Integrar `youtubeService` en orchestrator (paso 11) - actualmente usa mock
 
 ### Roadmap
-- **#24 End-to-End Pipeline** - Integración YouTubeService + producción completa
-- **#25 OCR + Thumbnails** - Extracción de texto de imágenes
+- **#25 End-to-End Pipeline** - Integración YouTubeService + producción completa
+- **#26 OCR + Thumbnails** - Extracción de texto de imágenes

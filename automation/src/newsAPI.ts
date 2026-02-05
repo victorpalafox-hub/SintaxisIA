@@ -5,6 +5,7 @@
 import axios from 'axios';
 import { config } from './config';
 import { logger } from '../utils/logger';
+import { NEWSDATA_QUERY, DEFAULT_NEWS_LIMIT, MAX_NEWS_LIMIT } from './config/newsdata.config';
 
 // Interfaces para la respuesta de NewsData.io
 export interface NewsArticle {
@@ -32,20 +33,25 @@ const NEWS_API_BASE_URL = 'https://newsdata.io/api/1/news';
 
 /**
  * Obtiene las últimas noticias de Inteligencia Artificial
- * @param limit - Número máximo de noticias a obtener (default: 5)
+ *
+ * @param limit - Número máximo de noticias a obtener (default: DEFAULT_NEWS_LIMIT)
  * @returns Array de artículos de noticias
+ *
+ * @updated Prompt 24 - Query y límites desde config centralizada
  */
-export async function fetchAINews(limit: number = 5): Promise<NewsArticle[]> {
-  logger.info('Obteniendo noticias de IA desde NewsData.io...');
+export async function fetchAINews(limit: number = DEFAULT_NEWS_LIMIT): Promise<NewsArticle[]> {
+  // Safety check: no exceder MAX_NEWS_LIMIT para proteger API quota
+  const safeLimit = Math.min(limit, MAX_NEWS_LIMIT);
+  logger.info(`Obteniendo ${safeLimit} noticias de IA desde NewsData.io...`);
 
   try {
     const response = await axios.get<NewsDataResponse>(NEWS_API_BASE_URL, {
       params: {
         apikey: config.api.newsDataApiKey,
-        q: 'artificial intelligence OR AI OR machine learning OR GPT OR OpenAI',
+        q: NEWSDATA_QUERY,
         language: config.content.targetLanguage,
         category: 'technology',
-        size: limit
+        size: safeLimit
       }
     });
 
