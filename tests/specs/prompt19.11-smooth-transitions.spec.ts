@@ -305,14 +305,15 @@ test.describe('Prompt 19.11 - ContentScene Fade-Out', () => {
     logger.info('finalOpacity en render');
   });
 
-  test('sceneDurationFrames sigue siendo 37 * fps (animaciones internas)', async () => {
-    logger.info('Verificando que animaciones internas no cambiaron');
+  test('sceneDurationFrames usa durationInFrames real del Sequence', async () => {
+    logger.info('Verificando que sceneDurationFrames usa durationInFrames');
 
     const content = fs.readFileSync(CONTENT_SCENE_PATH, 'utf-8');
 
-    expect(content).toMatch(/sceneDurationFrames\s*=\s*37\s*\*\s*fps/);
+    // Prompt 25: reemplazó 37*fps hardcodeado por durationInFrames
+    expect(content).toMatch(/sceneDurationFrames\s*=\s*durationInFrames/);
 
-    logger.info('sceneDurationFrames sin cambios');
+    logger.info('sceneDurationFrames usa durationInFrames');
   });
 });
 

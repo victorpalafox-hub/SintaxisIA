@@ -60,6 +60,11 @@ export interface TimingConfig {
   phraseTimestamps?: PhraseTimestamp[];
   /** FPS del video para conversión segundos→frames (default: 30) */
   fps?: number;
+  /** Offset en segundos del inicio de la escena respecto al audio (Prompt 25)
+   *  ContentScene empieza en ~7s del video pero useCurrentFrame() retorna frame 0.
+   *  Sin este offset, el texto va ~7s adelantado respecto al audio.
+   */
+  sceneOffsetSeconds?: number;
 }
 
 // =============================================================================
@@ -143,8 +148,11 @@ export function getPhraseTiming(
 
   // Prompt 19.7: Usar timestamps reales de Whisper si están disponibles
   if (phraseTimestamps && phraseTimestamps.length > 0) {
-    // Convertir frame actual a segundos
-    const currentSecond = currentFrame / fps;
+    // Prompt 25: Convertir frame actual a segundos CON offset de escena
+    // ContentScene empieza en segundo ~7 del video, pero su frame 0 = segundo 0 local.
+    // El audio empieza en segundo 0 absoluto, así que necesitamos sumar el offset.
+    const sceneOffset = config.sceneOffsetSeconds ?? 0;
+    const currentSecond = (currentFrame / fps) + sceneOffset;
 
     // Encontrar qué frase corresponde al tiempo actual
     currentPhraseIndex = findPhraseIndexByTime(phraseTimestamps, currentSecond);

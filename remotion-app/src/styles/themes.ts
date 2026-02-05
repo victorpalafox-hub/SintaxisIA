@@ -368,6 +368,10 @@ export const heroAnimation = {
   glowValues: [0, 30, 15, 22] as readonly number[],
   /** Multiplicador de glow para imagen (boxShadow) */
   imageGlowMultiplier: 2,
+  /** Opacidad máxima del flash de impacto inicial (0-1, 0 = desactivado) @since Prompt 25 */
+  flashMaxOpacity: 0.15,
+  /** Frames de duración del flash de impacto (0.3s @ 30fps) @since Prompt 25 */
+  flashDurationFrames: 10,
 };
 
 // ==========================================

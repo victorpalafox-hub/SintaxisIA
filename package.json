@@ -161,7 +161,10 @@
     "test:prompt23": "playwright test tests/specs/prompt23-smart-image-selector.spec.ts",
 
     "test:newsdata": "playwright test tests/specs/prompt24-newsdata-integration.spec.ts",
-    "test:prompt24": "playwright test tests/specs/prompt24-newsdata-integration.spec.ts"
+    "test:prompt24": "playwright test tests/specs/prompt24-newsdata-integration.spec.ts",
+
+    "test:audio-sync-fix": "playwright test tests/specs/prompt25-audio-sync-fix.spec.ts",
+    "test:prompt25": "playwright test tests/specs/prompt25-audio-sync-fix.spec.ts"
   },
   "keywords": [
     "youtube",

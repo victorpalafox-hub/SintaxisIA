@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 1013 tests (1011 passing, 2 skipped)
+**Test Status**: 1047 tests (1045 passing, 2 skipped)
 
-**Last Updated**: 2026-02-05 (Prompt 24 - NewsData.io Integration)
+**Last Updated**: 2026-02-05 (Prompt 25 - Audio Sync Fix)
 
 ## Prerequisites
 
@@ -67,7 +67,7 @@ npm run check
 | CI validation | `npm run ci:validate` |
 | News Manager | `npm run news:history / news:stats / news:help` |
 
-**Test suites**: 1013 tests en 42 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
+**Test suites**: 1047 tests en 43 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
 
 **Playwright config**: 4 workers local / 1 en CI, timeout 2min por test, retries solo en CI (2), reporters: HTML + JSON + JUnit.
 
@@ -164,7 +164,7 @@ if (isShortTimeout(timeout)) { /* manejar error */ }
 
 ```bash
 npm run check          # TypeScript sin errores
-npm test              # Tests pasando (1013 tests, 2 skipped)
+npm test              # Tests pasando (1047 tests, 2 skipped)
 npm run security:check # Sin vulnerabilidades críticas
 ```
 
@@ -470,6 +470,8 @@ output/
 | ImageScoring | `searchPexelsWithScoring()`, `scoreCandidate()` | 5 candidatos, 4 criterios (100pts), umbral 20 |
 | News Manager CLI | `news-manager-cli.ts` (10 comandos: history/active/expired/search/view/unlock/cleanup/clear/stats/help) | Peer de cli.ts, ts-node directo para args |
 | NewsEnricher | `enrichAll()`, `detectCompany()`, `detectType()` | 81 aliases, 8 type patterns, PASO 2 real |
+| AudioSync | `sceneOffsetSeconds`, `phraseTimestamps` pipeline | Offset ~7s, source of truth Whisper, max 3 img segments |
+| HeroFlash | `flashMaxOpacity`, `flashDurationFrames` | 0.15 opacity, 10 frames (~0.3s) |
 
 ## Prompt History (Resumen)
 
@@ -519,6 +521,7 @@ output/
 | 22 | CLI News Manager | 42 | `automation/src/news-manager-cli.ts`, nuevos métodos tracker, TrackerStats |
 | 23 | Smart Image Selector | 49 | `smart-query-generator.ts`, `smart-image.config.ts`, scoring en pexels, retry alternativas |
 | 24 | NewsData.io Integration | 44 | `newsdata.config.ts`, `news-enricher.service.ts`, PASO 2 real, 81 company aliases |
+| 25 | Audio Sync Fix + Hook Visual | 34 | Frame offset, phraseTimestamps pipeline, flash overlay, MAX_IMAGE_SEGMENTS=3 |
 
 ## Pendientes
 
@@ -526,5 +529,5 @@ output/
 - Integrar `youtubeService` en orchestrator (paso 11) - actualmente usa mock
 
 ### Roadmap
-- **#25 End-to-End Pipeline** - Integración YouTubeService + producción completa
-- **#26 OCR + Thumbnails** - Extracción de texto de imágenes
+- **#26 End-to-End Pipeline** - Integración YouTubeService + producción completa
+- **#27 OCR + Thumbnails** - Extracción de texto de imágenes

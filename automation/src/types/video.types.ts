@@ -189,7 +189,7 @@ export interface RemotionAssets {
  */
 export interface RemotionStyle {
   /** Tema de colores */
-  theme: 'cyberpunk' | 'minimal' | 'corporate';
+  theme: 'cyberpunk' | 'minimal' | 'corporate' | 'tech-editorial';
   /** Color primario */
   primaryColor: string;
   /** Color de acento */

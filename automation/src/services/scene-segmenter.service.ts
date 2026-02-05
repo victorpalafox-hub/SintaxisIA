@@ -26,6 +26,13 @@ import { SmartQueryGenerator } from './smart-query-generator';
 const SEGMENT_DURATION = 15;
 
 /**
+ * Máximo de segmentos de imagen por video (Prompt 25)
+ * Limita cambios de imagen para coherencia visual.
+ * Los cambios ocurren preferentemente en transiciones de sección.
+ */
+const MAX_IMAGE_SEGMENTS = 3;
+
+/**
  * Stopwords en español a filtrar
  */
 const SPANISH_STOPWORDS = new Set([
@@ -166,10 +173,11 @@ export class SceneSegmenterService {
     logger.info(`[SceneSegmenter] Segmentando script de ${totalDuration}s`);
 
     // Calcular número de segmentos
-    const numSegments = Math.max(4, Math.ceil(totalDuration / SEGMENT_DURATION));
+    // Prompt 25: Limitar a MAX_IMAGE_SEGMENTS para coherencia visual (2-3 cambios, no 4+)
+    const numSegments = Math.min(MAX_IMAGE_SEGMENTS, Math.max(2, Math.ceil(totalDuration / SEGMENT_DURATION)));
     const actualSegmentDuration = totalDuration / numSegments;
 
-    logger.info(`[SceneSegmenter] Creando ${numSegments} segmentos de ~${actualSegmentDuration.toFixed(1)}s`);
+    logger.info(`[SceneSegmenter] Creando ${numSegments} segmentos de ~${actualSegmentDuration.toFixed(1)}s (máx ${MAX_IMAGE_SEGMENTS})`);
 
     // Mapear secciones del script a segmentos
     const sections = this.mapScriptToSections(script, totalDuration);

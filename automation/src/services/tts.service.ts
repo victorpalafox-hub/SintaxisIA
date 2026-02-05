@@ -25,6 +25,7 @@ import { logger } from '../../utils/logger';
 import type {
   TTSRequest,
   TTSResponse,
+  TTSResponseWithTimestamps,
   TTSQuotaStatus,
   TTSQuotaData,
   AudioCacheEntry,
@@ -95,7 +96,7 @@ export class TTSService {
    * @param request - Configuracion de la solicitud TTS
    * @returns Respuesta con ruta al audio y metadata
    */
-  async generateAudio(request: TTSRequest): Promise<TTSResponse> {
+  async generateAudio(request: TTSRequest): Promise<TTSResponseWithTimestamps> {
     const { text, forceRegenerate = false, outputFileName } = request;
     const textHash = this.generateHash(text);
 

@@ -22,6 +22,7 @@
  * @updated Prompt 19.8 - Animaciones dinámicas: parallax/zoom full-duration, per-phrase slide, glow pulse
  * @updated Prompt 19.11 - Fade-out para crossfade con OutroScene
  * @updated Prompt 20 - Migración a Tech Editorial: sombras sutiles, fondo transparente
+ * @updated Prompt 25 - Audio sync: offset, timestamps como source of truth, crossfade imágenes
  */
 
 import React, { useMemo } from 'react';
@@ -105,39 +106,41 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
   const currentSecond = sceneStartSecond + (frame / fps);
 
   /**
-   * Obtiene la imagen actual basándose en el tiempo del video.
+   * Obtiene la imagen actual con progreso de transición crossfade (Prompt 25)
    *
    * Si hay imágenes dinámicas (Prompt 19.1), busca la imagen del segmento actual.
    * Si no, usa el comportamiento legacy (context image → hero fallback).
+   * Retorna un progreso de transición (0-1) para crossfade suave entre cambios.
    */
-  const getCurrentImage = (): string | undefined => {
-    // Si hay imágenes dinámicas, buscar la del segmento actual
-    if (dynamicScenes && dynamicScenes.length > 0) {
-      const currentScene = dynamicScenes.find(
-        scene => currentSecond >= scene.startSecond && currentSecond < scene.endSecond
-      );
-      // Si encontramos una escena, usar su imagen
-      if (currentScene) {
-        return currentScene.imageUrl;
-      }
-      // Si estamos fuera de rango, usar la última imagen disponible
-      const lastScene = dynamicScenes[dynamicScenes.length - 1];
-      if (currentSecond >= lastScene.endSecond) {
-        return lastScene.imageUrl;
-      }
-      // Si estamos antes del primer segmento, usar la primera imagen
-      return dynamicScenes[0].imageUrl;
+  const getImageWithTransition = (): { url: string | undefined; transitionProgress: number } => {
+    if (!dynamicScenes || dynamicScenes.length === 0) {
+      return { url: images?.context || images?.hero, transitionProgress: 1 };
     }
 
-    // Fallback a comportamiento legacy
-    return images?.context || images?.hero;
+    const currentScene = dynamicScenes.find(
+      scene => currentSecond >= scene.startSecond && currentSecond < scene.endSecond
+    );
+
+    if (!currentScene) {
+      const lastScene = dynamicScenes[dynamicScenes.length - 1];
+      const url = currentSecond >= lastScene.endSecond
+        ? lastScene.imageUrl
+        : dynamicScenes[0].imageUrl;
+      return { url, transitionProgress: 1 };
+    }
+
+    // Prompt 25: Crossfade suave en los primeros 20 frames de cada segmento
+    const segmentFrame = (currentSecond - currentScene.startSecond) * fps;
+    const transitionProgress = Math.min(1, segmentFrame / 20);
+
+    return { url: currentScene.imageUrl, transitionProgress };
   };
 
-  // Imagen actual a mostrar
-  const contextImage = getCurrentImage();
+  // Imagen actual a mostrar con su progreso de transición
+  const { url: contextImage, transitionProgress } = getImageWithTransition();
 
-  // Duración de ContentScene en frames (necesario antes de usarlo en animaciones)
-  const sceneDurationFrames = 37 * fps;
+  // Prompt 25: Usar durationInFrames real del Sequence (no hardcoded 37*fps)
+  const sceneDurationFrames = durationInFrames;
 
   // ==========================================
   // EFECTOS DINÁMICOS DE IMAGEN (Prompt 19.8)
@@ -179,14 +182,25 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
   // TEXTO SECUENCIAL (Prompt 19.2)
   // ==========================================
 
-  // Dividir descripción en frases legibles
-  const phrases = useMemo(
-    () => splitIntoReadablePhrases(description, {
+  // Prompt 25: Dividir descripción en frases legibles
+  // Si hay audioSync con timestamps, usar ESE texto como source of truth
+  // Esto evita mismatch entre el split visual y el split de Whisper
+  const phrases = useMemo(() => {
+    if (audioSync?.phraseTimestamps && audioSync.phraseTimestamps.length > 0) {
+      return audioSync.phraseTimestamps.map((ts, index) => ({
+        text: ts.text,
+        index,
+        charCount: ts.text.length,
+        wordCount: ts.text.split(/\s+/).length,
+      }));
+    }
+
+    // Fallback: split visual uniforme (sin Whisper)
+    return splitIntoReadablePhrases(description, {
       maxCharsPerPhrase: textAnimation.maxCharsPerPhrase,
       minWordsPerPhrase: textAnimation.minWordsPerPhrase,
-    }),
-    [description]
-  );
+    });
+  }, [description, audioSync]);
 
   // Calcular frase actual y opacity para transiciones
   // Prompt 19.7: Usa timestamps de Whisper si están disponibles para sincronización precisa
@@ -200,6 +214,9 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
       // Prompt 19.7: Timestamps de audio para sincronización real
       phraseTimestamps: audioSync?.phraseTimestamps,
       fps,
+      // Prompt 25: Offset para compensar que ContentScene empieza en segundo ~8
+      // Sin esto, frame 0 = segundo 0, pero el audio ya está en segundo ~8
+      sceneOffsetSeconds: sceneStartSecond,
     }
   );
 
@@ -268,7 +285,8 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
           <div
             style={{
               transform: `translateY(${parallaxY}px) scale(${imageScale})`,
-              opacity: imageOpacity,
+              // Prompt 25: imageOpacity * transitionProgress para crossfade entre imágenes
+              opacity: imageOpacity * transitionProgress,
               borderRadius: 16,
               overflow: 'hidden',
               // Sombra editorial de elevación (Prompt 20)

@@ -571,7 +571,7 @@ class VideoRenderingService {
       subtitles,
       sections,
       style: {
-        theme: 'cyberpunk',
+        theme: 'tech-editorial',
         primaryColor: '#00FFFF',
         accentColor: '#FF00FF',
         showSubtitles: true,
@@ -640,10 +640,18 @@ class VideoRenderingService {
       console.log(`   ✅ Audio sync enabled: ${request.phraseTimestamps!.length} phrase timestamps`);
     }
 
+    // Prompt 25: Log de validación de consistencia texto-audio
+    const descriptionPreview = request.script.substring(0, 80);
+    console.log(`   📝 On-screen text source: fullScript (${request.script.length} chars)`);
+    console.log(`   📝 Preview: "${descriptionPreview}..."`);
+
+
     return {
       news: {
         title: request.title,
-        description: request.body || request.script,
+        // Prompt 25: SIEMPRE usar el script completo narrado (no solo body)
+        // El audio narra fullScript, así que el texto on-screen debe ser el mismo
+        description: request.script,
         details: [], // Bullet points eliminados en Prompt 19.2.6
         source: request.newsSource || 'Sintaxis IA',
         publishedAt: new Date().toISOString().split('T')[0],

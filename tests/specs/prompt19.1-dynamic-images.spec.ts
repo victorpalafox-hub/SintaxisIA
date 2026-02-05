@@ -470,11 +470,12 @@ test.describe('Prompt 19.1 - Remotion Components', () => {
     expect(content).toContain('sceneStartSecond=');
   });
 
-  test('ContentScene.tsx implementa getCurrentImage', async () => {
+  test('ContentScene.tsx implementa selección de imagen dinámica', async () => {
     const filePath = path.join(__dirname, '../../remotion-app/src/components/scenes/ContentScene.tsx');
     const content = fs.readFileSync(filePath, 'utf-8');
 
-    expect(content).toContain('getCurrentImage');
+    // Prompt 25: renombrado getCurrentImage → getImageWithTransition
+    expect(content).toContain('getImageWithTransition');
     expect(content).toContain('dynamicScenes');
     expect(content).toContain('currentSecond');
   });

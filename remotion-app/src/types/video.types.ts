@@ -234,6 +234,14 @@ export interface VideoProps {
     /** Activar efectos dinámicos (zoom, parallax, blur) @default true */
     enhancedEffects?: boolean;
   };
+
+  /**
+   * Datos de sincronización de audio (Prompt 19.7/25)
+   * Contiene timestamps de frases de Whisper para sync preciso con texto on-screen
+   * Si no existe, ContentScene usa distribución uniforme de frases
+   * @since Prompt 25
+   */
+  audioSync?: AudioSync;
 }
 
 // =============================================================================

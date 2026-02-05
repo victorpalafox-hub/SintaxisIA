@@ -67,6 +67,7 @@ import { NewsEnricherService } from './services/news-enricher.service';
 import { ImageSearchResult, DynamicImagesResult } from './types/image.types';
 import { NewsScore } from './types/scoring.types';
 import { GeneratedScript } from './types/script.types';
+import type { PhraseTimestamp } from './types/tts.types';
 import { videoRenderingService } from './services/video-rendering.service';
 import { outputManager, OutputData } from './services/output-manager.service';
 
@@ -348,11 +349,19 @@ export async function runPipeline(
       console.log(`   📦 Cache: ${ttsResult.fromCache ? 'Sí' : 'No'}`);
       console.log(`   📊 Caracteres: ${ttsResult.charactersUsed}`);
 
+      // Prompt 25: Propagar phraseTimestamps de Whisper al render
+      if (ttsResult.phraseTimestamps?.length) {
+        console.log(`   🔄 Whisper timestamps: ${ttsResult.phraseTimestamps.length} frases`);
+      } else {
+        console.log(`   ℹ️  Sin timestamps de Whisper (sync por distribución uniforme)`);
+      }
+
       return {
         audioPath: ttsResult.audioPath,
         durationSeconds: ttsResult.durationSeconds,
         provider: ttsResult.provider,
         fromCache: ttsResult.fromCache,
+        phraseTimestamps: ttsResult.phraseTimestamps,  // Prompt 25
       };
     });
 
@@ -366,7 +375,8 @@ export async function runPipeline(
       const { generatedScript, fullScript } = scriptStep.data as { generatedScript: GeneratedScript; fullScript: string };
       const { dynamicImages, legacyImages } = imagesStep.data as { dynamicImages: DynamicImagesResult; legacyImages: ImageSearchResult };
       const images = legacyImages; // Formato legacy para compatibilidad
-      const audioData = audioStep.data as { audioPath: string; durationSeconds: number; provider: string; fromCache: boolean };
+      // Prompt 25: Incluir phraseTimestamps para sincronización audio-texto
+      const audioData = audioStep.data as { audioPath: string; durationSeconds: number; provider: string; fromCache: boolean; phraseTimestamps?: PhraseTimestamp[] };
 
       // Generar videoId único
       const videoId = crypto.randomBytes(8).toString('hex');
@@ -416,6 +426,7 @@ export async function runPipeline(
         company: news.company,
         newsType: news.type,
         dynamicScenes: dynamicImages?.scenes || [], // Prompt 19.1.7: Imágenes dinámicas
+        phraseTimestamps: audioData.phraseTimestamps, // Prompt 25: sync audio-texto
       });
 
       if (!renderResult.success) {

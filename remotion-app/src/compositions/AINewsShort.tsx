@@ -107,6 +107,7 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
   const hashtags = props.hashtags ?? ['#IA', '#AI'];
   const audio = props.audio ?? DEFAULT_AUDIO;
   const config = props.config;
+  const audioSync = props.audioSync; // Prompt 25: sync audio-texto
 
   // ==========================================
   // CONFIGURACION
@@ -215,6 +216,7 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
           totalDuration={durationInFrames}
           fps={fps}
           dynamicEffects={enhancedEffects}
+          audioSync={audioSync}
         />
       </Sequence>
 

@@ -17,6 +17,7 @@
  * @since Prompt 13
  * @updated Prompt 19.11 - Fade-out para crossfade con ContentScene
  * @updated Prompt 20 - Migración a Tech Editorial: sombras sutiles, fondo transparente
+ * @updated Prompt 25 - Flash de impacto inicial para retención
  */
 
 import React from 'react';
@@ -119,6 +120,19 @@ export const HeroScene: React.FC<HeroSceneProps> = ({
   const titleOpacity = interpolate(animation, [0, 1], [0, 1]);
 
   // ==========================================
+  // FLASH DE IMPACTO INICIAL (Prompt 25)
+  // ==========================================
+
+  // Overlay blanco muy breve que simula "encendido" de pantalla
+  // Captura el scroll en los primeros 0.3s sin tocar audio
+  const flashOpacity = interpolate(
+    frame,
+    [0, 4, heroAnimation.flashDurationFrames],
+    [heroAnimation.flashMaxOpacity, heroAnimation.flashMaxOpacity, 0],
+    { extrapolateRight: 'clamp' }
+  );
+
+  // ==========================================
   // FADE-OUT PARA CROSSFADE (Prompt 19.11)
   // ==========================================
 
@@ -199,6 +213,16 @@ export const HeroScene: React.FC<HeroSceneProps> = ({
           {title}
         </div>
       </AbsoluteFill>
+
+      {/* Prompt 25: Flash de impacto inicial para capturar scroll */}
+      {flashOpacity > 0 && (
+        <AbsoluteFill
+          style={{
+            backgroundColor: `rgba(255, 255, 255, ${flashOpacity})`,
+            pointerEvents: 'none',
+          }}
+        />
+      )}
     </AbsoluteFill>
   );
 };

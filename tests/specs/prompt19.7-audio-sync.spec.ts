@@ -345,7 +345,8 @@ test.describe('Prompt 19.7 - phrase-timing.ts', () => {
     );
 
     expect(content).toContain('if (phraseTimestamps && phraseTimestamps.length > 0)');
-    expect(content).toContain('currentSecond = currentFrame / fps');
+    // Prompt 25: ahora incluye offset para compensar inicio de escena
+    expect(content).toContain('currentFrame / fps');
 
     logger.info('Timestamps reales se usan cuando disponibles');
   });
