@@ -158,9 +158,13 @@ export function getPhraseTiming(
     currentPhraseIndex = findPhraseIndexByTime(phraseTimestamps, currentSecond);
 
     // Obtener timestamps de la frase actual
+    // Convertir a frames locales de escena restando el offset
+    // Sin esto, phraseStartFrame sería absoluto (e.g. 102) pero currentFrame es local (0),
+    // causando relativeFrame negativo → opacity 0 → texto invisible
     const timestamp = phraseTimestamps[currentPhraseIndex];
-    phraseStartFrame = Math.round(timestamp.startSeconds * fps);
-    phraseEndFrame = Math.round(timestamp.endSeconds * fps);
+    const sceneOffsetFrames = Math.round(sceneOffset * fps);
+    phraseStartFrame = Math.round(timestamp.startSeconds * fps) - sceneOffsetFrames;
+    phraseEndFrame = Math.round(timestamp.endSeconds * fps) - sceneOffsetFrames;
 
   } else {
     // Fallback: Distribución uniforme (comportamiento original)

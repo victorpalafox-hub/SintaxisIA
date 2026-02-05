@@ -124,10 +124,12 @@ test.describe('Prompt 25 - Suite 3: Frame offset en phrase-timing', () => {
     const filePath = path.join(REMOTION_SRC, 'utils', 'phrase-timing.ts');
     const content = fs.readFileSync(filePath, 'utf-8');
 
-    // Debe sumar el offset: (currentFrame / fps) + sceneOffset
-    expect(content).toContain('sceneOffset');
+    // Debe sumar el offset para currentSecond y restarlo para phraseStartFrame
     expect(content).toContain('+ sceneOffset');
-    logger.info('Offset aplicado correctamente');
+    // Prompt 25.1: phraseStartFrame debe restar offset para convertir a frames locales
+    expect(content).toContain('sceneOffsetFrames');
+    expect(content).toContain('- sceneOffsetFrames');
+    logger.info('Offset aplicado correctamente (suma en currentSecond, resta en phraseStartFrame)');
   });
 
   test('sceneOffsetSeconds tiene valor default 0', async () => {
