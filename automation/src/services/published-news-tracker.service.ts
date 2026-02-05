@@ -41,6 +41,7 @@ import {
   PublishedNewsEntry,
   PublishedNewsData,
   DuplicateCheckResult,
+  TrackerStats,
 } from '../types/published-news.types';
 import { NewsItem } from '../types/news.types';
 import { NewsScore } from '../types/scoring.types';
@@ -257,6 +258,253 @@ export class PublishedNewsTracker {
   }
 
   // ===========================================================================
+  // METODOS DE CONSULTA (CLI News Manager - Prompt 22)
+  // ===========================================================================
+
+  /**
+   * Retorna el historial completo ordenado por fecha descendente
+   *
+   * @param limit - Numero maximo de entries a retornar (opcional)
+   * @returns Historial ordenado, opcionalmente limitado
+   * @throws Error si el tracker no fue cargado con load()
+   *
+   * @since Prompt 22
+   */
+  getHistory(limit?: number): PublishedNewsEntry[] {
+    this.ensureLoaded();
+    const sorted = [...this.data.entries].sort(
+      (a, b) =>
+        new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
+    );
+    return limit ? sorted.slice(0, limit) : sorted;
+  }
+
+  /**
+   * Retorna entries activos (dentro de la ventana de cooldown)
+   *
+   * Estas son las noticias que el tracker BLOQUEA si se intenta re-publicar.
+   *
+   * @returns Entries dentro de cooldownDays
+   * @throws Error si el tracker no fue cargado
+   *
+   * @since Prompt 22
+   */
+  getActiveEntries(): PublishedNewsEntry[] {
+    this.ensureLoaded();
+    return this.getRecentEntries(PUBLISHED_NEWS_CONFIG.cooldownDays);
+  }
+
+  /**
+   * Retorna entries expirados (fuera de la ventana de cooldown)
+   *
+   * Estas noticias ya no bloquean publicacion pero siguen en historial.
+   *
+   * @returns Entries fuera de cooldownDays
+   * @throws Error si el tracker no fue cargado
+   *
+   * @since Prompt 22
+   */
+  getExpiredEntries(): PublishedNewsEntry[] {
+    this.ensureLoaded();
+    const activeIds = new Set(
+      this.getRecentEntries(PUBLISHED_NEWS_CONFIG.cooldownDays).map(
+        e => e.newsId,
+      ),
+    );
+    return this.data.entries.filter(e => !activeIds.has(e.newsId));
+  }
+
+  /**
+   * Busca entries por titulo (substring match sobre titulo normalizado)
+   *
+   * @param query - Texto a buscar (se normaliza automaticamente)
+   * @returns Entries que coinciden, ordenados por fecha desc
+   * @throws Error si el tracker no fue cargado
+   *
+   * @since Prompt 22
+   */
+  searchByTitle(query: string): PublishedNewsEntry[] {
+    this.ensureLoaded();
+    const normalizedQuery = PublishedNewsTracker.normalizeTitle(query);
+    return this.data.entries
+      .filter(entry => entry.normalizedTitle.includes(normalizedQuery))
+      .sort(
+        (a, b) =>
+          new Date(b.publishedAt).getTime() -
+          new Date(a.publishedAt).getTime(),
+      );
+  }
+
+  /**
+   * Obtiene un entry por ID exacto
+   *
+   * @param newsId - ID exacto de la noticia
+   * @returns Entry encontrado o undefined
+   * @throws Error si el tracker no fue cargado
+   *
+   * @since Prompt 22
+   */
+  getById(newsId: string): PublishedNewsEntry | undefined {
+    this.ensureLoaded();
+    return this.data.entries.find(e => e.newsId === newsId);
+  }
+
+  /**
+   * Busca entries por ID parcial (minimo 6 caracteres)
+   *
+   * Util para el CLI donde el usuario no quiere escribir el ID completo.
+   *
+   * @param partialId - Fragmento del ID (min 6 chars)
+   * @returns Entries cuyo newsId contiene el fragmento
+   * @throws Error si el tracker no fue cargado
+   *
+   * @since Prompt 22
+   */
+  findByPartialId(partialId: string): PublishedNewsEntry[] {
+    this.ensureLoaded();
+    if (partialId.length < 6) {
+      return [];
+    }
+    return this.data.entries.filter(e => e.newsId.includes(partialId));
+  }
+
+  /**
+   * Remueve un entry por ID exacto
+   *
+   * Usado por el comando unlock para desbloquear noticias.
+   * IMPORTANTE: Llamar save() despues para persistir el cambio.
+   *
+   * @param newsId - ID de la noticia a remover
+   * @returns true si se removio, false si no existia
+   * @throws Error si el tracker no fue cargado
+   *
+   * @since Prompt 22
+   */
+  removeById(newsId: string): boolean {
+    this.ensureLoaded();
+    const initialLength = this.data.entries.length;
+    this.data.entries = this.data.entries.filter(e => e.newsId !== newsId);
+    return this.data.entries.length < initialLength;
+  }
+
+  /**
+   * Limpia TODO el historial
+   *
+   * IMPORTANTE: Llamar save() despues para persistir el cambio.
+   *
+   * @returns Cantidad de entries eliminados
+   * @throws Error si el tracker no fue cargado
+   *
+   * @since Prompt 22
+   */
+  clearAll(): number {
+    this.ensureLoaded();
+    const count = this.data.entries.length;
+    this.data.entries = [];
+    return count;
+  }
+
+  /**
+   * Limpia entries expirados (fuera de la ventana de cooldown)
+   *
+   * IMPORTANTE: Llamar save() despues para persistir el cambio.
+   *
+   * @returns Objeto con cantidad removida y restante
+   * @throws Error si el tracker no fue cargado
+   *
+   * @since Prompt 22
+   */
+  cleanupExpired(): { removed: number; remaining: number } {
+    this.ensureLoaded();
+    const expired = this.getExpiredEntries();
+    const idsToRemove = new Set(expired.map(e => e.newsId));
+    this.data.entries = this.data.entries.filter(
+      e => !idsToRemove.has(e.newsId),
+    );
+    return {
+      removed: idsToRemove.size,
+      remaining: this.data.entries.length,
+    };
+  }
+
+  /**
+   * Obtiene estadisticas completas del historial
+   *
+   * @returns TrackerStats con conteos, promedios, distribucion, etc.
+   * @throws Error si el tracker no fue cargado
+   *
+   * @since Prompt 22
+   */
+  getStats(): TrackerStats {
+    this.ensureLoaded();
+
+    const active = this.getActiveEntries();
+    const entries = this.data.entries;
+
+    // Empresas y productos unicos
+    const companies = [
+      ...new Set(entries.filter(e => e.company).map(e => e.company!)),
+    ];
+    const products = [
+      ...new Set(entries.filter(e => e.productName).map(e => e.productName!)),
+    ];
+
+    // Score promedio
+    const avgScore =
+      entries.length > 0
+        ? entries.reduce((sum, e) => sum + e.score, 0) / entries.length
+        : 0;
+
+    // Distribucion por score
+    const scoreDistribution = { low: 0, good: 0, high: 0, excellent: 0 };
+    for (const entry of entries) {
+      if (entry.score < 75) scoreDistribution.low++;
+      else if (entry.score < 85) scoreDistribution.good++;
+      else if (entry.score < 95) scoreDistribution.high++;
+      else scoreDistribution.excellent++;
+    }
+
+    // Entries mas antiguo y mas reciente
+    let oldestEntry: { title: string; publishedAt: string } | null = null;
+    let newestEntry: { title: string; publishedAt: string } | null = null;
+    let daysSinceLastPublication: number | null = null;
+
+    if (entries.length > 0) {
+      const sorted = [...entries].sort(
+        (a, b) =>
+          new Date(a.publishedAt).getTime() -
+          new Date(b.publishedAt).getTime(),
+      );
+      oldestEntry = {
+        title: sorted[0].title,
+        publishedAt: sorted[0].publishedAt,
+      };
+      const newest = sorted[sorted.length - 1];
+      newestEntry = {
+        title: newest.title,
+        publishedAt: newest.publishedAt,
+      };
+      daysSinceLastPublication = Math.floor(
+        (Date.now() - new Date(newest.publishedAt).getTime()) /
+          (1000 * 60 * 60 * 24),
+      );
+    }
+
+    return {
+      totalEntries: entries.length,
+      activeEntries: active.length,
+      expiredEntries: entries.length - active.length,
+      averageScore: Math.round(avgScore * 10) / 10,
+      uniqueCompanies: companies,
+      uniqueProducts: products,
+      scoreDistribution,
+      oldestEntry,
+      newestEntry,
+      daysSinceLastPublication,
+    };
+  }
+
+  // ===========================================================================
   // METODOS ESTATICOS (funciones puras, testeables)
   // ===========================================================================
 
@@ -325,12 +573,27 @@ export class PublishedNewsTracker {
   // ===========================================================================
 
   /**
+   * Verifica que el tracker fue cargado con load()
+   *
+   * @throws Error si no se ha llamado load() previamente
+   *
+   * @since Prompt 22
+   */
+  private ensureLoaded(): void {
+    if (!this.loaded) {
+      throw new Error('Tracker not loaded. Call load() first.');
+    }
+  }
+
+  /**
    * Filtra entries dentro de una ventana de dias
+   *
+   * Cambiado de private a public en Prompt 22 para uso del CLI.
    *
    * @param days - Numero de dias hacia atras
    * @returns Entries publicados dentro de la ventana
    */
-  private getRecentEntries(days: number): PublishedNewsEntry[] {
+  getRecentEntries(days: number): PublishedNewsEntry[] {
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - days);
     const cutoffTime = cutoff.getTime();

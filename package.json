@@ -145,7 +145,17 @@
     "test:prompt20": "playwright test tests/specs/prompt20-tech-editorial.spec.ts",
 
     "test:anti-duplication": "playwright test tests/specs/prompt21-anti-duplication.spec.ts",
-    "test:prompt21": "playwright test tests/specs/prompt21-anti-duplication.spec.ts"
+    "test:prompt21": "playwright test tests/specs/prompt21-anti-duplication.spec.ts",
+
+    "test:news-manager": "playwright test tests/specs/prompt22-news-manager-cli.spec.ts",
+    "test:prompt22": "playwright test tests/specs/prompt22-news-manager-cli.spec.ts",
+
+    "news:history": "cd automation && npm run news-manager:history",
+    "news:active": "cd automation && npm run news-manager:active",
+    "news:expired": "cd automation && npm run news-manager:expired",
+    "news:stats": "cd automation && npm run news-manager:stats",
+    "news:cleanup": "cd automation && npm run news-manager:cleanup",
+    "news:help": "cd automation && npm run news-manager:help"
   },
   "keywords": [
     "youtube",

@@ -17,7 +17,14 @@
     "pipeline:dry-real": "ts-node src/cli.ts --dry-real",
     "pipeline:force": "ts-node src/cli.ts --force",
     "pipeline:prod": "ts-node src/cli.ts --prod",
-    "pipeline:help": "ts-node src/cli.ts --help"
+    "pipeline:help": "ts-node src/cli.ts --help",
+    "news-manager": "ts-node src/news-manager-cli.ts",
+    "news-manager:history": "ts-node src/news-manager-cli.ts history",
+    "news-manager:active": "ts-node src/news-manager-cli.ts active",
+    "news-manager:expired": "ts-node src/news-manager-cli.ts expired",
+    "news-manager:stats": "ts-node src/news-manager-cli.ts stats",
+    "news-manager:cleanup": "ts-node src/news-manager-cli.ts cleanup",
+    "news-manager:help": "ts-node src/news-manager-cli.ts --help"
   },
   "keywords": [
     "youtube",

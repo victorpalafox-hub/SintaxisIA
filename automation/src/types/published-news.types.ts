@@ -84,3 +84,51 @@ export interface DuplicateCheckResult {
   /** Porcentaje de similitud (para title-similarity, 0.0-1.0) */
   similarityScore?: number;
 }
+
+/**
+ * Estadisticas del tracker de noticias publicadas
+ *
+ * Retornada por `getStats()` para mostrar resumen del historial.
+ *
+ * @since Prompt 22
+ */
+export interface TrackerStats {
+  /** Total de entries en historial */
+  totalEntries: number;
+
+  /** Entries activos (dentro de ventana de cooldown) */
+  activeEntries: number;
+
+  /** Entries expirados (fuera de ventana de cooldown) */
+  expiredEntries: number;
+
+  /** Score promedio de todas las noticias */
+  averageScore: number;
+
+  /** Lista de empresas unicas mencionadas */
+  uniqueCompanies: string[];
+
+  /** Lista de productos unicos mencionados */
+  uniqueProducts: string[];
+
+  /** Distribucion por rangos de score */
+  scoreDistribution: {
+    /** 0-74 (no publicables) */
+    low: number;
+    /** 75-84 */
+    good: number;
+    /** 85-94 */
+    high: number;
+    /** 95+ */
+    excellent: number;
+  };
+
+  /** Entry mas antiguo (titulo + fecha) o null si vacio */
+  oldestEntry: { title: string; publishedAt: string } | null;
+
+  /** Entry mas reciente (titulo + fecha) o null si vacio */
+  newestEntry: { title: string; publishedAt: string } | null;
+
+  /** Dias desde la ultima publicacion o null si vacio */
+  daysSinceLastPublication: number | null;
+}
