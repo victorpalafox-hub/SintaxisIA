@@ -235,3 +235,54 @@ export interface DynamicImagesResult {
   /** Timestamp de generación */
   generatedAt: string;
 }
+
+// =============================================================================
+// PROMPT 23 - SMART IMAGE SELECTOR
+// =============================================================================
+
+/**
+ * Resultado de generación de queries inteligentes
+ *
+ * SmartQueryGenerator traduce keywords del español al inglés
+ * y genera queries alternativas para retry.
+ *
+ * @since Prompt 23
+ */
+export interface SmartQueryResult {
+  /** Query principal optimizada en inglés */
+  primary: string;
+
+  /** Queries alternativas para retry (máximo 2) */
+  alternatives: string[];
+
+  /** Idioma de las queries generadas */
+  language: 'en';
+
+  /** Keywords originales (español) que generaron las queries */
+  originalKeywords: string[];
+
+  /** Keywords traducidas al inglés */
+  translatedKeywords: string[];
+}
+
+/**
+ * Candidato de imagen de Pexels con metadata para scoring
+ *
+ * Retornado por searchPexelsMultiple() para evaluar
+ * cuál imagen es la más relevante.
+ *
+ * @since Prompt 23
+ */
+export interface PexelsCandidate {
+  /** URL de la imagen (portrait o large2x según orientación) */
+  url: string;
+
+  /** Texto alternativo / descripción de la imagen */
+  alt: string;
+
+  /** Ancho original de la imagen en píxeles */
+  width: number;
+
+  /** Alto original de la imagen en píxeles */
+  height: number;
+}

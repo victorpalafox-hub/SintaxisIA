@@ -155,7 +155,10 @@
     "news:expired": "cd automation && npm run news-manager:expired",
     "news:stats": "cd automation && npm run news-manager:stats",
     "news:cleanup": "cd automation && npm run news-manager:cleanup",
-    "news:help": "cd automation && npm run news-manager:help"
+    "news:help": "cd automation && npm run news-manager:help",
+
+    "test:smart-image": "playwright test tests/specs/prompt23-smart-image-selector.spec.ts",
+    "test:prompt23": "playwright test tests/specs/prompt23-smart-image-selector.spec.ts"
   },
   "keywords": [
     "youtube",

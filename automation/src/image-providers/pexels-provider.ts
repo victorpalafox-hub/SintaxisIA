@@ -8,13 +8,15 @@
  * Docs: https://www.pexels.com/api/documentation/
  *
  * @author Sintaxis IA
- * @version 1.0.0
+ * @version 1.1.0
  * @since Prompt 19.1
+ * @updated Prompt 23 - searchPexelsMultiple retorna PexelsCandidate[] para scoring
  */
 
 import axios from 'axios';
 import { IMAGE_API_CONFIG } from '../config/image-sources';
 import { logger } from '../../utils/logger';
+import type { PexelsCandidate } from '../types/image.types';
 
 /**
  * Resultado de búsqueda de Pexels
@@ -118,18 +120,23 @@ export async function searchPexels(
 }
 
 /**
- * Busca múltiples imágenes en Pexels (para variedad)
+ * Busca múltiples imágenes en Pexels con metadata para scoring
+ *
+ * Retorna candidatos con URL, alt text, y dimensiones para que
+ * el sistema de scoring pueda evaluar cuál es la más relevante.
  *
  * @param query - Término de búsqueda
  * @param count - Número de imágenes a retornar
  * @param orientation - Orientación de imagen
- * @returns Array de URLs de imágenes
+ * @returns Array de candidatos con metadata
+ *
+ * @updated Prompt 23 - Retorna PexelsCandidate[] en vez de string[]
  */
 export async function searchPexelsMultiple(
   query: string,
   count: number = 3,
   orientation: 'portrait' | 'landscape' = 'portrait'
-): Promise<string[]> {
+): Promise<PexelsCandidate[]> {
   try {
     const apiKey = IMAGE_API_CONFIG.pexels.apiKey;
 
@@ -154,11 +161,14 @@ export async function searchPexelsMultiple(
     );
 
     if (response.data.photos && response.data.photos.length > 0) {
-      return response.data.photos.map(photo =>
-        orientation === 'portrait'
+      return response.data.photos.map(photo => ({
+        url: orientation === 'portrait'
           ? photo.src.portrait || photo.src.large2x
-          : photo.src.landscape || photo.src.large2x
-      );
+          : photo.src.landscape || photo.src.large2x,
+        alt: photo.alt || '',
+        width: photo.width,
+        height: photo.height,
+      }));
     }
 
     return [];

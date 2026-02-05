@@ -196,7 +196,8 @@ test.describe('Prompt 19.5 - Lógica de Priorización', () => {
     logger.info('Verificando fallback a keywords');
 
     // Debe haber comentario indicando fallback
-    expect(serviceContent).toContain('Fallback: Usar keywords si no hay conceptos visuales');
+    // Prompt 23: El fallback ahora traduce keywords al inglés
+    expect(serviceContent).toContain('Fallback: Traducir keywords a ingl');
   });
 
   test('señal __LOGO__ se mantiene para segmento 0', async () => {

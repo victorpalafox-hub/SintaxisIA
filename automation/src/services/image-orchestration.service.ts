@@ -6,20 +6,24 @@
  *
  * Cascade de proveedores:
  * 1. Para logos (__LOGO__): Clearbit → Logo.dev → Google → Pexels → UI Avatars
- * 2. Para contenido: Pexels → Unsplash → Google → UI Avatars
+ * 2. Para contenido: Pexels(scoring) → Unsplash → Google → Alt1 → Alt2 → Simplified → UI Avatars
  *
  * @author Sintaxis IA
- * @version 1.1.0
+ * @version 1.2.0
  * @since Prompt 19.1
  * @updated Prompt 19.1.6 - Integración Clearbit/Logo.dev, eliminado sufijo 'technology'
+ * @updated Prompt 23 - Scoring inteligente + retry con queries alternativas
  */
 
 import { logger } from '../../utils/logger';
 import { searchPexels, isPexelsConfigured } from '../image-providers/pexels-provider';
+import { searchPexelsMultiple } from '../image-providers/pexels-provider';
 import { searchUnsplash } from '../image-providers/unsplash-provider';
 import { searchGoogle } from '../image-providers/google-provider';
 import { searchClearbit, searchLogodev } from '../image-providers';
-import type { SceneSegment, SceneImage, SceneImageSource, DynamicImagesResult } from '../types/image.types';
+import { SmartQueryGenerator } from './smart-query-generator';
+import { IMAGE_SCORING_CONFIG, FALLBACK_THEME } from '../config/smart-image.config';
+import type { SceneSegment, SceneImage, SceneImageSource, DynamicImagesResult, PexelsCandidate } from '../types/image.types';
 
 // =============================================================================
 // CONFIGURACIÓN
@@ -35,16 +39,6 @@ const RATE_LIMIT_DELAY_MS = 350;
  * URL base para fallback de UI Avatars
  */
 const UI_AVATARS_BASE = 'https://ui-avatars.com/api';
-
-/**
- * Colores editoriales para fallback (Prompt 20)
- */
-const FALLBACK_COLORS = [
-  { bg: '4A9EFF', fg: '000000' }, // Azul primario
-  { bg: '38BDF8', fg: '000000' }, // Sky blue
-  { bg: '64748B', fg: 'FFFFFF' }, // Slate
-  { bg: '0EA5E9', fg: 'FFFFFF' }, // Azul profundo
-];
 
 // =============================================================================
 // SERVICIO PRINCIPAL
@@ -63,6 +57,9 @@ const FALLBACK_COLORS = [
  * ```
  */
 export class ImageOrchestrationService {
+  /** Generador de queries inteligentes para alternativas (Prompt 23) */
+  private queryGenerator = new SmartQueryGenerator();
+
   /**
    * Busca 1 imagen para cada segmento
    *
@@ -111,14 +108,25 @@ export class ImageOrchestrationService {
   }
 
   /**
-   * Busca imagen con cascade de proveedores
+   * Busca imagen con cascade de proveedores + retry con queries alternativas
    *
    * Detecta señal __LOGO__ para usar cascade especial de logos.
+   * Para contenido, usa scoring inteligente y queries alternativas.
+   *
+   * Cascade contenido (Prompt 23):
+   * 1. Pexels con scoring (query principal)
+   * 2. Unsplash (query principal)
+   * 3. Google (query principal)
+   * 4. Pexels con scoring (alternativa 1)
+   * 5. Pexels con scoring (alternativa 2)
+   * 6. Pexels con scoring (query simplificada)
+   * 7. UI Avatars fallback (mejorado)
    *
    * @param segment - Segmento a buscar
    * @returns Imagen encontrada (nunca falla, tiene fallback garantizado)
    *
    * @updated Prompt 19.1.6 - Detecta __LOGO__ para Clearbit/Logo.dev
+   * @updated Prompt 23 - Scoring + queries alternativas
    */
   private async searchWithFallback(segment: SceneSegment): Promise<SceneImage> {
     const { index, startSecond, endSecond, searchQuery, keywords } = segment;
@@ -131,11 +139,11 @@ export class ImageOrchestrationService {
       return this.searchLogoWithCascade(index, startSecond, endSecond, company, keywords);
     }
 
-    // 1. Intentar Pexels (principal para contenido)
+    // 1. Intentar Pexels con scoring inteligente (Prompt 23)
     if (isPexelsConfigured()) {
-      const pexelsUrl = await searchPexels(searchQuery, 'portrait');
-      if (pexelsUrl) {
-        return this.createSceneImage(index, startSecond, endSecond, pexelsUrl, searchQuery, 'pexels');
+      const scoredUrl = await this.searchPexelsWithScoring(searchQuery, searchQuery.split(' '));
+      if (scoredUrl) {
+        return this.createSceneImage(index, startSecond, endSecond, scoredUrl, searchQuery, 'pexels');
       }
     }
 
@@ -151,18 +159,137 @@ export class ImageOrchestrationService {
       return this.createSceneImage(index, startSecond, endSecond, googleUrl, searchQuery, 'google');
     }
 
-    // 4. Intentar con query simplificada (SIN sufijo genérico - Prompt 19.1.6)
-    const simplifiedQuery = keywords.slice(0, 2).join(' ');
-    if (isPexelsConfigured()) {
-      const pexelsSimple = await searchPexels(simplifiedQuery, 'portrait');
+    // 4-5. Retry con queries alternativas (Prompt 23)
+    const smartQueries = this.queryGenerator.generateQueries(keywords, segment.text);
+    for (const altQuery of smartQueries.alternatives) {
+      if (isPexelsConfigured()) {
+        logger.info(`[ImageOrchestration] Retry con alternativa: "${altQuery}"`);
+        const altUrl = await this.searchPexelsWithScoring(altQuery, altQuery.split(' '));
+        if (altUrl) {
+          return this.createSceneImage(index, startSecond, endSecond, altUrl, altQuery, 'pexels');
+        }
+      }
+    }
+
+    // 6. Intentar con query simplificada (SIN sufijo genérico - Prompt 19.1.6)
+    const translatedKeywords = this.queryGenerator.translateKeywords(keywords);
+    const simplifiedQuery = translatedKeywords.slice(0, 2).join(' ');
+    if (isPexelsConfigured() && simplifiedQuery !== searchQuery) {
+      logger.info(`[ImageOrchestration] Retry simplificada: "${simplifiedQuery}"`);
+      const pexelsSimple = await this.searchPexelsWithScoring(simplifiedQuery, simplifiedQuery.split(' '));
       if (pexelsSimple) {
         return this.createSceneImage(index, startSecond, endSecond, pexelsSimple, simplifiedQuery, 'pexels');
       }
     }
 
-    // 5. Fallback garantizado: UI Avatars
+    // 7. Fallback garantizado: UI Avatars mejorado (Prompt 23)
     const fallbackUrl = this.generateFallbackImage(keywords, index);
     return this.createSceneImage(index, startSecond, endSecond, fallbackUrl, searchQuery, 'fallback');
+  }
+
+  /**
+   * Busca en Pexels con scoring inteligente (Prompt 23)
+   *
+   * En vez de tomar ciegamente el primer resultado, obtiene 5 candidatos
+   * y selecciona el mejor según relevancia textual, orientación y resolución.
+   *
+   * @param query - Query de búsqueda
+   * @param queryKeywords - Keywords individuales para scoring de relevancia
+   * @returns URL de la mejor imagen o null si ninguna pasa el umbral
+   */
+  private async searchPexelsWithScoring(
+    query: string,
+    queryKeywords: string[]
+  ): Promise<string | null> {
+    const candidates = await searchPexelsMultiple(
+      query,
+      IMAGE_SCORING_CONFIG.candidateCount,
+      'portrait'
+    );
+
+    if (candidates.length === 0) {
+      return null;
+    }
+
+    // Calcular score para cada candidato
+    let bestCandidate: PexelsCandidate | null = null;
+    let bestScore = -1;
+
+    for (let i = 0; i < candidates.length; i++) {
+      const candidate = candidates[i];
+      const score = this.scoreCandidate(candidate, queryKeywords, i);
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestCandidate = candidate;
+      }
+    }
+
+    if (bestCandidate && bestScore >= IMAGE_SCORING_CONFIG.minimumScore) {
+      logger.info(`[ImageOrchestration] Pexels scoring: mejor=${bestScore.toFixed(0)}/100 (${bestCandidate.alt.substring(0, 40)})`);
+      return bestCandidate.url;
+    }
+
+    logger.info(`[ImageOrchestration] Pexels scoring: ningún candidato supera umbral (mejor=${bestScore.toFixed(0)})`);
+    return null;
+  }
+
+  /**
+   * Calcula score de un candidato de Pexels (0-100)
+   *
+   * Criterios:
+   * - textRelevance (50pts): cuántas keywords aparecen en alt text
+   * - orientationBonus (25pts): portrait preferido para YouTube Shorts
+   * - resolution (15pts): resolución por ancho
+   * - positionBonus (10pts): posición en resultados de Pexels
+   *
+   * @param candidate - Candidato a evaluar
+   * @param queryKeywords - Keywords para matching
+   * @param position - Posición en resultados (0 = primero)
+   * @returns Score 0-100
+   */
+  private scoreCandidate(
+    candidate: PexelsCandidate,
+    queryKeywords: string[],
+    position: number
+  ): number {
+    const weights = IMAGE_SCORING_CONFIG.weights;
+    let score = 0;
+
+    // 1. Relevancia textual (50pts): keywords en alt text
+    if (candidate.alt && queryKeywords.length > 0) {
+      const altLower = candidate.alt.toLowerCase();
+      const matchCount = queryKeywords.filter(kw =>
+        altLower.includes(kw.toLowerCase())
+      ).length;
+      const matchRatio = matchCount / queryKeywords.length;
+      score += matchRatio * weights.textRelevance;
+    }
+
+    // 2. Orientación (25pts): portrait preferido
+    if (candidate.height > candidate.width) {
+      score += weights.orientationBonus; // Portrait: full points
+    } else if (candidate.height === candidate.width) {
+      score += weights.orientationBonus * 0.5; // Square: half points
+    } else {
+      score += weights.orientationBonus * 0.4; // Landscape: some points
+    }
+
+    // 3. Resolución (15pts): escala lineal por ancho
+    const minW = IMAGE_SCORING_CONFIG.minimumWidth;
+    const idealW = IMAGE_SCORING_CONFIG.idealWidth;
+    if (candidate.width >= idealW) {
+      score += weights.resolution;
+    } else if (candidate.width >= minW) {
+      const ratio = (candidate.width - minW) / (idealW - minW);
+      score += ratio * weights.resolution;
+    }
+
+    // 4. Posición en resultados (10pts): primeros = más relevantes
+    const positionScore = Math.max(0, 1 - (position * 0.2));
+    score += positionScore * weights.positionBonus;
+
+    return score;
   }
 
   /**
@@ -250,23 +377,25 @@ export class ImageOrchestrationService {
   }
 
   /**
-   * Genera imagen fallback con UI Avatars
+   * Genera imagen fallback mejorada con UI Avatars (Prompt 23)
    *
-   * @param keywords - Keywords para generar iniciales
-   * @param index - Índice para seleccionar color
+   * Usa nombre de empresa o topic como texto (no solo la inicial)
+   * y colores del tema Tech Editorial.
+   *
+   * @param keywords - Keywords para generar texto
+   * @param index - Índice para variación
    * @returns URL de imagen fallback
+   *
+   * @updated Prompt 23 - Usa nombre completo y colores Tech Editorial
    */
   private generateFallbackImage(keywords: string[], index: number): string {
-    // Obtener inicial de primera keyword
-    const initial = keywords.length > 0
-      ? keywords[0].charAt(0).toUpperCase()
+    // Usar las primeras 2-3 letras de la primera keyword (más descriptivo que una sola inicial)
+    const text = keywords.length > 0
+      ? keywords[0].substring(0, 3).toUpperCase()
       : 'AI';
 
-    // Seleccionar color según índice
-    const color = FALLBACK_COLORS[index % FALLBACK_COLORS.length];
-
-    // Generar URL
-    return `${UI_AVATARS_BASE}/?name=${encodeURIComponent(initial)}&size=800&background=${color.bg}&color=${color.fg}&bold=true&format=png`;
+    // Generar URL con colores Tech Editorial (Prompt 23)
+    return `${UI_AVATARS_BASE}/?name=${encodeURIComponent(text)}&size=${FALLBACK_THEME.imageSize}&background=${FALLBACK_THEME.backgroundColor}&color=${FALLBACK_THEME.textColor}&bold=${FALLBACK_THEME.bold}&format=png`;
   }
 
   /**

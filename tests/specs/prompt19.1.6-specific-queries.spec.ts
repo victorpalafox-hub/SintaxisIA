@@ -117,9 +117,9 @@ test.describe('Prompt 19.1.6 - image-orchestration Actualizado', () => {
     expect(content).toMatch(/import\s*\{[^}]*searchLogodev[^}]*\}\s*from/);
   });
 
-  test('tiene versión 1.1.0', async () => {
+  test('tiene versión 1.2.0', async () => {
     const content = fs.readFileSync(IMAGE_ORCHESTRATION_PATH, 'utf-8');
-    expect(content).toContain('@version 1.1.0');
+    expect(content).toContain('@version 1.2.0');
   });
 
 });
@@ -164,9 +164,9 @@ test.describe('Prompt 19.1.6 - Regresión', () => {
     expect(content).toMatch(/segmentScript\s*\(/);
   });
 
-  test('scene-segmenter tiene versión 1.1.0', async () => {
+  test('scene-segmenter tiene versión 1.2.0', async () => {
     const content = fs.readFileSync(SCENE_SEGMENTER_PATH, 'utf-8');
-    expect(content).toContain('@version 1.1.0');
+    expect(content).toContain('@version 1.2.0');
   });
 
 });

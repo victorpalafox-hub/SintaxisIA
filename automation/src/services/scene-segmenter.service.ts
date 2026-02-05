@@ -5,14 +5,16 @@
  * y extrae keywords relevantes para búsqueda de imágenes.
  *
  * @author Sintaxis IA
- * @version 1.1.0
+ * @version 1.2.0
  * @since Prompt 19.1
  * @updated Prompt 19.1.6 - Eliminados sufijos genéricos, señal __LOGO__ para logos
+ * @updated Prompt 23 - Traducción de keywords ES→EN via SmartQueryGenerator
  */
 
 import { logger } from '../../utils/logger';
 import type { GeneratedScript } from '../types/script.types';
 import type { SceneSegment } from '../types/image.types';
+import { SmartQueryGenerator } from './smart-query-generator';
 
 // =============================================================================
 // CONFIGURACIÓN
@@ -144,6 +146,9 @@ const VISUAL_PATTERNS: Array<{ pattern: RegExp; query: string }> = [
  * ```
  */
 export class SceneSegmenterService {
+  /** Generador de queries inteligentes para traducción ES→EN (Prompt 23) */
+  private queryGenerator = new SmartQueryGenerator();
+
   /**
    * Divide un script en segmentos de ~15 segundos
    * Extrae keywords relevantes de cada segmento
@@ -371,9 +376,10 @@ export class SceneSegmenterService {
       }
     }
 
-    // Fallback: Usar keywords si no hay conceptos visuales
-    // Máximo 3 keywords (APIs de imágenes funcionan mejor con queries cortas)
-    const queryKeywords = keywords.slice(0, Math.min(3, keywords.length));
+    // Fallback: Traducir keywords a inglés y usar como query (Prompt 23)
+    // APIs de imágenes (Pexels, Unsplash) funcionan mejor con queries en inglés
+    const translated = this.queryGenerator.translateKeywords(keywords);
+    const queryKeywords = translated.slice(0, Math.min(3, translated.length));
 
     // Si hay empresa y no está duplicada, incluirla al principio para contexto
     if (company && !queryKeywords.some(k => k.toLowerCase() === company.toLowerCase())) {
