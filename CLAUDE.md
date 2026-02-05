@@ -66,36 +66,9 @@ npm run check
 | Render video | `npm run render` |
 | CI validation | `npm run ci:validate` |
 
-**Test suites** (por script npm):
-- Smoke: `test` con `00-smoke-paths` (18) + `config-sync` (5) - Validación crítica
-- Core: `test:logger` (4) | `test:services` (4)
-- Video: `test:video` (19) | `test:content` (23) | `test:design` (29)
-- Scoring: `test:scoring` (33) | `test:image-search` (23)
-- Optimized: `test:video-optimized` (22) | `test:safeimage` (7) | `test:cleanup` (8)
-- Pipeline: `test:orchestrator` (16) | `test:notifications` (12) | `test:notification-fix` (12)
-- APIs: `test:gemini` (27) | `test:compliance` (18) | `test:tts` (27)
-- Rendering: `test:video-rendering` (27)
-- YouTube: `test:youtube` (53) | `test:prompt18` (alias)
-- Output: `test:output-manager` (43) | `test:prompt19` (alias)
-- Dynamic Images: `test:dynamic-images` (36) | `test:prompt19.1` (alias)
-- Sequential Text: `test:sequential-text` (41) | `test:prompt19.2` (alias)
-- Image Preload: `test:image-preload` (26) | `test:prompt19.3` (alias)
-- No Bullet Points: `test:no-bullet-points` (21) | `test:prompt19.2.6` (alias)
-- Large Text: `test:large-text` (25) | `test:prompt19.2.7` (alias)
-- Outro Duration: `test:outro-duration` (16) | `test:prompt19.4` (alias)
-- SafeImage Preload: `test:safeimage-preload` (17) | `test:prompt19.3.2` (alias)
-- Specific Queries: `test:specific-queries` (17) | `test:prompt19.1.6` (alias)
-- Visual Queries: `test:visual-queries` (24) | `test:prompt19.5` (alias)
-- Hero Image Fallback: `test:hero-image-fallback` (10) | `test:prompt19.6` (alias)
-- Audio Sync: `test:audio-sync` (29) | `test:prompt19.7` (alias)
-- Dynamic Animations: `test:dynamic-animations` (16) | `test:prompt19.8` (alias)
-- Outro Scene: `test:outro-scene` (13) | `test:prompt19.9` (alias)
-- Glow Intense: `test:glow-intense` (13) | `test:prompt19.10` (alias)
-- Smooth Transitions: `test:smooth-transitions` (37) | `test:prompt19.11` (alias)
-- Duration Fix: `test:duration-fix` (12) | `test:prompt19.12` (alias)
-- **Total**: 783 tests (781 passing, 2 skipped)
+**Test suites**: 783 tests en 30+ suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
 
-Ver `README.md` para lista completa de scripts.
+**Playwright config**: 4 workers local / 1 en CI, timeout 2min por test, retries solo en CI (2), reporters: HTML + JSON + JUnit.
 
 ## Architecture
 
@@ -162,6 +135,7 @@ if (isShortTimeout(timeout)) { /* manejar error */ }
 - **AAA Pattern**: Arrange, Act, Assert en todos los tests
 - **Record<string, unknown>**: Preferir sobre `any` para objetos de contexto
 - **Anti-Hardcode Timeouts**: NUNCA usar valores hardcodeados, usar `TIMEOUTS.xxx.value`
+- **Test naming**: `tests/specs/prompt[N]-nombre.spec.ts` + script `"test:nombre"` en `package.json`
 
 ## Gotchas Comunes
 
@@ -193,7 +167,7 @@ npm test              # Tests pasando (783 tests, 2 skipped)
 npm run security:check # Sin vulnerabilidades críticas
 ```
 
-## ⚠️ CI/CD Gotchas (CRÍTICOS)
+## CI/CD Gotchas (CRITICOS)
 
 ### 1. Variables de Entorno en CI (20 failures fix)
 **Error**: `Variable de entorno NEWSDATA_API_KEY no está definida en .env`
@@ -329,7 +303,7 @@ Usar **proactivamente** cuando corresponda:
 
 **Invocar**: `Task tool → subagent_type: "[agent-name]"`
 
-### 🔴 Context7 Obligatorio en Agentes
+### Context7 Obligatorio en Agentes
 
 **TODOS los agentes DEBEN usar Context7** antes de realizar cualquier modificación, creación o cambio. Esto garantiza que usen documentación actualizada y mejores prácticas.
 
@@ -368,19 +342,12 @@ mcp__context7__query-docs({
 
 ## MCP Servers
 
-Servidores MCP configurados para este proyecto:
-
 | Server | Comando | Descripción |
 |--------|---------|-------------|
 | `context7` | `npx -y @upstash/context7-mcp@latest` | Documentación actualizada de librerías |
 
-**Uso de context7**: Cuando necesites documentación actualizada de una librería (React, Remotion, Playwright, etc.), usa el MCP context7 para obtener docs frescos en lugar de depender del conocimiento base.
-
 ```bash
-# Agregar MCP server
 claude mcp add context7 -- npx -y @upstash/context7-mcp@latest
-
-# Ver servidores configurados
 claude mcp list
 ```
 
@@ -433,100 +400,6 @@ TEMP_STORAGE_PATH=./automation/temp/videos
 
 Configuración completa: Ver `.env.example` | Guía notificaciones: `SETUP-NOTIFICATIONS.md`
 
-## Prompt History
-
-### Prompts 4-10: Fundación (Tests + Infraestructura)
-| # | Feature | Tests | Archivos Clave |
-|---|---------|-------|----------------|
-| 4 | EnvironmentManager + AppConfig | - | `src/config/EnvironmentManager.ts` |
-| 5 | TestLogger (Winston) | 4 | `tests/utils/TestLogger.ts` |
-| 6 | Service Objects | 4 | `tests/page-objects/services/` |
-| 7 | Video Generation Tests | 19 | `tests/specs/prompt7-*.spec.ts` |
-| 8 | Content Validation Tests | 23 | `tests/specs/prompt8-*.spec.ts` |
-| 9 | CI/CD + npm scripts | - | `.github/workflows/test.yml` |
-| 10 | AudioMixer + ProgressBar + Temas | 29 | `remotion-app/src/styles/themes.ts` |
-
-### Prompts 11-14.2.1: Pipeline de Publicación
-| # | Feature | Tests | Descripción |
-|---|---------|-------|-------------|
-| 11 | News Scoring "Carnita" | 33 | Scoring 0-97 pts, umbral 75 |
-| 12 | Image Search Multi-Provider | 23 | Clearbit → Logo.dev → Google → Unsplash |
-| 13 | Video Optimizado (1 noticia) | 22 | 50s: Hero 8s + Content 37s + Outro 5s (Prompt 19.4) |
-| 13.1 | SafeImage CORS Fix | 7 | Fallback UI Avatars para preview |
-| 13.2 | Cleanup Composiciones | 8 | Eliminadas SintaxisIA* (obsoletas) |
-| 14 | Orchestrator + Calendario | 16 | Pipeline 9 pasos, publica cada 2 días |
-| 14.1 | Notificaciones Email + Telegram | 12 | Resend API + bot con callbacks |
-| 14.2 | Fix Callbacks Telegram | 12 | Aprobación desde Telegram sin dashboard |
-
-### Prompts 15-19: Integración APIs Reales
-| # | Feature | Tests | Descripción |
-|---|---------|-------|-------------|
-| 15 | Gemini Script Generation | 45 | Persona Alex Torres + Compliance 6 marcadores |
-| 16 | ElevenLabs TTS | 27 | Voz Josh + cache + fallback Edge-TTS |
-| 17-A | Carnita Score Refactor | - | Eliminado Twitter/X, umbral 75 pts, max 97 pts |
-| 17 | Video Rendering Service | 27 | Remotion CLI + subtítulos + secciones |
-| 18 | YouTube Upload Service | 53 | OAuth2 + upload resumible + quota management |
-| 19 | Output Manager + Dry-Run Real | 43 | VideoRenderingService integrado + --dry-real CLI |
-| 19.1 | Dynamic Images per Segment | 36 | N segmentos = N imágenes únicas + Pexels API |
-| 19.2 | Texto Secuencial en Escenas | 41 | Frases con fade in/out en ContentScene |
-| 19.3 | Image Preload & Transition Fix | 26 | Transiciones suaves 30 frames, imageAnimation config |
-| 19.3.1 | ELEVENLABS Optional Fallback | - | TTS usa Edge-TTS si API key no está definida |
-| 19.2.6 | No Bullet Points | 21 | Elimina bullet points de ContentScene, solo texto secuencial |
-| 19.2.7 | Large Text | 25 | fontSize 72px, maxCharsPerPhrase 60, contentTextStyle centralizado |
-| 19.4 | Outro Duration Sync | 16 | Reducido de 10s a 5s, elimina silencio final |
-| 19.3.2 | SafeImage Preload | 17 | delayRender + continueRender, elimina glitches de imagen |
-| 19.1.6 | Specific Queries | 17 | Elimina sufijos genéricos, integra Clearbit/Logo.dev para logos |
-| 19.5 | Visual Queries | 24 | Extrae conceptos visuales del texto para queries específicas de imágenes |
-| 19.6 | Hero Image Fallback | 10 | Fallback a URL si archivo local no existe, elimina placeholder cyan "AI" |
-| 19.7 | Audio Sync (Whisper) | 29 | WhisperService para timestamps de audio, sincronización precisa texto-voz |
-| 19.8 | Dynamic Animations | 16 | Parallax/zoom full-duration, per-phrase slide-up, glow pulse texto/imagen |
-| 19.9 | OutroScene Mejorado | 13 | Fade-out final, glow cíclico, Easing, textShadow, outroAnimation config |
-| 19.10 | Glow Intenso | 13 | heroAnimation config, multi-layer textShadow/boxShadow, glow +50% en todas las escenas |
-| 19.11 | Smooth Transitions | 37 | Crossfade 30 frames entre escenas, sceneTransition config, fade-out en Hero/Content |
-| 19.12 | Duration Fix | 12 | Composition 50s = Sequences 50s, elimina pantalla negra final |
-
-### Archivos Clave por Feature
-
-| Feature | Archivos Principales |
-|---------|---------------------|
-| News Scoring | `automation/src/news-scorer.ts`, `automation/src/config/scoring-rules.ts` |
-| Image Search | `automation/src/image-searcher-v2.ts`, `automation/src/image-providers/` |
-| Video Optimizado | `remotion-app/src/` (HeroScene, ContentScene, OutroScene) |
-| Orchestrator | `automation/src/orchestrator.ts`, `automation/src/cli.ts` |
-| Notificaciones | `automation/src/notifiers/` (email, telegram, callbacks) |
-| Gemini Scripts | `automation/src/scriptGen.ts`, `automation/src/services/compliance-validator.ts` |
-| TTS | `automation/src/services/tts.service.ts`, `automation/src/config/tts.config.ts` |
-| Video Rendering | `automation/src/services/video-rendering.service.ts`, `automation/src/config/video.config.ts` |
-| YouTube Upload | `automation/src/services/youtube-upload.service.ts`, `automation/src/config/youtube.config.ts` |
-| Output Manager | `automation/src/services/output-manager.service.ts`, `automation/src/config/output.config.ts` |
-| Dynamic Images | `automation/src/services/scene-segmenter.service.ts`, `automation/src/services/image-orchestration.service.ts`, `automation/src/image-providers/pexels-provider.ts` |
-| Sequential Text | `remotion-app/src/utils/text-splitter.ts`, `remotion-app/src/utils/phrase-timing.ts`, `remotion-app/src/styles/themes.ts` (textAnimation) |
-| Image Transitions | `remotion-app/src/styles/themes.ts` (imageAnimation), `remotion-app/src/components/elements/SafeImage.tsx` (delayRender preload) |
-| Visual Queries | `automation/src/services/scene-segmenter.service.ts` (VISUAL_PATTERNS, extractVisualConcepts) |
-| Hero Image Fallback | `automation/src/services/video-rendering.service.ts` (generateVideoProps con fallback a URL) |
-| Audio Sync | `automation/src/services/whisper.service.ts`, `automation/src/services/tts.service.ts` (addWhisperTimestamps), `remotion-app/src/utils/phrase-timing.ts` (timestamps reales) |
-| Dynamic Animations | `remotion-app/src/components/scenes/ContentScene.tsx` (parallax/zoom/glow/slide), `remotion-app/src/styles/themes.ts` (contentAnimation config) |
-| OutroScene Mejorado | `remotion-app/src/components/scenes/OutroScene.tsx` (fade-out/glow cíclico/Easing/textShadow), `remotion-app/src/styles/themes.ts` (outroAnimation config) |
-| Glow Intenso | `remotion-app/src/styles/themes.ts` (heroAnimation config, glow values +50%), `remotion-app/src/components/scenes/HeroScene.tsx` (multi-layer glow, config centralizada), `ContentScene.tsx` / `OutroScene.tsx` (multi-layer, alpha aumentado) |
-| Smooth Transitions | `remotion-app/src/styles/themes.ts` (sceneTransition config), `remotion-app/src/compositions/AINewsShort.tsx` (Sequence overlap), `HeroScene.tsx` / `ContentScene.tsx` (fadeOut), `OutroScene.tsx` (useVideoConfig, fade-in 30f) |
-| Duration Fix | `remotion-app/src/Root.tsx` (50s composition), `remotion-app/src/theme.ts` (durationSeconds 50), `automation/src/services/video-rendering.service.ts` (duration fijo 50) |
-
-### Quick Reference
-
-| Componente | Función Principal | Umbral/Límite |
-|------------|-------------------|---------------|
-| Carnita Score | `scoreNews()`, `selectPublishableNews()` | 75 pts mínimo, 97 máximo |
-| Gemini | `generateScript()` + Alex Torres Persona | 4/6 marcadores compliance |
-| ElevenLabs | `generateAudio()` + fallback Edge-TTS | 10k chars/mes |
-| YouTube | `uploadVideo()` + OAuth2 | 6 videos/día (quota 10k units) |
-| Video | 50s total: Hero 8s + Content 37s + Outro 5s | 1080x1920, 30fps |
-| Output Manager | `saveAllOutputs()` + TikTok copy | slug max 50 chars |
-| Sequential Text | `splitIntoReadablePhrases()` + `getPhraseTiming()` | 60 chars/frase, fade 15 frames |
-| Whisper | `whisperService.transcribe()` + `groupIntoPhrases()` | Opcional (OPENAI_API_KEY), ~$0.006/min |
-| ContentAnimation | parallax + zoom + glow + per-phrase slide | Full 37s duration, config en themes.ts |
-| OutroAnimation | fade-out + glow cíclico + Easing + textShadow | 5s, spring + config en themes.ts |
-| SceneTransition | crossfade 30 frames entre Sequences | sceneTransition en themes.ts |
-
 ## Pipeline de Publicación
 
 ### Orchestrator (11 pasos)
@@ -551,7 +424,7 @@ npm run automation:force      # Forzar (ignora calendario)
 npm run automation:prod       # Producción (con notificaciones)
 ```
 
-### Estructura de Output (Prompt 19)
+### Estructura de Output
 ```
 output/
 ├── YYYY-MM-DD_slug-titulo/   # Carpeta por video
@@ -573,30 +446,71 @@ output/
 - **Telegram**: Botones inline (Aprobar/Rechazar/Detalles) | Callbacks en tiempo real
 - **Storage**: `automation/temp/videos/{videoId}.json`
 
-## Estado de Implementación
+## Quick Reference
 
-### Funcional (Real API) ✅
-| Componente | Tecnología | Prompt |
-|------------|------------|--------|
-| News Collection | NewsData.io API | Base |
-| News Scoring | Carnita Score (0-97 pts, umbral 75) | 11, 17-A |
-| Image Search | Multi-provider + caché (7 días) | 12 |
-| Script Generation | Gemini 2.5 Flash + Alex Torres Persona | 15 |
-| Audio Generation | ElevenLabs + fallback Edge-TTS | 16 |
-| Video Rendering | Remotion CLI + subtítulos (INTEGRADO) | 17, **19** |
-| YouTube Upload | OAuth2 + upload resumible + quota | 18 |
-| **Output Manager** | Guarda outputs + TikTok copy | **19** |
-| Publication Calendar | Cada 2 días (Lun/Mié/Vie/Dom 14:00) | 14 |
-| Notification System | Email (Resend) + Telegram callbacks | 14.1, 14.2 |
+| Componente | Función Principal | Umbral/Límite |
+|------------|-------------------|---------------|
+| Carnita Score | `scoreNews()`, `selectPublishableNews()` | 75 pts mínimo, 97 máximo |
+| Gemini | `generateScript()` + Alex Torres Persona | 4/6 marcadores compliance |
+| ElevenLabs | `generateAudio()` + fallback Edge-TTS | 10k chars/mes |
+| YouTube | `uploadVideo()` + OAuth2 | 6 videos/día (quota 10k units) |
+| Video | 50s total: Hero 8s + Content 37s + Outro 5s | 1080x1920, 30fps |
+| Output Manager | `saveAllOutputs()` + TikTok copy | slug max 50 chars |
+| Sequential Text | `splitIntoReadablePhrases()` + `getPhraseTiming()` | 60 chars/frase, fade 15 frames |
+| Whisper | `whisperService.transcribe()` + `groupIntoPhrases()` | Opcional (OPENAI_API_KEY), ~$0.006/min |
+| ContentAnimation | parallax + zoom + glow + per-phrase slide | Full 37s duration, config en themes.ts |
+| OutroAnimation | fade-out + glow cíclico + Easing + textShadow | 5s, spring + config en themes.ts |
+| SceneTransition | crossfade 30 frames entre Sequences | sceneTransition en themes.ts |
 
-### Pendiente Integración 🔧
-- Integrar `youtubeService` en orchestrator (paso 10) - actualmente usa mock
+## Prompt History (Resumen)
 
-### Pendientes 📅
+| # | Feature | Tests | Archivos Clave |
+|---|---------|-------|----------------|
+| 4 | EnvironmentManager + AppConfig | - | `src/config/EnvironmentManager.ts` |
+| 5 | TestLogger (Winston) | 4 | `tests/utils/TestLogger.ts` |
+| 6 | Service Objects | 4 | `tests/page-objects/services/` |
+| 7 | Video Generation Tests | 19 | `tests/specs/prompt7-*.spec.ts` |
+| 8 | Content Validation Tests | 23 | `tests/specs/prompt8-*.spec.ts` |
+| 9 | CI/CD + npm scripts | - | `.github/workflows/test.yml` |
+| 10 | AudioMixer + ProgressBar + Temas | 29 | `remotion-app/src/styles/themes.ts` |
+| 11 | News Scoring "Carnita" | 33 | `automation/src/news-scorer.ts`, `config/scoring-rules.ts` |
+| 12 | Image Search Multi-Provider | 23 | `automation/src/image-searcher-v2.ts`, `image-providers/` |
+| 13 | Video Optimizado (1 noticia) | 22 | `remotion-app/src/` (HeroScene, ContentScene, OutroScene) |
+| 13.1 | SafeImage CORS Fix | 7 | `remotion-app/src/components/elements/SafeImage.tsx` |
+| 13.2 | Cleanup Composiciones | 8 | Eliminadas SintaxisIA* (obsoletas) |
+| 14 | Orchestrator + Calendario | 16 | `automation/src/orchestrator.ts`, `cli.ts` |
+| 14.1 | Notificaciones Email + Telegram | 12 | `automation/src/notifiers/` |
+| 14.2 | Fix Callbacks Telegram | 12 | Aprobación desde Telegram sin dashboard |
+| 15 | Gemini Script Generation | 45 | `automation/src/scriptGen.ts`, `services/compliance-validator.ts` |
+| 16 | ElevenLabs TTS | 27 | `automation/src/services/tts.service.ts` |
+| 17-A | Carnita Score Refactor | - | Eliminado Twitter/X, umbral 75, max 97 |
+| 17 | Video Rendering Service | 27 | `automation/src/services/video-rendering.service.ts` |
+| 18 | YouTube Upload Service | 53 | `automation/src/services/youtube-upload.service.ts` |
+| 19 | Output Manager + Dry-Run Real | 43 | `automation/src/services/output-manager.service.ts` |
+| 19.1 | Dynamic Images per Segment | 36 | `scene-segmenter.service.ts`, `image-orchestration.service.ts` |
+| 19.2 | Texto Secuencial en Escenas | 41 | `remotion-app/src/utils/text-splitter.ts`, `phrase-timing.ts` |
+| 19.3 | Image Preload & Transitions | 26 | `themes.ts` (imageAnimation), `SafeImage.tsx` (delayRender) |
+| 19.3.1 | ELEVENLABS Optional Fallback | - | TTS usa Edge-TTS si API key no definida |
+| 19.2.6 | No Bullet Points | 21 | Solo texto secuencial en ContentScene |
+| 19.2.7 | Large Text | 25 | fontSize 72px, maxCharsPerPhrase 60, contentTextStyle |
+| 19.4 | Outro Duration Sync | 16 | Reducido de 10s a 5s |
+| 19.3.2 | SafeImage Preload | 17 | delayRender + continueRender |
+| 19.1.6 | Specific Queries | 17 | Clearbit/Logo.dev para logos, sin sufijos genéricos |
+| 19.5 | Visual Queries | 24 | `extractVisualConcepts()` en scene-segmenter |
+| 19.6 | Hero Image Fallback | 10 | Fallback a URL si archivo local no existe |
+| 19.7 | Audio Sync (Whisper) | 29 | `whisper.service.ts`, timestamps reales texto-voz |
+| 19.8 | Dynamic Animations | 16 | parallax/zoom/glow/slide en ContentScene |
+| 19.9 | OutroScene Mejorado | 13 | fade-out, glow cíclico, Easing, textShadow |
+| 19.10 | Glow Intenso | 13 | heroAnimation config, multi-layer glow +50% |
+| 19.11 | Smooth Transitions | 37 | crossfade 30 frames, sceneTransition config |
+| 19.12 | Duration Fix | 12 | Composition 50s = Sequences 50s |
+
+## Pendientes
+
+### Pendiente Integración
+- Integrar `youtubeService` en orchestrator (paso 11) - actualmente usa mock
+
+### Roadmap
 - **#20 Visual Identity** - Branding humanizado
 - **#21 End-to-End Pipeline** - Integración YouTubeService + producción completa
 - **#22 OCR + Thumbnails** - Extracción de texto de imágenes
-
----
-
-*Para historial detallado de prompts anteriores, ver secciones "Prompts Detallados" arriba.*
