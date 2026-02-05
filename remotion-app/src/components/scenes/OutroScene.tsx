@@ -18,9 +18,9 @@
  * @version 2.2.0
  * @since Prompt 13
  * @updated Prompt 19.4 - Duración reducida de 10s a 5s
- * @updated Prompt 19.9 - Fade-out final, glow cíclico, Easing, textShadow, config centralizada
- * @updated Prompt 19.10 - Glow intensificado: multi-layer boxShadow, brand name mejorado
+ * @updated Prompt 19.9 - Fade-out final, Easing, config centralizada
  * @updated Prompt 19.11 - Crossfade: useVideoConfig, fade-in sincronizado con sceneTransition
+ * @updated Prompt 20 - Migración a Tech Editorial: sombras sutiles, fondo transparente
  */
 
 import React from 'react';
@@ -32,7 +32,7 @@ import {
   useVideoConfig,
   Easing,
 } from 'remotion';
-import { colors, spacing, outroAnimation, sceneTransition } from '../../styles/themes';
+import { colors, spacing, outroAnimation, sceneTransition, editorialShadow } from '../../styles/themes';
 import type { OutroSceneProps } from '../../types/video.types';
 
 /**
@@ -40,7 +40,7 @@ import type { OutroSceneProps } from '../../types/video.types';
  *
  * Cierre memorable con:
  * - Logo zoom in con pulse
- * - Glow pulsante animado
+ * - Sombra editorial sutil
  * - CTA fade in
  * - SIN hashtags (solo metadata)
  *
@@ -101,19 +101,6 @@ export const OutroScene: React.FC<OutroSceneProps> = ({
   const logoScale = interpolate(logoAnimation, [0, 1], [0.8, 1]);
 
   // ==========================================
-  // EFECTOS DE GLOW (Prompt 19.9: cíclico full-duration)
-  // ==========================================
-
-  // Glow pulsante cíclico del logo (patrón Prompt 19.8)
-  // Ciclo cada 3 segundos, cubre toda la duración de la escena
-  const glowIntensity = interpolate(
-    frame % outroAnimation.glowCycle,
-    [0, outroAnimation.glowCycle / 2, outroAnimation.glowCycle],
-    [20, outroAnimation.glowMax, 20],
-    { extrapolateRight: 'clamp' }
-  );
-
-  // ==========================================
   // ANIMACION CTA (Prompt 19.9: Easing + config)
   // ==========================================
 
@@ -135,9 +122,8 @@ export const OutroScene: React.FC<OutroSceneProps> = ({
   return (
     <AbsoluteFill
       style={{
-        background: `linear-gradient(180deg,
-          ${colors.background.gradient.start} 0%,
-          ${colors.background.darker} 100%)`,
+        // Fondo transparente: BackgroundDirector proporciona el fondo (Prompt 20)
+        background: 'transparent',
         opacity: finalOpacity,
       }}
     >
@@ -167,19 +153,15 @@ export const OutroScene: React.FC<OutroSceneProps> = ({
             fontWeight: 900,
             fontSize: 64,
             color: colors.background.darker,
-            // Box shadow multi-capa con glow dinámico (Prompt 19.10)
-            boxShadow: `
-              0 0 ${glowIntensity}px ${colors.primary},
-              0 0 ${glowIntensity * 2}px ${colors.primary}40,
-              0 20px 60px rgba(0, 0, 0, 0.6)
-            `,
+            // Sombra editorial con tinte de marca (Prompt 20)
+            boxShadow: editorialShadow.logoBrandTint(colors.primary),
             letterSpacing: 2,
           }}
         >
           SI
         </div>
 
-        {/* NOMBRE COMPLETO (Prompt 19.9: textShadow con glow) */}
+        {/* NOMBRE COMPLETO (Prompt 20: textShadow editorial) */}
         <div
           style={{
             opacity: ctaOpacity,
@@ -189,7 +171,7 @@ export const OutroScene: React.FC<OutroSceneProps> = ({
             color: colors.text.primary,
             textAlign: 'center',
             letterSpacing: 1,
-            textShadow: `0 0 ${glowIntensity * 0.7}px ${colors.primary}, 0 4px 8px rgba(0, 0, 0, 0.8)`,
+            textShadow: editorialShadow.textDepth,
           }}
         >
           SINTAXIS IA

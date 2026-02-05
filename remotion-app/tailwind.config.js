@@ -10,41 +10,43 @@ module.exports = {
   ],
   theme: {
     extend: {
-      // Colores del tema Sintaxis IA
+      // Colores del tema Sintaxis IA (Tech Editorial - Prompt 20)
       colors: {
         'sintaxis': {
-          'cyan': '#00f0ff',
-          'magenta': '#ff0099',
-          'purple': '#cc00ff',
-          'dark': '#0a0a0f',
+          'blue': '#4A9EFF',
+          'slate': '#64748B',
+          'sky': '#38BDF8',
+          'dark': '#0F1419',
           'gold': '#ffd700',
           'red': '#ff3366'
         },
         // Aliases para uso rápido
-        'neon-cyan': '#00f0ff',
-        'neon-magenta': '#ff0099',
-        'neon-purple': '#cc00ff',
-        'bg-dark': '#0a0a0f',
+        'brand-blue': '#4A9EFF',
+        'brand-slate': '#64748B',
+        'brand-sky': '#38BDF8',
+        'bg-dark': '#0F1419',
         'accent-gold': '#ffd700',
         'accent-red': '#ff3366'
       },
-      // Sombras con glow neón
+      // Sombras editoriales sutiles (Prompt 20)
       boxShadow: {
-        'neon-cyan': '0 0 10px #00f0ff, 0 0 20px #00f0ff50',
-        'neon-magenta': '0 0 10px #ff0099, 0 0 20px #ff009950',
-        'neon-purple': '0 0 10px #cc00ff, 0 0 20px #cc00ff50',
-        'neon-gold': '0 0 10px #ffd700, 0 0 20px #ffd70050'
+        'editorial-blue': '0 2px 12px #4A9EFF20',
+        'editorial-slate': '0 2px 12px #64748B20',
+        'elevation-sm': '0 2px 8px rgba(0,0,0,0.2)',
+        'elevation-md': '0 4px 24px rgba(0,0,0,0.3)',
+        'elevation-lg': '0 8px 32px rgba(0,0,0,0.4)'
       },
       // Animaciones personalizadas
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'glow': 'glow 2s ease-in-out infinite alternate',
+        'sweep': 'sweep 8s ease-in-out infinite',
         'float': 'float 3s ease-in-out infinite'
       },
       keyframes: {
-        glow: {
-          '0%': { boxShadow: '0 0 5px #00f0ff, 0 0 10px #00f0ff50' },
-          '100%': { boxShadow: '0 0 20px #00f0ff, 0 0 40px #00f0ff50' }
+        sweep: {
+          '0%': { opacity: '0', transform: 'translateX(-100%)' },
+          '50%': { opacity: '0.05' },
+          '100%': { opacity: '0', transform: 'translateX(200%)' }
         },
         float: {
           '0%, 100%': { transform: 'translateY(0)' },
@@ -53,8 +55,8 @@ module.exports = {
       },
       // Fuentes
       fontFamily: {
-        'display': ['Arial Black', 'sans-serif'],
-        'body': ['Arial', 'sans-serif']
+        'display': ['Inter', 'Arial Black', 'sans-serif'],
+        'body': ['Inter', 'Roboto', 'Arial', 'sans-serif']
       },
       // Tamaños para video vertical
       spacing: {

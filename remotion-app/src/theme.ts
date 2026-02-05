@@ -8,26 +8,26 @@
  */
 
 export const theme = {
-  // Paleta de colores
+  // Paleta de colores (Tech Editorial - Prompt 20)
   colors: {
     // Colores primarios
-    primary: '#00f0ff',      // Cyan - color principal
-    secondary: '#ff0099',    // Magenta - color secundario
-    accent: '#cc00ff',       // Purple - acento
+    primary: '#4A9EFF',      // Azul profesional - color principal
+    secondary: '#64748B',    // Slate gray - color secundario
+    accent: '#38BDF8',       // Sky blue - acento sutil
 
     // Colores de estado
     gold: '#ffd700',         // Dorado - impacto/destacado
     red: '#ff3366',          // Rojo - alertas/urgente
 
     // Fondos
-    darkBg: '#0a0a0f',       // Fondo principal oscuro
-    cardBg: '#1a1a2e',       // Fondo de tarjetas
-    surfaceBg: '#15151f',    // Fondo de superficies
+    darkBg: '#0F1419',       // Navy-charcoal profundo
+    cardBg: '#1a2332',       // Tarjetas azul-gris
+    surfaceBg: '#151d28',    // Superficies oscuras
 
     // Texto
-    text: '#ffffff',         // Texto principal
-    textMuted: '#888888',    // Texto secundario
-    textDark: '#666666',     // Texto deshabilitado
+    text: '#F0F6FC',         // Off-white (menos agresivo)
+    textMuted: '#8B949E',    // Gris profesional
+    textDark: '#484F58',     // Gris sutil
   },
 
   // Tipografía
@@ -123,11 +123,11 @@ export const theme = {
     trackOpacity: 0.1,
   },
 
-  // Sombras y efectos
+  // Sombras y efectos (Tech Editorial - Prompt 20)
   shadows: {
-    text: '0 2px 10px rgba(0,0,0,0.8)',
-    neon: (color: string) => `0 0 20px ${color}, 0 0 40px ${color}`,
-    glow: (color: string) => `0 0 10px ${color}, 0 0 20px ${color}, 0 0 40px ${color}`,
+    text: '0 2px 8px rgba(0,0,0,0.6), 0 1px 3px rgba(0,0,0,0.3)',
+    subtle: (color: string) => `0 2px 12px ${color}20`,
+    elevation: (color: string) => `0 4px 24px ${color}15, 0 8px 32px rgba(0,0,0,0.3)`,
   },
 
   // Gradientes

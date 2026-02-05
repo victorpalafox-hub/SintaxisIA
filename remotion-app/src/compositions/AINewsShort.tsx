@@ -15,10 +15,11 @@
  * 3. Outro (45-50s): Logo "Sintaxis IA" hardcoded
  *
  * @author Sintaxis IA
- * @version 2.1.0
+ * @version 3.0.0
  * @since Prompt 13
  * @updated Prompt 19.4 - Duración OutroScene reducida de 10s a 5s
  * @updated Prompt 19.11 - Crossfade entre escenas (30 frames overlap)
+ * @updated Prompt 20 - BackgroundDirector como fondo persistente, escenas transparentes
  */
 
 import React from 'react';
@@ -28,6 +29,9 @@ import { AbsoluteFill, Sequence } from 'remotion';
 import { HeroScene } from '../components/scenes/HeroScene';
 import { ContentScene } from '../components/scenes/ContentScene';
 import { OutroScene } from '../components/scenes/OutroScene';
+
+// Fondo animado persistente (Prompt 20)
+import { BackgroundDirector } from '../components/backgrounds/BackgroundDirector';
 
 // Componentes de audio
 import { AudioMixer } from '../components/audio/AudioMixer';
@@ -61,7 +65,7 @@ const DEFAULT_NEWS: VideoProps['news'] = {
 };
 
 const DEFAULT_IMAGES: VideoProps['images'] = {
-  hero: 'https://ui-avatars.com/api/?name=AI&size=400&background=00F0FF&color=000000',
+  hero: 'https://ui-avatars.com/api/?name=AI&size=400&background=4A9EFF&color=000000',
 };
 
 const DEFAULT_AUDIO: VideoProps['audio'] = {
@@ -155,11 +159,20 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
       }}
     >
       {/* ==========================================
+          BACKGROUND DIRECTOR - Fondo animado persistente (Prompt 20)
+          ==========================================
+          Capa base que permanece visible durante todo el video.
+          Las escenas son transparentes y solo el contenido se
+          desvanece durante crossfades, creando transiciones suaves.
+      */}
+      <BackgroundDirector />
+
+      {/* ==========================================
           HERO SCENE - Hook Visual (0-8s, fade-out crossfade)
           ==========================================
           Captura atención con:
           - Logo empresa con zoom dramático
-          - Título con slide up + glow
+          - Título con slide up + sombra
           - Efecto blur to focus
       */}
       <Sequence
@@ -209,7 +222,7 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
           OUTRO SCENE - Branding (44-50s, crossfade) - Prompt 19.4/19.11
           ==========================================
           Cierre memorable con:
-          - Logo "Sintaxis IA" con glow
+          - Logo "Sintaxis IA" con sombra editorial
           - CTA claro
           - SIN hashtags visibles
           - Duración reducida de 10s a 5s para eliminar silencio

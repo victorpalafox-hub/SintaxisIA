@@ -1,17 +1,17 @@
 /**
- * @fileoverview Tests para Prompt 19.10 - Glow Intenso
+ * @fileoverview Tests para Prompt 20 - Editorial Shadows
  *
- * Valida la intensificación del glow cyberpunk en todas las escenas:
- * - heroAnimation config centralizada en themes.ts
- * - HeroScene: multi-layer textShadow/boxShadow, config centralizada
- * - ContentScene: textGlowMax/imageGlowMax aumentados, multi-layer, alpha
- * - OutroScene: glowMax aumentado, multi-layer boxShadow, brand name
+ * Valida la migración de glow cyberpunk a sombras editoriales profesionales:
+ * - editorialShadow config centralizada en themes.ts
+ * - HeroScene: textDepth + imageElevation (no glowIntensity)
+ * - ContentScene: textDepth + imageElevation (no textGlow/imageGlow)
+ * - OutroScene: logoBrandTint + textDepth (no glowIntensity)
  *
  * Complementa tests de Prompt 19.8 (ContentScene) y 19.9 (OutroScene).
  *
  * @author Sintaxis IA
- * @version 1.0.0
- * @since Prompt 19.10
+ * @version 2.0.0
+ * @since Prompt 20
  */
 
 import { test, expect } from '@playwright/test';
@@ -96,8 +96,8 @@ test.describe('Prompt 19.10 - heroAnimation Config', () => {
 // TESTS: HEROSCENE
 // =============================================================================
 
-test.describe('Prompt 19.10 - HeroScene Glow', () => {
-  const logger = new TestLogger({ testName: 'Prompt19.10-Hero' });
+test.describe('Prompt 20 - HeroScene Editorial Shadows', () => {
+  const logger = new TestLogger({ testName: 'Prompt20-Hero' });
 
   test('HeroScene importa heroAnimation de themes', async () => {
     logger.info('Verificando import de heroAnimation');
@@ -110,45 +110,42 @@ test.describe('Prompt 19.10 - HeroScene Glow', () => {
     logger.info('Import de heroAnimation presente');
   });
 
-  test('HeroScene usa heroAnimation.glowKeyframes (no hardcoded)', async () => {
-    logger.info('Verificando config centralizada de glow');
+  test('HeroScene usa editorialShadow.imageElevation para imagen (no glow)', async () => {
+    logger.info('Verificando imageElevation en lugar de glow');
 
     const content = fs.readFileSync(HERO_SCENE_PATH, 'utf-8');
 
-    expect(content).toContain('heroAnimation.glowKeyframes');
-    expect(content).toContain('heroAnimation.glowValues');
+    expect(content).toContain('editorialShadow.imageElevation');
+    expect(content).not.toContain('heroAnimation.glowKeyframes');
+    expect(content).not.toContain('heroAnimation.glowValues');
 
-    logger.info('Glow usa config centralizada');
+    logger.info('HeroScene usa imageElevation editorial');
   });
 
-  test('HeroScene textShadow tiene 3+ capas de glow', async () => {
-    logger.info('Verificando multi-layer textShadow');
+  test('HeroScene usa editorialShadow.textDepth para texto (no multi-layer glow)', async () => {
+    logger.info('Verificando textDepth en textShadow');
 
     const content = fs.readFileSync(HERO_SCENE_PATH, 'utf-8');
 
-    // Contar capas de glow en textShadow del título (glowIntensity aparece 3+ veces)
+    expect(content).toContain('editorialShadow.textDepth');
+
+    // No debe usar glowIntensity
     const titleSection = content.match(/textShadow:[\s\S]*?`,/);
-    expect(titleSection).toBeTruthy();
+    if (titleSection) {
+      expect(titleSection[0]).not.toContain('glowIntensity');
+    }
 
-    const glowLayers = (titleSection![0].match(/glowIntensity/g) || []).length;
-    expect(glowLayers).toBeGreaterThanOrEqual(3);
-
-    logger.info(`HeroScene textShadow tiene ${glowLayers} capas de glow`);
+    logger.info('HeroScene textShadow usa textDepth editorial');
   });
 
-  test('HeroScene boxShadow imagen tiene 2+ capas de glow', async () => {
-    logger.info('Verificando multi-layer boxShadow');
+  test('HeroScene NO contiene glowIntensity', async () => {
+    logger.info('Verificando ausencia de glowIntensity');
 
     const content = fs.readFileSync(HERO_SCENE_PATH, 'utf-8');
 
-    // boxShadow de imagen debe tener al menos 2 capas de glow
-    const boxSection = content.match(/boxShadow:[\s\S]*?`,/);
-    expect(boxSection).toBeTruthy();
+    expect(content).not.toContain('glowIntensity');
 
-    const glowLayers = (boxSection![0].match(/glowIntensity/g) || []).length;
-    expect(glowLayers).toBeGreaterThanOrEqual(2);
-
-    logger.info(`HeroScene boxShadow tiene ${glowLayers} capas de glow`);
+    logger.info('glowIntensity eliminado de HeroScene');
   });
 });
 
@@ -156,30 +153,29 @@ test.describe('Prompt 19.10 - HeroScene Glow', () => {
 // TESTS: CONTENTSCENE
 // =============================================================================
 
-test.describe('Prompt 19.10 - ContentScene Glow', () => {
-  const logger = new TestLogger({ testName: 'Prompt19.10-Content' });
+test.describe('Prompt 20 - ContentScene Editorial Shadows', () => {
+  const logger = new TestLogger({ testName: 'Prompt20-Content' });
 
-  test('ContentScene textShadow tiene 2+ capas de glow', async () => {
-    logger.info('Verificando multi-layer textShadow');
+  test('ContentScene usa editorialShadow.textDepth para texto', async () => {
+    logger.info('Verificando textDepth en textShadow');
 
     const content = fs.readFileSync(CONTENT_SCENE_PATH, 'utf-8');
 
-    // textShadow debe tener textGlow al menos 2 veces (multi-layer)
-    const textShadowMatch = content.match(/textShadow:.*textGlow.*textGlow/s);
-    expect(textShadowMatch).toBeTruthy();
+    expect(content).toContain('editorialShadow.textDepth');
+    expect(content).not.toContain('textGlow');
 
-    logger.info('ContentScene textShadow tiene multi-layer');
+    logger.info('ContentScene textShadow usa textDepth editorial');
   });
 
-  test('ContentScene imageGlow alpha es 50 (no 30)', async () => {
-    logger.info('Verificando alpha de imageGlow');
+  test('ContentScene usa editorialShadow.imageElevation para imagen', async () => {
+    logger.info('Verificando imageElevation en boxShadow');
 
     const content = fs.readFileSync(CONTENT_SCENE_PATH, 'utf-8');
 
-    // boxShadow debe tener colors.primary seguido de 50 (alpha hex)
-    expect(content).toMatch(/imageGlow.*colors\.primary\}50/s);
+    expect(content).toContain('editorialShadow.imageElevation');
+    expect(content).not.toContain('imageGlow');
 
-    logger.info('imageGlow alpha actualizado a 50');
+    logger.info('ContentScene boxShadow usa imageElevation editorial');
   });
 });
 
@@ -187,42 +183,36 @@ test.describe('Prompt 19.10 - ContentScene Glow', () => {
 // TESTS: OUTROSCENE
 // =============================================================================
 
-test.describe('Prompt 19.10 - OutroScene Glow', () => {
-  const logger = new TestLogger({ testName: 'Prompt19.10-Outro' });
+test.describe('Prompt 20 - OutroScene Editorial Shadows', () => {
+  const logger = new TestLogger({ testName: 'Prompt20-Outro' });
 
-  test('OutroScene logo boxShadow tiene 2+ capas de glow', async () => {
-    logger.info('Verificando multi-layer logo boxShadow');
+  test('OutroScene usa editorialShadow.logoBrandTint para logo', async () => {
+    logger.info('Verificando logoBrandTint en logo');
 
     const content = fs.readFileSync(OUTRO_SCENE_PATH, 'utf-8');
 
-    // boxShadow del logo debe tener glowIntensity al menos 2 veces
-    const boxSection = content.match(/boxShadow:[\s\S]*?`,/);
-    expect(boxSection).toBeTruthy();
+    expect(content).toContain('editorialShadow.logoBrandTint');
 
-    const glowLayers = (boxSection![0].match(/glowIntensity/g) || []).length;
-    expect(glowLayers).toBeGreaterThanOrEqual(2);
-
-    logger.info(`OutroScene logo boxShadow tiene ${glowLayers} capas`);
+    logger.info('OutroScene logo usa logoBrandTint editorial');
   });
 
-  test('OutroScene brand name multiplicador >= 0.7', async () => {
-    logger.info('Verificando multiplicador de brand name');
+  test('OutroScene usa editorialShadow.textDepth para brand name', async () => {
+    logger.info('Verificando textDepth en brand name');
 
     const content = fs.readFileSync(OUTRO_SCENE_PATH, 'utf-8');
 
-    // Debe tener glowIntensity * 0.7 (no 0.5)
-    expect(content).toContain('glowIntensity * 0.7');
+    expect(content).toContain('editorialShadow.textDepth');
 
-    logger.info('Brand name multiplicador actualizado');
+    logger.info('OutroScene brand name usa textDepth editorial');
   });
 
-  test('Documentacion JSDoc menciona Prompt 19.10', async () => {
-    logger.info('Verificando documentación');
+  test('OutroScene NO contiene glowIntensity', async () => {
+    logger.info('Verificando ausencia de glowIntensity');
 
     const content = fs.readFileSync(OUTRO_SCENE_PATH, 'utf-8');
 
-    expect(content).toMatch(/@updated Prompt 19\.10/);
+    expect(content).not.toContain('glowIntensity');
 
-    logger.info('Documentación actualizada');
+    logger.info('glowIntensity eliminado de OutroScene');
   });
 });

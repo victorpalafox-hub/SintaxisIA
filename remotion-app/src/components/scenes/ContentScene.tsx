@@ -20,8 +20,8 @@
  * @updated Prompt 19.2.6 - Bullet points eliminados
  * @updated Prompt 19.2.7 - Aumentar tamaño de texto (72px)
  * @updated Prompt 19.8 - Animaciones dinámicas: parallax/zoom full-duration, per-phrase slide, glow pulse
- * @updated Prompt 19.10 - Glow intensificado: multi-layer textShadow, alpha aumentado
  * @updated Prompt 19.11 - Fade-out para crossfade con OutroScene
+ * @updated Prompt 20 - Migración a Tech Editorial: sombras sutiles, fondo transparente
  */
 
 import React, { useMemo } from 'react';
@@ -32,7 +32,7 @@ import {
   useVideoConfig,
   Easing,
 } from 'remotion';
-import { colors, spacing, textAnimation, imageAnimation, contentTextStyle, contentAnimation, sceneTransition } from '../../styles/themes';
+import { colors, spacing, textAnimation, imageAnimation, contentTextStyle, contentAnimation, sceneTransition, editorialShadow } from '../../styles/themes';
 import { ProgressBar } from '../ui/ProgressBar';
 import { SafeImage } from '../elements/SafeImage';
 import { splitIntoReadablePhrases, getPhraseTiming } from '../../utils';
@@ -170,17 +170,6 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
       )
     : 1.0;
 
-  // Glow pulse en contenedor de imagen (Prompt 19.8)
-  // Ciclo sutil cada 6 segundos, consistente con HeroScene
-  const imageGlow = dynamicEffects && contextImage
-    ? interpolate(
-        frame % contentAnimation.imageGlowCycle,
-        [0, contentAnimation.imageGlowCycle / 2, contentAnimation.imageGlowCycle],
-        [0, contentAnimation.imageGlowMax, 0],
-        { extrapolateRight: 'clamp' }
-      )
-    : 0;
-
   // Fade in de imagen (Prompt 19.3 - transición más suave)
   const imageOpacity = contextImage
     ? interpolate(frame, [0, imageAnimation.fadeInFrames], [0, 1], { extrapolateRight: 'clamp' })
@@ -250,17 +239,6 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
   // Opacity final: combina fade de escena con transición de frase
   const descriptionOpacity = baseOpacity * phraseTiming.opacity;
 
-  // Glow pulse en texto (Prompt 19.8)
-  // Ciclo sutil cada 4 segundos, consistente con estética HeroScene
-  const textGlow = dynamicEffects
-    ? interpolate(
-        frame % contentAnimation.textGlowCycle,
-        [0, contentAnimation.textGlowCycle / 2, contentAnimation.textGlowCycle],
-        [3, contentAnimation.textGlowMax, 3],
-        { extrapolateRight: 'clamp' }
-      )
-    : 0;
-
   // ==========================================
   // RENDER
   // ==========================================
@@ -268,9 +246,8 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
   return (
     <AbsoluteFill
       style={{
-        background: `linear-gradient(180deg,
-          ${colors.background.gradient.start} 0%,
-          ${colors.background.gradient.end} 100%)`,
+        // Fondo transparente: BackgroundDirector proporciona el fondo (Prompt 20)
+        background: 'transparent',
         opacity: finalOpacity,
       }}
     >
@@ -294,7 +271,8 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
               opacity: imageOpacity,
               borderRadius: 16,
               overflow: 'hidden',
-              boxShadow: `0 20px 60px rgba(0, 0, 0, 0.5), 0 0 ${imageGlow}px ${colors.primary}50`,
+              // Sombra editorial de elevación (Prompt 20)
+              boxShadow: editorialShadow.imageElevation,
             }}
           >
             <SafeImage
@@ -321,9 +299,8 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
             color: colors.text.secondary,
             textAlign: 'center',
             lineHeight: contentTextStyle.lineHeight,
-            // Prompt 19.8: Glow pulse sutil en texto
-            // Prompt 19.10: Multi-layer glow para identidad cyberpunk
-            textShadow: `0 0 ${textGlow}px ${colors.primary}50, 0 0 ${textGlow * 2}px ${colors.primary}25, 0 2px 4px rgba(0, 0, 0, 0.6)`,
+            // Sombra editorial de profundidad (Prompt 20)
+            textShadow: editorialShadow.textDepth,
             // Más ancho si no hay imagen (centralizado en themes.ts Prompt 19.2.7)
             maxWidth: contextImage
               ? contentTextStyle.maxWidthWithImage

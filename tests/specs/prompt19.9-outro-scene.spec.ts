@@ -3,17 +3,18 @@
  *
  * Valida las mejoras incrementales al OutroScene existente:
  * - Fade-out suave al final de la escena
- * - Glow cíclico full-duration (patrón Prompt 19.8)
+ * - Editorial Shadows (Prompt 20 migration: glow cíclico reemplazado por editorialShadow)
  * - Configuración centralizada en outroAnimation (themes.ts)
  * - Easing en animaciones de entrada y CTA
- * - textShadow dinámico en brand name
+ * - textShadow dinámico en brand name (ahora editorialShadow.textDepth)
  * - Mantiene compatibilidad con Prompt 19.4
  *
  * Complementa los 16 tests de prompt19.4-outro-duration.spec.ts.
  *
  * @author Sintaxis IA
- * @version 1.0.0
+ * @version 1.1.0
  * @since Prompt 19.9
+ * @updated Prompt 20 - Migración de glow a editorial shadows
  */
 
 import { test, expect } from '@playwright/test';
@@ -75,33 +76,38 @@ test.describe('Prompt 19.9 - Fade-Out Final', () => {
 });
 
 // =============================================================================
-// TESTS: GLOW CÍCLICO
+// TESTS: EDITORIAL SHADOWS (Prompt 20 Migration)
 // =============================================================================
 
-test.describe('Prompt 19.9 - Glow Cíclico Full-Duration', () => {
-  const logger = new TestLogger({ testName: 'Prompt19.9-Glow' });
+test.describe('Prompt 19.9 - Editorial Shadows', () => {
+  const logger = new TestLogger({ testName: 'Prompt19.9-EditorialShadows' });
 
-  test('glowIntensity usa frame % para ciclo continuo', async () => {
-    logger.info('Verificando glow cíclico');
+  test('OutroScene NO contiene glowIntensity (migrado a editorial)', async () => {
+    logger.info('Verificando que glowIntensity fue removido');
 
     const content = fs.readFileSync(OUTRO_SCENE_PATH, 'utf-8');
 
-    // Debe usar patrón cíclico (frame % cycle) en lugar de keyframes lineales
-    expect(content).toContain('frame % outroAnimation.glowCycle');
-    expect(content).toContain('outroAnimation.glowMax');
+    // glowIntensity debe estar REMOVIDO completamente (Prompt 20)
+    expect(content).not.toContain('glowIntensity');
+    expect(content).not.toContain('frame % outroAnimation.glowCycle');
+    expect(content).not.toContain('outroAnimation.glowMax');
 
-    logger.info('Glow usa patrón cíclico');
+    logger.info('glowIntensity removido correctamente');
   });
 
-  test('glowIntensity NO tiene keyframes hardcoded [0, 30, 60, 90, 120]', async () => {
-    logger.info('Verificando que no hay keyframes hardcoded');
+  test('OutroScene usa editorialShadow en lugar de glow', async () => {
+    logger.info('Verificando migración a editorialShadow');
 
     const content = fs.readFileSync(OUTRO_SCENE_PATH, 'utf-8');
 
-    // No debe tener el patrón anterior hardcoded
-    expect(content).not.toMatch(/glowIntensity[\s\S]{0,200}\[0, 30, 60, 90, 120\]/);
+    // Debe importar editorialShadow
+    expect(content).toContain('editorialShadow');
+    // Debe usar editorialShadow.logoBrandTint para logo
+    expect(content).toContain('editorialShadow.logoBrandTint(colors.primary)');
+    // Debe usar editorialShadow.textDepth para brand name
+    expect(content).toContain('editorialShadow.textDepth');
 
-    logger.info('Sin keyframes hardcoded');
+    logger.info('editorialShadow implementado correctamente');
   });
 });
 
@@ -183,15 +189,15 @@ test.describe('Prompt 19.9 - Easing y Spring', () => {
 test.describe('Prompt 19.9 - TextShadow y Compatibilidad', () => {
   const logger = new TestLogger({ testName: 'Prompt19.9-TextShadow' });
 
-  test('textShadow aplicado al brand name', async () => {
-    logger.info('Verificando textShadow en brand name');
+  test('textShadow usa editorialShadow.textDepth en brand name (Prompt 20)', async () => {
+    logger.info('Verificando textShadow editorial en brand name');
 
     const content = fs.readFileSync(OUTRO_SCENE_PATH, 'utf-8');
 
-    // Debe tener textShadow con glowIntensity y colors.primary
-    expect(content).toMatch(/textShadow:.*glowIntensity.*colors\.primary/s);
+    // Debe usar editorialShadow.textDepth (no glowIntensity)
+    expect(content).toContain('textShadow: editorialShadow.textDepth');
 
-    logger.info('textShadow presente en brand name');
+    logger.info('textShadow editorial presente en brand name');
   });
 
   test('Mantiene hashtags prop (compatibilidad Prompt 19.4)', async () => {

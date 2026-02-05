@@ -6,10 +6,10 @@
  * Sistema de Temas - Sintaxis IA
  *
  * Permite cambiar fácilmente entre estilos visuales.
- * Actualmente activo: Cyberpunk Neón
+ * Actualmente activo: Tech Editorial (Prompt 20)
  *
  * Para cambiar de tema:
- * 1. Cambiar la línea: export const activeTheme = themes.cyberpunk;
+ * 1. Cambiar la línea: export const activeTheme = themes.techEditorial;
  * 2. Guardar archivo
  * 3. El video se regenera automáticamente con nuevo estilo
  */
@@ -158,6 +158,56 @@ export const minimalistTheme: Theme = {
 };
 
 // ==========================================
+// TEMA 3: TECH EDITORIAL (Prompt 20)
+// ==========================================
+
+/**
+ * Tema Tech Editorial
+ *
+ * Estilo profesional inspirado en medios tech de referencia.
+ * Sombras sutiles en lugar de glows neón, paleta fría azul-slate.
+ *
+ * Paleta:
+ * - Azul (#4A9EFF): Color principal, profesional
+ * - Slate (#64748B): Color secundario, neutro
+ * - Sky (#38BDF8): Acento sutil
+ *
+ * @since Prompt 20
+ */
+export const techEditorialTheme: Theme = {
+  name: 'Tech Editorial',
+  colors: {
+    primary: '#4A9EFF',      // Azul profesional
+    secondary: '#64748B',    // Slate gray
+    accent: '#38BDF8',       // Sky blue sutil
+    background: {
+      dark: '#0F1419',       // Navy-charcoal profundo
+      darker: '#0A0D12',     // Casi negro con undertone azul
+      gradient: {
+        start: '#0F1419',
+        middle: '#121A24',   // Azul-gris oscuro
+        end: '#0D1117',      // GitHub-dark inspirado
+      },
+    },
+    text: {
+      primary: '#F0F6FC',    // Off-white (menos agresivo que #FFF)
+      secondary: '#8B949E',  // Gris profesional
+      muted: '#484F58',      // Gris sutil
+    },
+    overlay: {
+      light: '#4A9EFF08',    // Azul 8%
+      medium: '#4A9EFF15',   // Azul 15%
+      strong: '#4A9EFF25',   // Azul 25%
+    },
+  },
+  spacing: {
+    unit: 8,
+    padding: { xs: 16, sm: 24, md: 32, lg: 48, xl: 64 },
+    safe: { top: 80, bottom: 120, horizontal: 40 },
+  },
+};
+
+// ==========================================
 // TEMA ACTIVO (CAMBIAR AQUÍ)
 // ==========================================
 
@@ -165,10 +215,11 @@ export const minimalistTheme: Theme = {
  * TEMA ACTIVO
  *
  * Para cambiar de tema, modifica esta línea:
+ * - Tech Editorial: export const activeTheme = techEditorialTheme;
  * - Cyberpunk: export const activeTheme = cyberpunkTheme;
  * - Minimalista: export const activeTheme = minimalistTheme;
  */
-export const activeTheme = cyberpunkTheme;
+export const activeTheme = techEditorialTheme;
 
 // ==========================================
 // EXPORTS PARA COMPATIBILIDAD
@@ -374,8 +425,94 @@ export const contentTextStyle = {
   marginBottomWithoutImage: 80,
 };
 
+// ==========================================
+// CONFIGURACIÓN DE FONDO ANIMADO (Prompt 20)
+// ==========================================
+
+/**
+ * Configuración para BackgroundDirector
+ *
+ * Controla los parámetros del fondo animado persistente:
+ * gradiente con drift, blobs parallax, grain y vignette.
+ *
+ * @since Prompt 20
+ */
+export const backgroundAnimation = {
+  /** Rango de drift del ángulo del gradiente (grados) */
+  gradientAngleDrift: [0, 15] as readonly [number, number],
+  /** Velocidad de movimiento del blob primario */
+  parallaxSpeed: 0.005,
+  /** Velocidad de movimiento del blob secundario */
+  parallaxSpeedSecondary: 0.003,
+  /** Rango de opacidad del grain [mínima, máxima] */
+  grainOpacity: [0.03, 0.05] as readonly [number, number],
+  /** Tamaño de celda del noise para grain */
+  grainScale: 1.5,
+  /** Fuerza del efecto vignette (0-1) */
+  vignetteStrength: 0.7,
+  /** Opacidad del blob primario */
+  blobPrimaryOpacity: 0.08,
+  /** Opacidad del blob secundario */
+  blobSecondaryOpacity: 0.05,
+  /** Radio de blur de los blobs (px) */
+  blobBlur: 80,
+  /** Multiplicador de parallax por sección */
+  sectionMultiplier: {
+    hero: 1.5,
+    content: 0.8,
+    outro: 0.3,
+  },
+};
+
+// ==========================================
+// CONFIGURACIÓN DE LIGHT SWEEP (Prompt 20)
+// ==========================================
+
+/**
+ * Configuración para micro-eventos de barrido de luz
+ *
+ * Barrido diagonal sutil que aparece periódicamente
+ * para agregar dinamismo al fondo sin distraer.
+ *
+ * @since Prompt 20
+ */
+export const lightSweep = {
+  /** Frames entre cada barrido (~8s @ 30fps) */
+  intervalFrames: 240,
+  /** Duración del barrido en frames (~2s) */
+  durationFrames: 60,
+  /** Opacidad máxima del barrido (muy sutil) */
+  maxOpacity: 0.05,
+  /** Ángulo del barrido (grados) */
+  angle: 75,
+};
+
+// ==========================================
+// CONFIGURACIÓN DE SOMBRAS EDITORIALES (Prompt 20)
+// ==========================================
+
+/**
+ * Sombras editoriales - Reemplazo de glows neón
+ *
+ * Sistema de sombras sutiles y profesionales que reemplaza
+ * los multi-layer glow del tema Cyberpunk.
+ *
+ * @since Prompt 20
+ */
+export const editorialShadow = {
+  /** Sombra de profundidad para texto principal */
+  textDepth: '0 2px 8px rgba(0,0,0,0.6), 0 1px 3px rgba(0,0,0,0.3)',
+  /** Sombra de elevación para imágenes */
+  imageElevation: '0 8px 32px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)',
+  /** Sombra con tinte de marca para logo/branding */
+  logoBrandTint: (color: string) => `0 4px 24px ${color}25, 0 8px 32px rgba(0,0,0,0.3)`,
+  /** Sombra para barra de progreso */
+  progressBar: (color: string) => `0 0 8px ${color}40`,
+};
+
 // Colección de todos los temas disponibles
 export const themes = {
+  techEditorial: techEditorialTheme,
   cyberpunk: cyberpunkTheme,
   minimalist: minimalistTheme,
 };

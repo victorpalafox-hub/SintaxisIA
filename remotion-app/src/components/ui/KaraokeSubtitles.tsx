@@ -82,7 +82,7 @@ export const KaraokeSubtitles: React.FC<KaraokeSubtitlesProps> = ({
               transform: `scale(${scale})`,
               transition: `all ${theme.animation.transitionDuration}s ease`,
               textShadow: isActive
-                ? theme.shadows.neon(activeColor)
+                ? theme.shadows.subtle(activeColor)
                 : theme.shadows.text,
               backgroundColor: isActive
                 ? `${activeColor}1A`

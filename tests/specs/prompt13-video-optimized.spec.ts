@@ -211,20 +211,20 @@ test.describe('PROMPT 13: Video Optimizado para 1 Noticia', () => {
       });
     });
 
-    test('HeroScene should have glow effect (glowIntensity)', async () => {
-      await logger.info('Validando efecto glow en HeroScene');
+    test('HeroScene should have editorial shadow effect (Prompt 20)', async () => {
+      await logger.info('Validando editorial shadow en HeroScene');
 
       const heroPath = path.join(REMOTION_SRC, 'components', 'scenes', 'HeroScene.tsx');
       const content = fs.readFileSync(heroPath, 'utf-8');
 
-      const hasGlowIntensity = content.includes('glowIntensity');
+      const hasEditorialShadow = content.includes('editorialShadow');
 
-      expect(hasGlowIntensity).toBeTruthy();
+      expect(hasEditorialShadow).toBeTruthy();
 
       await logger.logValidationResults({
-        validator: 'GlowEffect',
-        passed: hasGlowIntensity,
-        details: { effect: 'glow-pulsante' },
+        validator: 'EditorialShadow',
+        passed: hasEditorialShadow,
+        details: { effect: 'editorial-shadow' },
       });
     });
 

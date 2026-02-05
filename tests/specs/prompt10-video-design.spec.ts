@@ -53,7 +53,8 @@ const EXPECTED_FILES = {
   audioTypes: path.join(PATHS.types, 'audio.types.ts'),
   themes: path.join(PATHS.styles, 'themes.ts'),
   theme: path.join(PATHS.src, 'theme.ts'),
-  video: path.join(PATHS.src, 'Video.tsx'),
+  aiNewsShort: path.join(PATHS.src, 'compositions', 'AINewsShort.tsx'),
+  contentScene: path.join(PATHS.components, 'scenes', 'ContentScene.tsx'),
   packageJson: path.join(PATHS.root, 'package.json'),
   remotionReadme: path.join(PATHS.root, 'README-REMOTION.md'),
 };
@@ -565,10 +566,10 @@ test.describe('Suite 4: Audio Configuration in Theme', () => {
 });
 
 // ============================================================================
-// SUITE 5: INTEGRACION EN VIDEO.TSX
+// SUITE 5: INTEGRACION EN AINEWSSHORT.TSX (Prompt 20)
 // ============================================================================
 
-test.describe('Suite 5: Integration in Video.tsx', () => {
+test.describe('Suite 5: Integration in AINewsShort.tsx', () => {
   let logger: TestLogger;
 
   test.beforeEach(() => {
@@ -576,12 +577,14 @@ test.describe('Suite 5: Integration in Video.tsx', () => {
   });
 
   /**
-   * Verifica que Video.tsx importa AudioMixer
+   * Verifica que AINewsShort.tsx importa AudioMixer
+   * NOTA: Video.tsx fue eliminado en Prompt 20 como dead code.
+   * La composición activa es AINewsShort.tsx
    */
-  test('should import AudioMixer in Video.tsx', async () => {
-    logger.info('Verificando import de AudioMixer en Video.tsx');
+  test('should import AudioMixer in AINewsShort.tsx', async () => {
+    logger.info('Verificando import de AudioMixer en AINewsShort.tsx');
 
-    const content = fs.readFileSync(EXPECTED_FILES.video, 'utf-8');
+    const content = fs.readFileSync(EXPECTED_FILES.aiNewsShort, 'utf-8');
 
     const importsAudioMixer = content.includes("import { AudioMixer }") ||
                                content.includes("import {AudioMixer}");
@@ -589,19 +592,20 @@ test.describe('Suite 5: Integration in Video.tsx', () => {
     logger.logValidationResults({
       validator: 'AudioMixerImport',
       passed: importsAudioMixer,
-      details: { importsAudioMixer }
+      details: { importsAudioMixer, file: 'AINewsShort.tsx' }
     });
 
     expect(importsAudioMixer).toBe(true);
   });
 
   /**
-   * Verifica que Video.tsx importa ProgressBar
+   * Verifica que ContentScene.tsx importa ProgressBar
+   * NOTA: ProgressBar no se importa en AINewsShort.tsx, se usa dentro de ContentScene.tsx
    */
-  test('should import ProgressBar in Video.tsx', async () => {
-    logger.info('Verificando import de ProgressBar en Video.tsx');
+  test('should import ProgressBar in ContentScene.tsx', async () => {
+    logger.info('Verificando import de ProgressBar en ContentScene.tsx');
 
-    const content = fs.readFileSync(EXPECTED_FILES.video, 'utf-8');
+    const content = fs.readFileSync(EXPECTED_FILES.contentScene, 'utf-8');
 
     const importsProgressBar = content.includes("import { ProgressBar }") ||
                                 content.includes("import {ProgressBar}");
@@ -609,45 +613,45 @@ test.describe('Suite 5: Integration in Video.tsx', () => {
     logger.logValidationResults({
       validator: 'ProgressBarImport',
       passed: importsProgressBar,
-      details: { importsProgressBar }
+      details: { importsProgressBar, file: 'ContentScene.tsx' }
     });
 
     expect(importsProgressBar).toBe(true);
   });
 
   /**
-   * Verifica que Video.tsx usa AudioMixer
+   * Verifica que AINewsShort.tsx usa AudioMixer
    */
-  test('should use AudioMixer component in Video.tsx', async () => {
-    logger.info('Verificando uso de AudioMixer en Video.tsx');
+  test('should use AudioMixer component in AINewsShort.tsx', async () => {
+    logger.info('Verificando uso de AudioMixer en AINewsShort.tsx');
 
-    const content = fs.readFileSync(EXPECTED_FILES.video, 'utf-8');
+    const content = fs.readFileSync(EXPECTED_FILES.aiNewsShort, 'utf-8');
 
     const usesAudioMixer = content.includes('<AudioMixer');
 
     logger.logValidationResults({
       validator: 'AudioMixerUsage',
       passed: usesAudioMixer,
-      details: { usesAudioMixer }
+      details: { usesAudioMixer, file: 'AINewsShort.tsx' }
     });
 
     expect(usesAudioMixer).toBe(true);
   });
 
   /**
-   * Verifica que Video.tsx usa ProgressBar
+   * Verifica que ContentScene.tsx usa ProgressBar
    */
-  test('should use ProgressBar component in Video.tsx', async () => {
-    logger.info('Verificando uso de ProgressBar en Video.tsx');
+  test('should use ProgressBar component in ContentScene.tsx', async () => {
+    logger.info('Verificando uso de ProgressBar en ContentScene.tsx');
 
-    const content = fs.readFileSync(EXPECTED_FILES.video, 'utf-8');
+    const content = fs.readFileSync(EXPECTED_FILES.contentScene, 'utf-8');
 
     const usesProgressBar = content.includes('<ProgressBar');
 
     logger.logValidationResults({
       validator: 'ProgressBarUsage',
       passed: usesProgressBar,
-      details: { usesProgressBar }
+      details: { usesProgressBar, file: 'ContentScene.tsx' }
     });
 
     expect(usesProgressBar).toBe(true);
@@ -810,33 +814,43 @@ test.describe('Suite 7: Hashtags NOT Rendered in Video (Prompt 10.1)', () => {
   /**
    * Verifica que la interfaz VideoProps aún tiene la propiedad hashtags
    * para uso en título de YouTube (metadata)
+   * NOTA: Video.tsx fue eliminado en Prompt 20, ahora se verifica video.types.ts y OutroScene.tsx
    */
   test('should keep hashtags property in interfaces for YouTube title metadata', async () => {
     logger.info('Verificando que hashtags se mantienen en interfaces para metadata');
 
-    // Buscar archivos que definen interfaces de video
-    const videoFile = EXPECTED_FILES.video;
-    const contenidoPrincipal = path.join(PATHS.components, 'sequences', 'ContenidoPrincipal.tsx');
+    // Verificar en video.types.ts (VideoProps interface)
+    const videoTypesPath = path.join(PATHS.types, 'video.types.ts');
+    const outroScenePath = path.join(PATHS.components, 'scenes', 'OutroScene.tsx');
 
     let hashtagsInInterface = false;
+    let hashtagsInOutro = false;
 
-    // Verificar en ContenidoPrincipal.tsx que tags sigue en la interfaz
-    if (fs.existsSync(contenidoPrincipal)) {
-      const content = fs.readFileSync(contenidoPrincipal, 'utf-8');
-      hashtagsInInterface = content.includes('tags: string[]') ||
-                            content.includes('tags:string[]');
+    // Verificar VideoProps en video.types.ts
+    if (fs.existsSync(videoTypesPath)) {
+      const content = fs.readFileSync(videoTypesPath, 'utf-8');
+      hashtagsInInterface = content.includes('hashtags: string[]') ||
+                            content.includes('hashtags:string[]');
+    }
+
+    // Verificar que OutroScene recibe hashtags (aunque no los renderiza)
+    if (fs.existsSync(outroScenePath)) {
+      const content = fs.readFileSync(outroScenePath, 'utf-8');
+      hashtagsInOutro = content.includes('hashtags');
     }
 
     logger.logValidationResults({
       validator: 'HashtagsInInterface',
-      passed: hashtagsInInterface,
+      passed: hashtagsInInterface && hashtagsInOutro,
       details: {
         hashtagsInInterface,
+        hashtagsInOutro,
         purpose: 'YouTube title metadata (not visual rendering)'
       }
     });
 
     expect(hashtagsInInterface).toBe(true);
+    expect(hashtagsInOutro).toBe(true);
     logger.info('✅ Hashtags disponibles en interfaz para título de YouTube');
   });
 });

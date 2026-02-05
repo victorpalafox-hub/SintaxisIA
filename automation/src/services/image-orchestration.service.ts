@@ -37,13 +37,13 @@ const RATE_LIMIT_DELAY_MS = 350;
 const UI_AVATARS_BASE = 'https://ui-avatars.com/api';
 
 /**
- * Colores cyberpunk para fallback
+ * Colores editoriales para fallback (Prompt 20)
  */
 const FALLBACK_COLORS = [
-  { bg: '00F0FF', fg: '000000' }, // Cyan
-  { bg: 'FF00FF', fg: 'FFFFFF' }, // Magenta
-  { bg: '00FF00', fg: '000000' }, // Green
-  { bg: 'FF6600', fg: 'FFFFFF' }, // Orange
+  { bg: '4A9EFF', fg: '000000' }, // Azul primario
+  { bg: '38BDF8', fg: '000000' }, // Sky blue
+  { bg: '64748B', fg: 'FFFFFF' }, // Slate
+  { bg: '0EA5E9', fg: 'FFFFFF' }, // Azul profundo
 ];
 
 // =============================================================================

@@ -151,7 +151,7 @@ async function searchHeroImage(
     `https://ui-avatars.com/api/?` +
     `name=${encodeURIComponent(initial)}` +
     `&size=400` +
-    `&background=00F0FF` + // Cyan cyberpunk
+    `&background=4A9EFF` + // Azul editorial
     `&color=000000` + // Negro
     `&bold=true` +
     `&format=png`;

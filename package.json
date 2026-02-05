@@ -139,7 +139,10 @@
     "test:prompt19.11": "playwright test tests/specs/prompt19.11-smooth-transitions.spec.ts",
 
     "test:duration-fix": "playwright test tests/specs/prompt19.12-duration-fix.spec.ts",
-    "test:prompt19.12": "playwright test tests/specs/prompt19.12-duration-fix.spec.ts"
+    "test:prompt19.12": "playwright test tests/specs/prompt19.12-duration-fix.spec.ts",
+
+    "test:tech-editorial": "playwright test tests/specs/prompt20-tech-editorial.spec.ts",
+    "test:prompt20": "playwright test tests/specs/prompt20-tech-editorial.spec.ts"
   },
   "keywords": [
     "youtube",

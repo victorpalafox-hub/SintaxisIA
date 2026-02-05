@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 783 tests (781 passing, 2 skipped)
+**Test Status**: 826 tests (826 passing, 2 skipped)
 
-**Last Updated**: 2026-02-04 (Prompt 19.12 - Duration Fix)
+**Last Updated**: 2026-02-05 (Prompt 20 - Tech Editorial + Background Animado)
 
 ## Prerequisites
 
@@ -66,7 +66,7 @@ npm run check
 | Render video | `npm run render` |
 | CI validation | `npm run ci:validate` |
 
-**Test suites**: 783 tests en 30+ suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
+**Test suites**: 826 tests en 30+ suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
 
 **Playwright config**: 4 workers local / 1 en CI, timeout 2min por test, retries solo en CI (2), reporters: HTML + JSON + JUnit.
 
@@ -163,7 +163,7 @@ if (isShortTimeout(timeout)) { /* manejar error */ }
 
 ```bash
 npm run check          # TypeScript sin errores
-npm test              # Tests pasando (783 tests, 2 skipped)
+npm test              # Tests pasando (826 tests, 2 skipped)
 npm run security:check # Sin vulnerabilidades críticas
 ```
 
@@ -280,11 +280,12 @@ test.describe('Prompt [N] - Nombre Feature', () => {
 - 1080x1920 (9:16), 30 FPS
 - **Composición Producción** (`AINewsShort`): 50s, 1 noticia con efectos dinámicos
   - Timing: Hero 8s + Content 37s + Outro 5s (Prompt 19.4), crossfade 1s entre escenas (Prompt 19.11)
-  - Efectos: zoom, blur-to-focus, parallax, glow pulsante
+  - Efectos: zoom, blur-to-focus, parallax, sombras editoriales
+  - BackgroundDirector: fondo animado persistente (gradient drift + parallax blobs + grain + light sweep + vignette)
   - 3 imágenes: hero (logo), context (screenshot), outro (hardcoded)
   - ContentScene: Texto secuencial con fade in/out (Prompt 19.2)
 - **Composición Preview** (`AINewsShort-Preview`): 10s para desarrollo rápido
-- Tema activo: Cyberpunk Neón (`remotion-app/src/styles/themes.ts`)
+- Tema activo: Tech Editorial (`remotion-app/src/styles/themes.ts`) - Prompt 20
 - AudioMixer: ducking automático (voz 100%, música 15% → 9%)
 
 ## Custom Agents
@@ -458,9 +459,11 @@ output/
 | Output Manager | `saveAllOutputs()` + TikTok copy | slug max 50 chars |
 | Sequential Text | `splitIntoReadablePhrases()` + `getPhraseTiming()` | 60 chars/frase, fade 15 frames |
 | Whisper | `whisperService.transcribe()` + `groupIntoPhrases()` | Opcional (OPENAI_API_KEY), ~$0.006/min |
-| ContentAnimation | parallax + zoom + glow + per-phrase slide | Full 37s duration, config en themes.ts |
-| OutroAnimation | fade-out + glow cíclico + Easing + textShadow | 5s, spring + config en themes.ts |
+| ContentAnimation | parallax + zoom + per-phrase slide | Full 37s duration, config en themes.ts |
+| OutroAnimation | fade-out + Easing + textShadow editorial | 5s, spring + config en themes.ts |
 | SceneTransition | crossfade 30 frames entre Sequences | sceneTransition en themes.ts |
+| BackgroundDirector | gradient drift + parallax blobs + grain + light sweep | Persistente, configs en themes.ts |
+| EditorialShadow | textDepth, imageElevation, logoBrandTint | Reemplaza glows neón (Prompt 20) |
 
 ## Prompt History (Resumen)
 
@@ -504,6 +507,7 @@ output/
 | 19.10 | Glow Intenso | 13 | heroAnimation config, multi-layer glow +50% |
 | 19.11 | Smooth Transitions | 37 | crossfade 30 frames, sceneTransition config |
 | 19.12 | Duration Fix | 12 | Composition 50s = Sequences 50s |
+| 20 | Tech Editorial + Background Animado | 45 | `BackgroundDirector.tsx`, `GrainOverlay.tsx`, `LightSweep.tsx`, `themes.ts` |
 
 ## Pendientes
 
@@ -511,6 +515,5 @@ output/
 - Integrar `youtubeService` en orchestrator (paso 11) - actualmente usa mock
 
 ### Roadmap
-- **#20 Visual Identity** - Branding humanizado
 - **#21 End-to-End Pipeline** - Integración YouTubeService + producción completa
 - **#22 OCR + Thumbnails** - Extracción de texto de imágenes

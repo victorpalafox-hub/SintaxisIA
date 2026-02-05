@@ -52,10 +52,10 @@ export interface VideoData {
 // ===================================
 
 export const THEME_COLORS = {
-  cyanPrimary: '#00f0ff',
-  magentaPrimary: '#ff0099',
-  purpleMid: '#cc00ff',
-  bgDark: '#0a0a0f',
+  bluePrimary: '#4A9EFF',
+  slateSecondary: '#64748B',
+  skyAccent: '#38BDF8',
+  bgDark: '#0F1419',
   accentGold: '#ffd700',
   accentRed: '#ff3366'
 };
@@ -84,7 +84,7 @@ export function createVideoData(
   const videoData: VideoData = {
     videoConfig: {
       title: `Sintaxis IA - ${dateStr}`,
-      themeColor: THEME_COLORS.cyanPrimary,
+      themeColor: THEME_COLORS.bluePrimary,
       duration: 60,
       fps: 30,
       width: 1080,

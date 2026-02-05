@@ -91,12 +91,8 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
     width: `${progress}%`,
     backgroundColor: color,
     borderRadius: height / 2,
-    // Efecto neón/glow característico del estilo cyberpunk
-    boxShadow: `
-      0 0 10px ${color},
-      0 0 20px ${color},
-      0 0 30px ${color}
-    `,
+    // Sombra editorial sutil (Prompt 20)
+    boxShadow: `0 0 8px ${color}40`,
     // Animación suave
     transition: 'width 0.1s ease-out',
   };
@@ -111,7 +107,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
     fontSize: theme.fontSizes.xs,
     fontFamily: theme.fonts.main,
     fontWeight: 'bold',
-    textShadow: theme.shadows.neon(color),
+    textShadow: theme.shadows.subtle(color),
     opacity: progress > 5 ? 1 : 0, // Ocultar al inicio
     transition: 'opacity 0.3s ease',
   };

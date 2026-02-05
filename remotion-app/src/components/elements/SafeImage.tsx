@@ -212,14 +212,14 @@ function generatePlaceholder(
     initial = 'IMG';
   }
 
-  // Generar URL de UI Avatars con estilo cyberpunk
+  // Generar URL de UI Avatars con estilo editorial
   const size = Math.max(width, height);
 
   return (
     `https://ui-avatars.com/api/?` +
     `name=${encodeURIComponent(initial)}` +
     `&size=${size}` +
-    `&background=00F0FF` + // Cyan cyberpunk
+    `&background=4A9EFF` + // Azul editorial
     `&color=000000` + // Negro
     `&bold=true` +
     `&format=png`

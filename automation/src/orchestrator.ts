@@ -272,7 +272,7 @@ export async function runPipeline(
       // Para mantener compatibilidad con código existente, también generamos formato legacy
       const legacyImages: ImageSearchResult = {
         hero: {
-          url: dynamicImages.scenes[0]?.imageUrl || 'https://ui-avatars.com/api/?name=AI&size=400&background=00F0FF',
+          url: dynamicImages.scenes[0]?.imageUrl || 'https://ui-avatars.com/api/?name=AI&size=400&background=4A9EFF',
           source: (dynamicImages.scenes[0]?.source as 'clearbit' | 'logodev' | 'google' | 'unsplash' | 'ui-avatars') || 'ui-avatars',
           cached: false,
         },

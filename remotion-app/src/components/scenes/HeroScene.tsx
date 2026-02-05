@@ -7,16 +7,16 @@
  *
  * Elementos:
  * - Imagen HERO (logo empresa) con zoom dramático
- * - Título grande con slide up + glow
+ * - Título grande con slide up + sombra editorial
  * - Efecto blur to focus en entrada
  *
  * Objetivo: Capturar atención en primeros 2 segundos
  *
  * @author Sintaxis IA
- * @version 2.1.0
+ * @version 3.0.0
  * @since Prompt 13
- * @updated Prompt 19.10 - Glow intensificado, multi-layer, config centralizada (heroAnimation)
  * @updated Prompt 19.11 - Fade-out para crossfade con ContentScene
+ * @updated Prompt 20 - Migración a Tech Editorial: sombras sutiles, fondo transparente
  */
 
 import React from 'react';
@@ -28,7 +28,7 @@ import {
   useVideoConfig,
   Easing,
 } from 'remotion';
-import { colors, spacing, heroAnimation, sceneTransition } from '../../styles/themes';
+import { colors, spacing, heroAnimation, sceneTransition, editorialShadow } from '../../styles/themes';
 import { SafeImage } from '../elements/SafeImage';
 import type { HeroSceneProps } from '../../types/video.types';
 
@@ -38,7 +38,7 @@ import type { HeroSceneProps } from '../../types/video.types';
  * Captura atención con efectos dinámicos:
  * - Zoom dramático del logo (0.8 -> 1.2)
  * - Blur to focus (20px -> 0px)
- * - Título con slide up y glow pulsante
+ * - Título con slide up y sombra editorial
  *
  * @example
  * <HeroScene
@@ -118,17 +118,6 @@ export const HeroScene: React.FC<HeroSceneProps> = ({
   // Fade in del título sincronizado con animation
   const titleOpacity = interpolate(animation, [0, 1], [0, 1]);
 
-  // Glow pulsante intensificado (Prompt 19.10)
-  // Frame 30: empieza | Frame 60: pico 30px | Frame 90-120: estabiliza
-  const glowIntensity = interpolate(
-    frame,
-    heroAnimation.glowKeyframes,
-    heroAnimation.glowValues,
-    {
-      extrapolateRight: 'clamp',
-    }
-  );
-
   // ==========================================
   // FADE-OUT PARA CROSSFADE (Prompt 19.11)
   // ==========================================
@@ -148,11 +137,8 @@ export const HeroScene: React.FC<HeroSceneProps> = ({
   return (
     <AbsoluteFill
       style={{
-        // Gradiente de fondo oscuro con tonos del tema
-        background: `linear-gradient(180deg,
-          ${colors.background.gradient.start} 0%,
-          ${colors.background.gradient.middle} 50%,
-          ${colors.background.gradient.end} 100%)`,
+        // Fondo transparente: BackgroundDirector proporciona el fondo (Prompt 20)
+        background: 'transparent',
         // Prompt 19.11: Fade-out para crossfade con ContentScene
         opacity: fadeOut,
       }}
@@ -176,12 +162,8 @@ export const HeroScene: React.FC<HeroSceneProps> = ({
             filter: `blur(${imageBlur}px)`,
             borderRadius: 24,
             overflow: 'hidden',
-            // Sombra con glow multi-capa (Prompt 19.10)
-            boxShadow: `
-              0 20px 60px rgba(0, 0, 0, 0.5),
-              0 0 ${glowIntensity * heroAnimation.imageGlowMultiplier}px ${colors.primary},
-              0 0 ${glowIntensity * heroAnimation.imageGlowMultiplier * 2}px ${colors.primary}40
-            `,
+            // Sombra editorial sutil (Prompt 20)
+            boxShadow: editorialShadow.imageElevation,
           }}
         >
           <SafeImage
@@ -207,13 +189,8 @@ export const HeroScene: React.FC<HeroSceneProps> = ({
             fontSize: 72,
             color: colors.text.primary,
             textAlign: 'center',
-            // Text shadow multi-capa para identidad cyberpunk (Prompt 19.10)
-            textShadow: `
-              0 0 ${glowIntensity}px ${colors.primary},
-              0 0 ${glowIntensity * 2}px ${colors.primary}60,
-              0 0 ${glowIntensity * 3}px ${colors.primary}30,
-              0 4px 8px rgba(0, 0, 0, 0.8)
-            `,
+            // Sombra editorial de profundidad (Prompt 20)
+            textShadow: editorialShadow.textDepth,
             lineHeight: 1.2,
             maxWidth: 900,
             padding: '0 40px',

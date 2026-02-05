@@ -261,8 +261,10 @@ async function validateFlexibility(): Promise<ValidationResult> {
 
   // Colores aceptables (definidos en theme.ts o como props por defecto)
   const acceptableColors = [
-    '#00f0ff', '#ff0099', '#cc00ff', '#ffd700', '#ff3366',
-    '#0a0a0f', '#1a1a2e', '#15151f', '#ffffff', '#888888', '#666666'
+    '#4A9EFF', '#64748B', '#38BDF8', '#ffd700', '#ff3366',
+    '#0F1419', '#1a2332', '#151d28', '#F0F6FC', '#8B949E', '#484F58',
+    // Legacy (temas alternativos)
+    '#00f0ff', '#ff0099', '#cc00ff', '#0a0a0f', '#ffffff', '#888888'
   ];
 
   for (const filePath of themeRequiredFiles) {

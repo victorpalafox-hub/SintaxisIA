@@ -67,7 +67,7 @@ export const imageConfig = {
       baseUrl: 'https://ui-avatars.com/api',
       format: '?name={name}&size={size}&background={bg}&color={color}&bold=true',
       defaultSize: 512,
-      defaultBg: '00f0ff',          // Cyan (tema Sintaxis IA)
+      defaultBg: '4A9EFF',          // Azul editorial (tema Sintaxis IA)
       defaultColor: 'ffffff',        // Blanco
       timeout: 2000,
     },
@@ -163,7 +163,7 @@ export const imageConfig = {
     genericImageUrl: process.env.GENERIC_IMAGE_URL || null,
     placeholderStyle: {
       size: 512,
-      background: '00f0ff',  // Cyan Sintaxis IA
+      background: '4A9EFF',  // Azul editorial Sintaxis IA
       textColor: 'ffffff',
       fontSize: 0.5,          // Proporción del tamaño
     },

@@ -125,54 +125,58 @@ test.describe('Prompt 19.8 - Per-Phrase Slide-Up', () => {
 // TESTS: GLOW PULSE
 // =============================================================================
 
-test.describe('Prompt 19.8 - Glow Pulse', () => {
-  const logger = new TestLogger({ testName: 'Prompt19.8-GlowPulse' });
+test.describe('Prompt 19.8 - Glow Pulse (Migrated to Editorial Shadows - Prompt 20)', () => {
+  const logger = new TestLogger({ testName: 'Prompt19.8-EditorialShadows' });
 
-  test('textGlow tiene patron ciclico con frame %', async () => {
-    logger.info('Verificando glow ciclico en texto');
+  test('textShadow usa editorialShadow.textDepth (no textGlow dinamico)', async () => {
+    logger.info('Verificando migracion a sombras editoriales para texto');
 
     const content = fs.readFileSync(CONTENT_SCENE_PATH, 'utf-8');
 
-    expect(content).toContain('textGlow');
-    expect(content).toContain('contentAnimation.textGlowCycle');
-    expect(content).toContain('contentAnimation.textGlowMax');
+    // Debe usar editorialShadow.textDepth (estatico)
+    expect(content).toContain('textShadow: editorialShadow.textDepth');
 
-    logger.info('textGlow tiene patron ciclico');
+    // NO debe contener textGlow (variable dinamica eliminada)
+    expect(content).not.toContain('textGlow');
+
+    logger.info('textShadow usa editorialShadow.textDepth');
   });
 
-  test('textShadow usa colors.primary para glow', async () => {
-    logger.info('Verificando textShadow con color del tema');
+  test('boxShadow usa editorialShadow.imageElevation (no imageGlow dinamico)', async () => {
+    logger.info('Verificando migracion a sombras editoriales para imagen');
 
     const content = fs.readFileSync(CONTENT_SCENE_PATH, 'utf-8');
 
-    // textShadow debe usar textGlow y colors.primary
-    expect(content).toContain('textShadow:');
-    expect(content).toMatch(/textShadow:.*textGlow.*colors\.primary/s);
+    // Debe usar editorialShadow.imageElevation (estatico)
+    expect(content).toContain('boxShadow: editorialShadow.imageElevation');
 
-    logger.info('textShadow usa color del tema');
+    // NO debe contener imageGlow (variable dinamica eliminada)
+    expect(content).not.toContain('imageGlow');
+
+    logger.info('boxShadow usa editorialShadow.imageElevation');
   });
 
-  test('imageGlow tiene patron ciclico', async () => {
-    logger.info('Verificando glow ciclico en imagen');
+  test('ContentScene importa editorialShadow de themes', async () => {
+    logger.info('Verificando import de editorialShadow');
 
     const content = fs.readFileSync(CONTENT_SCENE_PATH, 'utf-8');
 
-    expect(content).toContain('imageGlow');
-    expect(content).toContain('contentAnimation.imageGlowCycle');
-    expect(content).toContain('contentAnimation.imageGlowMax');
+    // Debe importar editorialShadow desde themes
+    expect(content).toContain('editorialShadow');
+    expect(content).toContain("from '../../styles/themes'");
 
-    logger.info('imageGlow tiene patron ciclico');
+    logger.info('Import de editorialShadow presente');
   });
 
-  test('boxShadow del wrapper de imagen es dinamico', async () => {
-    logger.info('Verificando boxShadow dinamico');
+  test('Documentacion JSDoc menciona Prompt 20 (Tech Editorial)', async () => {
+    logger.info('Verificando documentacion de migracion');
 
     const content = fs.readFileSync(CONTENT_SCENE_PATH, 'utf-8');
 
-    // boxShadow debe contener imageGlow (no ser estatico)
-    expect(content).toMatch(/boxShadow:.*imageGlow.*colors\.primary/s);
+    // Debe mencionar Prompt 20 en la documentacion
+    expect(content).toMatch(/@updated Prompt 20/);
 
-    logger.info('boxShadow es dinamico');
+    logger.info('Documentacion actualizada con Prompt 20');
   });
 });
 
