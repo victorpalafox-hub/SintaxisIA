@@ -514,6 +514,9 @@ export async function runPipeline(
     // ==========================================
     // PASO 8: ENVIAR NOTIFICACIONES
     // ==========================================
+    /* DESHABILITADO TEMPORALMENTE - Pendiente integración YouTube (Prompt 26)
+     * Las notificaciones Telegram/Email están ligadas al flujo de aprobación
+     * para publicación en YouTube, que aún no está integrado.
     // No enviar notificaciones si es dry run (simulado o real)
     if (areNotificationsEnabled() && !finalConfig.dryRun && !finalConfig.dryReal) {
       await executeStep('send_notifications', steps, async () => {
@@ -562,6 +565,10 @@ export async function runPipeline(
       console.log('⏭️  PASO 8: Notificaciones omitidas (dry run)');
       console.log('');
     }
+    */
+    console.log('');
+    console.log('⏭️  PASO 8: Notificaciones deshabilitadas (pendiente integración YouTube)');
+    console.log('');
 
     // ==========================================
     // PASO 9: APROBACIÓN MANUAL (si está habilitado y no es dryReal)
@@ -647,10 +654,12 @@ export async function runPipeline(
     result.totalDuration = endTime.getTime() - startTime.getTime();
 
     // Enviar notificación de error (si está configurado)
+    /* DESHABILITADO TEMPORALMENTE - Pendiente integración YouTube (Prompt 26)
     if (areNotificationsEnabled() && !finalConfig.dryRun) {
       const failedStep = steps.find(s => s.status === 'failed');
       await notifyPipelineError(errorMessage, failedStep?.name || 'unknown');
     }
+    */
   }
 
   return result;

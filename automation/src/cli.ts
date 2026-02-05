@@ -166,12 +166,15 @@ async function main(): Promise<void> {
   // - No es dry run (simulado)
   // - No es dry real (no necesita aprobación)
   // - Notificaciones están habilitadas
+  /* DESHABILITADO TEMPORALMENTE - Pendiente integración YouTube (Prompt 26)
   const shouldWaitForApproval = !options.dry && !options.dryReal && areNotificationsEnabled();
 
   if (shouldWaitForApproval) {
     initCallbackHandler();
     console.log('');
   }
+  */
+  const shouldWaitForApproval = false;
 
   try {
     // Ejecutar pipeline
