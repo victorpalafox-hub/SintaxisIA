@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 841 tests (841 passing, 2 skipped)
+**Test Status**: 878 tests (876 passing, 2 skipped)
 
-**Last Updated**: 2026-02-05 (Prompt 20.1 - Background Revival)
+**Last Updated**: 2026-02-05 (Prompt 21 - Anti-Duplication)
 
 ## Prerequisites
 
@@ -66,7 +66,7 @@ npm run check
 | Render video | `npm run render` |
 | CI validation | `npm run ci:validate` |
 
-**Test suites**: 841 tests en 30+ suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
+**Test suites**: 878 tests en 31+ suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
 
 **Playwright config**: 4 workers local / 1 en CI, timeout 2min por test, retries solo en CI (2), reporters: HTML + JSON + JUnit.
 
@@ -163,7 +163,7 @@ if (isShortTimeout(timeout)) { /* manejar error */ }
 
 ```bash
 npm run check          # TypeScript sin errores
-npm test              # Tests pasando (841 tests, 2 skipped)
+npm test              # Tests pasando (878 tests, 2 skipped)
 npm run security:check # Sin vulnerabilidades críticas
 ```
 
@@ -464,6 +464,7 @@ output/
 | SceneTransition | crossfade 30 frames entre Sequences | sceneTransition en themes.ts |
 | BackgroundDirector | gradient drift + parallax blobs + grain + light sweep | Persistente, configs en themes.ts |
 | EditorialShadow | textDepth, imageElevation, logoBrandTint | Reemplaza glows neón (Prompt 20) |
+| Anti-Duplicación | `PublishedNewsTracker` + `selectTopNewsExcluding()` | 3 capas: ID, titulo 80%, empresa+producto 7d |
 
 ## Prompt History (Resumen)
 
@@ -509,6 +510,7 @@ output/
 | 19.12 | Duration Fix | 12 | Composition 50s = Sequences 50s |
 | 20 | Tech Editorial + Background Animado | 45 | `BackgroundDirector.tsx`, `GrainOverlay.tsx`, `LightSweep.tsx`, `themes.ts` |
 | 20.1 | Background Revival (fix visibilidad) | 15 | Fix doble alpha, `SubtleGrid.tsx`, micro-zoom, transition boost |
+| 21 | Anti-Duplicación de Noticias | 35 | `PublishedNewsTracker`, `selectTopNewsExcluding`, 3-layer dedup |
 
 ## Pendientes
 
@@ -516,5 +518,5 @@ output/
 - Integrar `youtubeService` en orchestrator (paso 11) - actualmente usa mock
 
 ### Roadmap
-- **#21 End-to-End Pipeline** - Integración YouTubeService + producción completa
-- **#22 OCR + Thumbnails** - Extracción de texto de imágenes
+- **#22 End-to-End Pipeline** - Integración YouTubeService + producción completa
+- **#23 OCR + Thumbnails** - Extracción de texto de imágenes

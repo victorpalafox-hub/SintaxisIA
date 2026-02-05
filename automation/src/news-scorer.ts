@@ -527,11 +527,48 @@ export function selectPublishableNews(
   return publishable[0];
 }
 
+/**
+ * Selecciona la mejor noticia excluyendo noticias previamente publicadas
+ *
+ * Filtra noticias duplicadas ANTES de rankear usando un filtro
+ * proporcionado por PublishedNewsTracker. Las funciones existentes
+ * (selectTopNews, selectPublishableNews) permanecen sin cambios.
+ *
+ * @param newsItems - Array de noticias
+ * @param excludeFilter - Funcion que retorna true si la noticia debe excluirse
+ * @returns Noticia con mayor score que no sea duplicada, o null
+ *
+ * @since Prompt 21
+ */
+export function selectTopNewsExcluding(
+  newsItems: NewsItem[],
+  excludeFilter: (newsId: string, title: string, company?: string, productName?: string) => boolean,
+): { news: NewsItem; score: NewsScore } | null {
+  if (newsItems.length === 0) return null;
+
+  // Filtrar noticias ya publicadas antes de rankear
+  const filteredItems = newsItems.filter(
+    item => !excludeFilter(item.id, item.title, item.company, item.productName),
+  );
+
+  if (filteredItems.length === 0) return null;
+
+  // Rankear solo las noticias no duplicadas
+  const ranked = rankNews(filteredItems);
+  const topScore = ranked[0];
+  const topNews = filteredItems.find(n => n.id === topScore.newsId);
+
+  if (!topNews) return null;
+
+  return { news: topNews, score: topScore };
+}
+
 // Exports por defecto para facilitar imports
 export default {
   scoreNews,
   rankNews,
   selectTopNews,
+  selectTopNewsExcluding,
   filterByScore,
   selectPublishableNews,
   PUBLISH_THRESHOLD,

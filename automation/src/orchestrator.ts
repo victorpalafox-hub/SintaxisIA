@@ -44,7 +44,8 @@ import {
   STORAGE_CONFIG,
   areNotificationsEnabled,
 } from './config/env.config';
-import { selectTopNews } from './news-scorer';
+import { selectTopNews, selectTopNewsExcluding } from './news-scorer';
+import { PublishedNewsTracker } from './services/published-news-tracker.service';
 import { searchImagesV2 } from './image-searcher-v2';
 import { ScriptGenerator } from './scriptGen';
 import { SceneSegmenterService } from './services/scene-segmenter.service';
@@ -123,6 +124,12 @@ export async function runPipeline(
   console.log(`   Notificaciones: ${notificationsEnabled ? '✅ Habilitadas' : '⚠️  Deshabilitadas'}`);
   console.log('');
 
+  // Inicializar tracker anti-duplicacion (Prompt 21)
+  const tracker = new PublishedNewsTracker();
+  await tracker.load();
+  console.log(`📋 Historial anti-duplicacion: ${tracker.getEntryCount()} noticias registradas`);
+  console.log('');
+
   const steps: PipelineStep[] = [];
   const result: PipelineResult = {
     success: false,
@@ -187,10 +194,20 @@ export async function runPipeline(
       console.log('🎯 PASO 3: Rankeando y seleccionando top noticia...');
 
       const newsItems = newsStep.data as NewsItem[];
-      const topResult = selectTopNews(newsItems);
+
+      // Anti-duplicacion: filtrar noticias ya publicadas (Prompt 21)
+      const excludeFilter = tracker.getExclusionFilter();
+      const filteredCount = newsItems.filter(
+        n => excludeFilter(n.id, n.title, n.company, n.productName),
+      ).length;
+      if (filteredCount > 0) {
+        console.log(`   ⚠️  ${filteredCount}/${newsItems.length} noticias excluidas (ya publicadas)`);
+      }
+
+      const topResult = selectTopNewsExcluding(newsItems, excludeFilter);
 
       if (!topResult) {
-        throw new Error('No hay noticias para procesar');
+        throw new Error('No hay noticias para procesar (todas fueron excluidas como duplicadas)');
       }
 
       const { news, score } = topResult;
@@ -454,6 +471,15 @@ export async function runPipeline(
     } else {
       console.log('');
       console.log('⏭️  PASO 7.5: Guardado de outputs omitido (dry run)');
+      console.log('');
+    }
+
+    // Registrar noticia publicada en tracker anti-duplicacion (Prompt 21)
+    if (outputSummary) {
+      const { news, score } = topNewsStep.data as { news: NewsItem; score: NewsScore };
+      tracker.record(news, score, outputSummary.folderName);
+      await tracker.save();
+      console.log('   📋 Noticia registrada en historial anti-duplicacion');
       console.log('');
     }
 
