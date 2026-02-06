@@ -670,6 +670,12 @@ class VideoRenderingService {
           src: assets.audioPath,
           volume: 1.0,
         },
+        // Prompt 27: Music bed para eliminar silencio en HeroScene
+        music: {
+          src: 'audio/news-bed.wav',
+          volume: 0.22,
+          ducking: true,
+        },
       },
       // Prompt 19.7: Timestamps de sincronización (opcional)
       audioSync,

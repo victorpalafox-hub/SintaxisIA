@@ -375,6 +375,30 @@ export const heroAnimation = {
 };
 
 // ==========================================
+// CONFIGURACIÓN DE MUSIC BED (Prompt 27)
+// ==========================================
+
+/**
+ * Configuración para audio bed de fondo
+ *
+ * Loop corto de música ambient que arranca en frame 0
+ * para eliminar el silencio de HeroScene (0-8s).
+ * Volumen alto durante Hero, ducked durante Content/Outro.
+ *
+ * @since Prompt 27
+ */
+export const musicBed = {
+  /** Volumen durante HeroScene (sin competencia de voz) */
+  heroVolume: 0.22,
+  /** Volumen durante Content/Outro (ducked por voz) */
+  contentVolume: 0.08,
+  /** Frames de fade-out al final del video (2s @ 30fps) */
+  fadeOutFrames: 60,
+  /** Ruta por defecto del archivo de audio bed */
+  defaultSrc: 'audio/news-bed.wav',
+};
+
+// ==========================================
 // CONFIGURACIÓN DE TRANSICIONES ENTRE ESCENAS (Prompt 19.11)
 // ==========================================
 

@@ -20,10 +20,11 @@
  * @updated Prompt 19.4 - Duración OutroScene reducida de 10s a 5s
  * @updated Prompt 19.11 - Crossfade entre escenas (30 frames overlap)
  * @updated Prompt 20 - BackgroundDirector como fondo persistente, escenas transparentes
+ * @updated Prompt 27 - Audio bed desde frame 0, music separado de AudioMixer
  */
 
 import React from 'react';
-import { AbsoluteFill, Sequence } from 'remotion';
+import { AbsoluteFill, Audio, Sequence, interpolate, staticFile } from 'remotion';
 
 // Escenas optimizadas
 import { HeroScene } from '../components/scenes/HeroScene';
@@ -40,7 +41,7 @@ import { AudioMixer } from '../components/audio/AudioMixer';
 import type { VideoProps } from '../types/video.types';
 
 // Estilos
-import { colors, sceneTransition } from '../styles/themes';
+import { colors, sceneTransition, musicBed } from '../styles/themes';
 
 // =============================================================================
 // PROPS PARCIALES (para compatibilidad con Remotion Composition)
@@ -246,16 +247,50 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
       </Sequence>
 
       {/* ==========================================
-          AUDIO MIXER - Voz + Música con Ducking (Prompt 26)
+          BACKGROUND MUSIC BED - Audio de fondo (Prompt 27)
+          ==========================================
+          Elimina el silencio de HeroScene (0-8s) con un
+          loop de música ambient/breaking news.
+          - Hero: 22% (sin competencia de voz)
+          - Content/Outro: 8% (ducked por narración)
+          - Fade-out de 2s al final
+          Solo se renderiza si hay audio.music configurado.
+      */}
+      {audio.music?.src && (
+        <Sequence from={0} durationInFrames={durationInFrames} name="BackgroundMusic">
+          <Audio
+            src={staticFile(audio.music.src)}
+            volume={(f: number) => {
+              // Hero (0 a contentStart): volumen alto, sin voz
+              if (f < contentStart) return musicBed.heroVolume;
+              // Fade-out final (últimos 2s)
+              const fadeOutStart = durationInFrames - musicBed.fadeOutFrames;
+              if (f > fadeOutStart) {
+                return interpolate(
+                  f,
+                  [fadeOutStart, durationInFrames],
+                  [musicBed.contentVolume, 0],
+                  { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+                );
+              }
+              // Content + Outro: volumen bajo (ducked)
+              return musicBed.contentVolume;
+            }}
+            loop
+          />
+        </Sequence>
+      )}
+
+      {/* ==========================================
+          VOICE NARRATION - Voz TTS (Prompt 26)
           ==========================================
           Retrasado al inicio de ContentScene para que:
-          - HeroScene sea silenciosa (solo visual)
-          - Audio arranque sincronizado con el texto
+          - HeroScene solo tenga music bed (Prompt 27)
+          - Narración arranque sincronizada con el texto
       */}
       <Sequence from={contentStart} name="Narration">
         <AudioMixer
           voice={audio.voice}
-          music={audio.music}
         />
       </Sequence>
     </AbsoluteFill>

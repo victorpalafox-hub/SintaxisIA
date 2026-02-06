@@ -18,6 +18,7 @@
  * @updated Prompt 19.11 - Fade-out para crossfade con ContentScene
  * @updated Prompt 20 - Migración a Tech Editorial: sombras sutiles, fondo transparente
  * @updated Prompt 25 - Flash de impacto inicial para retención
+ * @updated Prompt 27 - Micro zoom-in escena (0.96→1.0) para retención
  */
 
 import React from 'react';
@@ -133,6 +134,19 @@ export const HeroScene: React.FC<HeroSceneProps> = ({
   );
 
   // ==========================================
+  // MICRO ZOOM-IN DE ESCENA (Prompt 27)
+  // ==========================================
+
+  // Zoom sutil a nivel de escena completa (0.96 -> 1.0 en 2s)
+  // Da sensación de "acercamiento a la noticia" para retención
+  const sceneZoom = interpolate(
+    frame,
+    [0, 60],
+    [0.96, 1.0],
+    { extrapolateRight: 'clamp', easing: Easing.ease }
+  );
+
+  // ==========================================
   // FADE-OUT PARA CROSSFADE (Prompt 19.11)
   // ==========================================
 
@@ -157,7 +171,7 @@ export const HeroScene: React.FC<HeroSceneProps> = ({
         opacity: fadeOut,
       }}
     >
-      {/* Contenedor centrado con safe zones */}
+      {/* Contenedor centrado con safe zones + micro zoom-in (Prompt 27) */}
       <AbsoluteFill
         style={{
           display: 'flex',
@@ -166,6 +180,7 @@ export const HeroScene: React.FC<HeroSceneProps> = ({
           justifyContent: 'center',
           gap: spacing.padding.xl,
           padding: `${spacing.safe.top}px ${spacing.safe.horizontal}px ${spacing.safe.bottom}px`,
+          transform: `scale(${sceneZoom})`,
         }}
       >
         {/* IMAGEN HERO (Logo empresa) */}

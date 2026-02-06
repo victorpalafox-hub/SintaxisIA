@@ -29,6 +29,8 @@ cache/
 *.mp4
 *.mp3
 *.wav
+# Excepción: audio bed bundled para HeroScene (Prompt 27)
+!remotion-app/public/audio/news-bed.wav
 
 # ===================================
 # CACHE Y TEMPORALES
