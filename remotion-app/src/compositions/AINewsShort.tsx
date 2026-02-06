@@ -22,6 +22,7 @@
  * @updated Prompt 20 - BackgroundDirector como fondo persistente, escenas transparentes
  * @updated Prompt 27 - Audio bed desde frame 0, music separado de AudioMixer
  * @updated Prompt 30 - Breathing room (1s) entre narración y outro, duración dinámica via calculateMetadata
+ * @updated Prompt 32 - Title Card overlay (0.5s) como thumbnail topic-aware
  */
 
 import React from 'react';
@@ -41,8 +42,12 @@ import { AudioMixer } from '../components/audio/AudioMixer';
 // Tipos
 import type { VideoProps } from '../types/video.types';
 
+// Title Card (Prompt 32)
+import { TitleCardScene } from '../components/scenes/TitleCardScene';
+import { deriveTitleCardText, deriveBadge } from '../utils/title-derivation';
+
 // Estilos
-import { colors, sceneTransition, musicBed } from '../styles/themes';
+import { colors, sceneTransition, musicBed, titleCard } from '../styles/themes';
 
 // =============================================================================
 // PROPS PARCIALES (para compatibilidad con Remotion Composition)
@@ -297,6 +302,26 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
       <Sequence from={contentStart} name="Narration">
         <AudioMixer
           voice={audio.voice}
+        />
+      </Sequence>
+
+      {/* ==========================================
+          TITLE CARD OVERLAY - YouTube Thumbnail (Prompt 32)
+          ==========================================
+          Overlay de 0.5s que aparece encima de HeroScene.
+          Último en JSX = mayor z-index = se renderiza encima de todo.
+          NO cambia timing de Hero/Content/Outro ni audio.
+      */}
+      <Sequence
+        from={0}
+        durationInFrames={titleCard.durationFrames}
+        name="TitleCard"
+      >
+        <TitleCardScene
+          titleText={deriveTitleCardText(news.title)}
+          badge={deriveBadge(props.newsType)}
+          backgroundImage={images.hero}
+          fps={fps}
         />
       </Sequence>
     </AbsoluteFill>

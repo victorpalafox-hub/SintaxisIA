@@ -326,6 +326,29 @@ export interface OutroSceneProps {
 }
 
 // =============================================================================
+// TITLE CARD SCENE (Prompt 32)
+// =============================================================================
+
+/**
+ * Props para TitleCardScene
+ *
+ * Overlay de 0.5s que aparece encima de HeroScene.
+ * Diseñado como frame capturable para thumbnail de YouTube.
+ *
+ * @since Prompt 32
+ */
+export interface TitleCardProps {
+  /** Texto del título (derivado de news.title, max 7 palabras) */
+  titleText: string;
+  /** Badge de 1 palabra (NUEVO, MODELO, etc.) */
+  badge: string;
+  /** URL de imagen de fondo (hero image con overlay) */
+  backgroundImage: string;
+  /** FPS del video para cálculos de animación */
+  fps: number;
+}
+
+// =============================================================================
 // EXPORTS
 // =============================================================================
 

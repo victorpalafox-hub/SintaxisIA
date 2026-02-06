@@ -486,9 +486,9 @@ test.describe('Prompt 19.11 - Regresion', () => {
 
     const matches = content.match(/<Sequence/g);
     expect(matches).toBeTruthy();
-    // Prompt 27: 5 Sequences - Hero, Content, Outro, Narration + BackgroundMusic
-    expect(matches!.length).toBe(5);
+    // Prompt 27: 5 Sequences + Prompt 32: TitleCard = 6 Sequences
+    expect(matches!.length).toBe(6);
 
-    logger.info('5 Sequences presentes');
+    logger.info('6 Sequences presentes');
   });
 });

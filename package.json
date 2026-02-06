@@ -179,7 +179,10 @@
     "test:prompt30": "playwright test tests/specs/prompt30-final-duration-fix.spec.ts",
 
     "test:premium-background": "playwright test tests/specs/prompt31-premium-background.spec.ts",
-    "test:prompt31": "playwright test tests/specs/prompt31-premium-background.spec.ts"
+    "test:prompt31": "playwright test tests/specs/prompt31-premium-background.spec.ts",
+
+    "test:titlecard": "playwright test tests/specs/prompt32-titlecard-topic-aware.spec.ts",
+    "test:prompt32": "playwright test tests/specs/prompt32-titlecard-topic-aware.spec.ts"
   },
   "keywords": [
     "youtube",

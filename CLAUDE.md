@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 1178 tests (1176 passing, 2 skipped)
+**Test Status**: 1209 tests (1207 passing, 2 skipped)
 
-**Last Updated**: 2026-02-06 (Prompt 31 - Fondo Premium con vida: boost + color pulse + accent glow)
+**Last Updated**: 2026-02-06 (Prompt 32 - Title Card / Thumbnail topic-aware con badge contextual)
 
 ## Prerequisites
 
@@ -67,7 +67,7 @@ npm run check
 | CI validation | `npm run ci:validate` |
 | News Manager | `npm run news:history / news:stats / news:help` |
 
-**Test suites**: 1178 tests en 48 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
+**Test suites**: 1209 tests en 49 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
 
 **Playwright config**: 4 workers local / 1 en CI, timeout 2min por test, retries solo en CI (2), reporters: HTML + JSON + JUnit.
 
@@ -164,7 +164,7 @@ if (isShortTimeout(timeout)) { /* manejar error */ }
 
 ```bash
 npm run check          # TypeScript sin errores
-npm test              # Tests pasando (1178 tests, 2 skipped)
+npm test              # Tests pasando (1209 tests, 2 skipped)
 npm run security:check # Sin vulnerabilidades críticas
 ```
 
@@ -477,6 +477,7 @@ output/
 | ImageEditorial | `imageAnimation` width/height/borderRadius | 920x520, borderRadius 24, crossfade real |
 | TopicSegmentation | `findTopicBoundaries()`, `findMarkerPositions()` | 18 marcadores ES, targets 33%/66%, min 8s, score ≥0.3 |
 | DynamicDuration | `calculateMetadata` en Root.tsx, `BREATHING_ROOM_FRAMES` | Composition dinámica via props, 1s breathing room antes de outro |
+| TitleCard | `TitleCardScene.tsx`, `title-derivation.ts`, `deriveTitleCardText()`, `deriveBadge()` | Overlay 0.5s (15 frames), badge contextual, hero image background, max 7 palabras |
 
 ## Prompt History (Resumen)
 
@@ -535,6 +536,7 @@ output/
 | 29 | Segmentación Topic-Aware | 35 | TRANSITION_MARKERS, `findTopicBoundaries()`, marcadores ES→cortes 33%/66%, fallback uniforme |
 | 30 | Duración Dinámica + CTA Fix | 23 | `calculateMetadata` en Root.tsx, `BREATHING_ROOM_FRAMES`, duration +1s breathing |
 | 31 | Fondo Premium "con vida" | 25 | Boost configs 2-3x, color pulse hue-rotate, accent glow blob, dual LightSweep, GrainOverlay variable, secciones dinámicas |
+| 32 | Title Card / Thumbnail Topic-Aware | 31 | `TitleCardScene.tsx`, `title-derivation.ts`, overlay 0.5s, badge contextual, SafeImage hero background |
 
 ## Pendientes
 

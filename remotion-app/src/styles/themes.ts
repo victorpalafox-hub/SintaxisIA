@@ -595,6 +595,55 @@ export const premiumBackground = {
 };
 
 // ==========================================
+// CONFIGURACIÓN DE TITLE CARD (Prompt 32)
+// ==========================================
+
+/**
+ * Configuración para title card overlay (0.5s = 15 frames)
+ *
+ * Overlay que aparece encima de HeroScene durante los primeros 0.5s.
+ * Diseñado para ser capturable como thumbnail de YouTube.
+ *
+ * @since Prompt 32
+ */
+export const titleCard = {
+  /** Duración total del title card (0.5s @ 30fps) */
+  durationFrames: 15,
+  /** Frames para fade in (~0.2s) */
+  fadeInFrames: 6,
+  /** Opacidad de la imagen de fondo (hero image) */
+  backgroundImageOpacity: 0.25,
+  /** Colores del gradient overlay (asegura legibilidad del texto) */
+  gradientOverlay: {
+    start: 'rgba(10, 13, 18, 0.70)',
+    end: 'rgba(10, 13, 18, 0.92)',
+  },
+  /** Estilos del título principal */
+  title: {
+    fontSize: 96,
+    fontWeight: 900,
+    lineHeight: 1.15,
+    maxWidth: 980,
+  },
+  /** Estilos del badge/kicker */
+  badge: {
+    fontSize: 32,
+    fontWeight: 700,
+    letterSpacing: '0.15em',
+    paddingV: 12,
+    paddingH: 24,
+    borderRadius: 8,
+  },
+  /** Estilos del branding pequeño */
+  branding: {
+    fontSize: 24,
+    fontWeight: 600,
+  },
+  /** Zoom micro sutil (1.00 → 1.02 en 15 frames) */
+  zoomRange: [1.00, 1.02] as readonly [number, number],
+};
+
+// ==========================================
 // CONFIGURACIÓN DE SOMBRAS EDITORIALES (Prompt 20)
 // ==========================================
 

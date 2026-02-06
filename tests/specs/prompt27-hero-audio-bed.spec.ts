@@ -200,9 +200,10 @@ test.describe('Prompt 27 - AINewsShort BackgroundMusic', () => {
 
     const matches = content.match(/<Sequence/g);
     expect(matches).toBeTruthy();
-    expect(matches!.length).toBe(5);
+    // Prompt 32: +1 TitleCard Sequence = 6 total
+    expect(matches!.length).toBe(6);
 
-    await logger.info('5 Sequences presentes');
+    await logger.info('6 Sequences presentes');
   });
 });
 
