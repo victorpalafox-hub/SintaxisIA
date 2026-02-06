@@ -177,7 +177,7 @@ export function getPhraseTiming(
     phraseStartFrame = Math.max(0, Math.round((timestamp.startSeconds - leadSeconds) * fps) - sceneOffsetFrames);
     // Prompt 25.2: fadeOut buffer + Prompt 25.3: lag perceptual
     const fadeOut = config.fadeOutFrames ?? 15;
-    phraseEndFrame = Math.min(totalFrames, Math.round((timestamp.endSeconds + lagSeconds) * fps) - sceneOffsetFrames + fadeOut);
+    phraseEndFrame = Math.max(phraseStartFrame + 1, Math.min(totalFrames, Math.round((timestamp.endSeconds + lagSeconds) * fps) - sceneOffsetFrames + fadeOut));
 
   } else {
     // Fallback: Distribución uniforme (comportamiento original)
