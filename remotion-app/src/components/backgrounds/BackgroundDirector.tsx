@@ -216,7 +216,8 @@ export const BackgroundDirector: React.FC = () => {
             width: '40%',
             height: '40%',
             borderRadius: '50%',
-            background: `radial-gradient(circle, ${colors.secondary} 0%, transparent 70%)`,
+            // Prompt 32.1: accent en vez de secondary (gris → sky blue vibrante)
+            background: `radial-gradient(circle, ${colors.accent} 0%, transparent 70%)`,
             filter: `blur(${backgroundAnimation.blobBlur}px) hue-rotate(${colorShift}deg)`,
             opacity: blob2Opacity,
             transform: `translate(${blob2X}%, ${blob2Y}%)`,

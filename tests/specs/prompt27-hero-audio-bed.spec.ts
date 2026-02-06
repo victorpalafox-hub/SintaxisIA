@@ -287,8 +287,8 @@ test.describe('Prompt 27 - Regresion', () => {
 
     const content = fs.readFileSync(AI_NEWS_SHORT_PATH, 'utf-8');
 
-    // La voz sigue empezando en contentStart
-    expect(content).toMatch(/Sequence\s+from=\{contentStart\}\s+name="Narration"/);
+    // La voz sigue empezando en contentStart (Prompt 32.1: ahora con durationInFrames)
+    expect(content).toMatch(/Sequence\s+from=\{contentStart\}[\s\S]*?name="Narration"/);
 
     await logger.info('Narration en contentStart');
   });

@@ -108,20 +108,20 @@ test.describe('Prompt 32 - Config titleCard en themes.ts', () => {
     expect(content).toContain('export const titleCard');
   });
 
-  test('durationFrames === 15 (0.5s)', async () => {
-    logger.info('Verificando duración de 15 frames');
+  test('durationFrames === 90 (3s)', async () => {
+    logger.info('Verificando duración de 90 frames');
 
     const match = content.match(/titleCard[\s\S]*?durationFrames:\s*(\d+)/);
     expect(match).toBeTruthy();
-    expect(parseInt(match![1])).toBe(15);
+    expect(parseInt(match![1])).toBe(90);
   });
 
-  test('fadeInFrames === 6', async () => {
-    logger.info('Verificando fade in de 6 frames');
+  test('fadeOutFrames === 15', async () => {
+    logger.info('Verificando fade out de 15 frames');
 
-    const match = content.match(/titleCard[\s\S]*?fadeInFrames:\s*(\d+)/);
+    const match = content.match(/titleCard[\s\S]*?fadeOutFrames:\s*(\d+)/);
     expect(match).toBeTruthy();
-    expect(parseInt(match![1])).toBe(6);
+    expect(parseInt(match![1])).toBe(15);
   });
 
   test('title.fontSize === 96', async () => {
@@ -137,11 +137,11 @@ test.describe('Prompt 32 - Config titleCard en themes.ts', () => {
     expect(content).toMatch(/titleCard[\s\S]*?badge:[\s\S]*?fontSize:\s*32/);
   });
 
-  test('zoomRange definido [1.00, 1.02]', async () => {
+  test('zoomRange definido [1.00, 1.03]', async () => {
     logger.info('Verificando zoomRange');
 
     expect(content).toContain('zoomRange:');
-    expect(content).toMatch(/zoomRange:\s*\[1\.00,\s*1\.02\]/);
+    expect(content).toMatch(/zoomRange:\s*\[1\.00,\s*1\.03\]/);
   });
 });
 
@@ -183,7 +183,7 @@ test.describe('Prompt 32 - TitleCardScene Componente', () => {
   test('Usa titleCard config de themes', async () => {
     logger.info('Verificando uso de titleCard config');
 
-    expect(content).toContain('titleCard.fadeInFrames');
+    expect(content).toContain('titleCard.fadeOutFrames');
     expect(content).toContain('titleCard.durationFrames');
     expect(content).toContain('titleCard.backgroundImageOpacity');
     expect(content).toContain('titleCard.zoomRange');
@@ -301,7 +301,8 @@ test.describe('Prompt 32 - Regresión', () => {
     logger.info('Verificando audio timing intacto');
 
     const content = fs.readFileSync(AINEWS_PATH, 'utf-8');
-    expect(content).toContain('<Sequence from={contentStart} name="Narration">');
+    // Prompt 32.1: Narration ahora tiene durationInFrames
+    expect(content).toMatch(/Sequence\s+from=\{contentStart\}[\s\S]*?name="Narration"/);
   });
 
   test('BackgroundDirector sigue como primera capa', async () => {

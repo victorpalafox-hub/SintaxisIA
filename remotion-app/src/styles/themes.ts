@@ -184,9 +184,9 @@ export const techEditorialTheme: Theme = {
       dark: '#0F1419',       // Navy-charcoal profundo
       darker: '#0A0D12',     // Casi negro con undertone azul
       gradient: {
-        start: '#0F1419',
-        middle: '#121A24',   // Azul-gris oscuro
-        end: '#0D1117',      // GitHub-dark inspirado
+        start: '#0C1220',    // Azul profundo saturado
+        middle: '#141E30',   // Azul-navy real
+        end: '#0B1628',      // Azul oscuro con saturación
       },
     },
     text: {
@@ -480,16 +480,16 @@ export const backgroundAnimation = {
   parallaxSpeedSecondary: 0.008,
   /** Rango de opacidad del grain [mínima, máxima] - Prompt 31: +50% */
   grainOpacity: [0.06, 0.10] as readonly [number, number],
-  /** Fuerza del efecto vignette (0-1) - Prompt 31: menos oscuro en bordes */
-  vignetteStrength: 0.50,
-  /** % desde centro donde empieza el vignette - Prompt 31: centro más claro */
-  vignetteTransparentStop: 60,
-  /** Opacidad del blob primario - Prompt 31: +67% (era 0.18) */
-  blobPrimaryOpacity: 0.30,
-  /** Opacidad del blob secundario - Prompt 31: +83% (era 0.12) */
-  blobSecondaryOpacity: 0.22,
-  /** Radio de blur de los blobs (px) - Prompt 31: menos difuso, más definido */
-  blobBlur: 80,
+  /** Fuerza del efecto vignette (0-1) - Prompt 32.1: reducido para más brillo */
+  vignetteStrength: 0.35,
+  /** % desde centro donde empieza el vignette - Prompt 32.1: centro más claro */
+  vignetteTransparentStop: 70,
+  /** Opacidad del blob primario - Prompt 32.1: +33% (era 0.30) */
+  blobPrimaryOpacity: 0.40,
+  /** Opacidad del blob secundario - Prompt 32.1: +36% (era 0.22) */
+  blobSecondaryOpacity: 0.30,
+  /** Radio de blur de los blobs (px) - Prompt 32.1: menos difuso = más visible */
+  blobBlur: 65,
   /** Amplitud de drift de blobs en % - Prompt 31: +20% rango */
   blobDriftAmplitude: { x: 30, y: 22 },
   /** Multiplicador de parallax por sección - Prompt 31: hero +20%, outro +40% */
@@ -584,12 +584,12 @@ export const premiumBackground = {
   colorPulseRange: 10,
   /** Velocidad del color pulse (rad/frame) */
   colorPulseSpeed: 0.008,
-  /** Opacidad del accent glow spot */
-  accentGlowOpacity: 0.15,
+  /** Opacidad del accent glow spot - Prompt 32.1: +67% */
+  accentGlowOpacity: 0.25,
   /** Blur del accent glow spot (px) */
   accentGlowBlur: 60,
-  /** Tamaño del accent glow spot (% del viewport) */
-  accentGlowSize: 25,
+  /** Tamaño del accent glow spot (% del viewport) - Prompt 32.1: +20% */
+  accentGlowSize: 30,
   /** Radio de órbita del accent glow (% del viewport) */
   accentGlowOrbit: { x: 20, y: 15 },
 };
@@ -599,20 +599,21 @@ export const premiumBackground = {
 // ==========================================
 
 /**
- * Configuración para title card overlay (0.5s = 15 frames)
+ * Configuración para title card overlay (3s = 90 frames)
  *
- * Overlay que aparece encima de HeroScene durante los primeros 0.5s.
- * Diseñado para ser capturable como thumbnail de YouTube.
+ * Overlay que aparece encima de HeroScene durante los primeros 3s.
+ * Visible desde frame 0 (thumbnail-ready), fade-out suave al final.
  *
  * @since Prompt 32
+ * @updated Prompt 32.1 - 3s duración, visible desde frame 0, fade-out
  */
 export const titleCard = {
-  /** Duración total del title card (0.5s @ 30fps) */
-  durationFrames: 15,
-  /** Frames para fade in (~0.2s) */
-  fadeInFrames: 6,
+  /** Duración total del title card (3s @ 30fps) */
+  durationFrames: 90,
+  /** Frames para fade out al final (~0.5s) */
+  fadeOutFrames: 15,
   /** Opacidad de la imagen de fondo (hero image) */
-  backgroundImageOpacity: 0.25,
+  backgroundImageOpacity: 0.35,
   /** Colores del gradient overlay (asegura legibilidad del texto) */
   gradientOverlay: {
     start: 'rgba(10, 13, 18, 0.70)',
@@ -639,8 +640,8 @@ export const titleCard = {
     fontSize: 24,
     fontWeight: 600,
   },
-  /** Zoom micro sutil (1.00 → 1.02 en 15 frames) */
-  zoomRange: [1.00, 1.02] as readonly [number, number],
+  /** Zoom micro sutil (1.00 → 1.03 en 90 frames) */
+  zoomRange: [1.00, 1.03] as readonly [number, number],
 };
 
 // ==========================================

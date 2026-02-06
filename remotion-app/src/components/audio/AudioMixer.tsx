@@ -55,8 +55,11 @@ export const AudioMixer: React.FC<AudioMixerProps> = ({
   // Obtener configuración de audio del theme
   const audioConfig = theme.audio;
 
-  // Volumen de voz: siempre constante (protagonista)
+  // Volumen base de voz (protagonista)
   const voiceVolume = voice.volume ?? audioConfig.voiceVolume;
+
+  // Prompt 32.1: Fade-out de voz en últimos 30 frames (1s) para transición suave a outro
+  const VOICE_FADEOUT_FRAMES = 30;
 
   /**
    * Calcula el volumen de la música con ducking y fades
@@ -126,14 +129,21 @@ export const AudioMixer: React.FC<AudioMixerProps> = ({
 
   return (
     <>
-      {/* Audio de voz TTS - Protagonista */}
+      {/* Audio de voz TTS - Protagonista con fade-out (Prompt 32.1) */}
       {voice.src && (
         <Audio
           src={staticFile(normalizeAudioPath(voice.src))}
-          volume={voiceVolume}
+          volume={(f: number) => {
+            // Prompt 32.1: Fade-out suave en últimos 30 frames (1s)
+            const fadeOut = interpolate(
+              f,
+              [durationInFrames - VOICE_FADEOUT_FRAMES, durationInFrames],
+              [1, 0],
+              { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+            );
+            return voiceVolume * fadeOut;
+          }}
           startFrom={voiceStartFrom}
-          // La voz siempre se reproduce al 100% (o volumen configurado)
-          // Es el audio principal que el espectador debe escuchar
         />
       )}
 

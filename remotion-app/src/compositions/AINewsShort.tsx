@@ -299,7 +299,7 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
           - HeroScene solo tenga music bed (Prompt 27)
           - Narración arranque sincronizada con el texto
       */}
-      <Sequence from={contentStart} name="Narration">
+      <Sequence from={contentStart} durationInFrames={contentDuration} name="Narration">
         <AudioMixer
           voice={audio.voice}
         />

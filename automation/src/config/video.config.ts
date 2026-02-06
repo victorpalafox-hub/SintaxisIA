@@ -101,8 +101,8 @@ export const REMOTION_CONFIG = {
    * Videos de 60-90s a 1080p pueden tomar 5-10 minutos
    */
   get timeout() {
-    // Multiplicamos por factor de seguridad para rendering largo (5-10 min)
-    return TIMEOUTS.videoRender.value * 10; // ~5-20 minutos según entorno
+    // Multiplicamos por factor de seguridad para rendering largo (7-10 min)
+    return TIMEOUTS.videoRender.value * 20; // ~10 min local, ~40 min CI
   },
   /** Número de reintentos en caso de fallo */
   retries: 2,

@@ -218,7 +218,8 @@ test.describe('Prompt 30 - Regresión', () => {
     logger.info('Verificando AudioMixer');
 
     const content = fs.readFileSync(AINEWS_PATH, 'utf-8');
-    expect(content).toContain('<Sequence from={contentStart} name="Narration">');
+    // Prompt 32.1: Narration ahora tiene durationInFrames
+    expect(content).toMatch(/Sequence\s+from=\{contentStart\}[\s\S]*?name="Narration"/);
     expect(content).toContain('<AudioMixer');
   });
 

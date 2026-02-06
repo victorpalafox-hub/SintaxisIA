@@ -11,12 +11,14 @@
  * - Background: Hero image semi-transparente + gradient overlay
  *
  * Animations:
- * - Fade in: 0-6 frames (0-0.2s)
- * - Micro zoom: 1.00 → 1.02 (sutil)
+ * - Visible desde frame 0 (thumbnail-ready)
+ * - Fade out: últimos 15 frames (0.5s)
+ * - Micro zoom: 1.00 → 1.03 (sutil)
  *
  * @author Sintaxis IA
- * @version 1.0.0
+ * @version 1.1.0
  * @since Prompt 32
+ * @updated Prompt 32.1 - Visible desde frame 0, fade-out en vez de fade-in, 3s
  */
 
 import React from 'react';
@@ -56,12 +58,12 @@ export const TitleCardScene: React.FC<TitleCardProps> = ({
   // ANIMACIONES
   // ==========================================
 
-  // Fade in rápido (0-6 frames)
+  // Prompt 32.1: Visible desde frame 0 (thumbnail-ready), fade-out al final
   const opacity = interpolate(
     frame,
-    [0, titleCard.fadeInFrames],
-    [0, 1],
-    { extrapolateRight: 'clamp', easing: Easing.ease }
+    [titleCard.durationFrames - titleCard.fadeOutFrames, titleCard.durationFrames],
+    [1, 0],
+    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.ease }
   );
 
   // Micro zoom sutil (1.00 → 1.02)
