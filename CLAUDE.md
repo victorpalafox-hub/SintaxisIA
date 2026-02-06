@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 1153 tests (1151 passing, 2 skipped)
+**Test Status**: 1178 tests (1176 passing, 2 skipped)
 
-**Last Updated**: 2026-02-06 (Prompt 30 - Duración dinámica real + CTA después de narración)
+**Last Updated**: 2026-02-06 (Prompt 31 - Fondo Premium con vida: boost + color pulse + accent glow)
 
 ## Prerequisites
 
@@ -67,7 +67,7 @@ npm run check
 | CI validation | `npm run ci:validate` |
 | News Manager | `npm run news:history / news:stats / news:help` |
 
-**Test suites**: 1153 tests en 47 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
+**Test suites**: 1178 tests en 48 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
 
 **Playwright config**: 4 workers local / 1 en CI, timeout 2min por test, retries solo en CI (2), reporters: HTML + JSON + JUnit.
 
@@ -164,7 +164,7 @@ if (isShortTimeout(timeout)) { /* manejar error */ }
 
 ```bash
 npm run check          # TypeScript sin errores
-npm test              # Tests pasando (1153 tests, 2 skipped)
+npm test              # Tests pasando (1178 tests, 2 skipped)
 npm run security:check # Sin vulnerabilidades críticas
 ```
 
@@ -464,7 +464,7 @@ output/
 | ContentAnimation | parallax + zoom + per-phrase slide | Full 37s duration, config en themes.ts |
 | OutroAnimation | fade-out + Easing + textShadow editorial | 5s, spring + config en themes.ts |
 | SceneTransition | crossfade 30 frames entre Sequences | sceneTransition en themes.ts |
-| BackgroundDirector | gradient drift + parallax blobs + grain + light sweep | Persistente, configs en themes.ts |
+| BackgroundDirector | gradient drift + parallax blobs + color pulse + accent glow + grain + light sweep dual | Persistente, configs en themes.ts + premiumBackground |
 | EditorialShadow | textDepth, imageElevation, logoBrandTint | Reemplaza glows neón (Prompt 20) |
 | Anti-Duplicación | `PublishedNewsTracker` + `selectTopNewsExcluding()` | 3 capas: ID, titulo 80%, empresa+producto 7d |
 | SmartQuery | `translateKeywords()`, `generateQueries()` | 170+ ES→EN, max 3 kw/query, 2 alternativas |
@@ -534,6 +534,7 @@ output/
 | 28 | Imágenes Editoriales + Crossfade Real | 25 | imageAnimation width/height, ContentScene 920x520, crossfade dual, newsTitle en queries |
 | 29 | Segmentación Topic-Aware | 35 | TRANSITION_MARKERS, `findTopicBoundaries()`, marcadores ES→cortes 33%/66%, fallback uniforme |
 | 30 | Duración Dinámica + CTA Fix | 23 | `calculateMetadata` en Root.tsx, `BREATHING_ROOM_FRAMES`, duration +1s breathing |
+| 31 | Fondo Premium "con vida" | 25 | Boost configs 2-3x, color pulse hue-rotate, accent glow blob, dual LightSweep, GrainOverlay variable, secciones dinámicas |
 
 ## Pendientes
 

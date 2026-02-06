@@ -176,7 +176,10 @@
     "test:prompt29": "playwright test tests/specs/prompt29-topic-segmentation.spec.ts",
 
     "test:final-duration": "playwright test tests/specs/prompt30-final-duration-fix.spec.ts",
-    "test:prompt30": "playwright test tests/specs/prompt30-final-duration-fix.spec.ts"
+    "test:prompt30": "playwright test tests/specs/prompt30-final-duration-fix.spec.ts",
+
+    "test:premium-background": "playwright test tests/specs/prompt31-premium-background.spec.ts",
+    "test:prompt31": "playwright test tests/specs/prompt31-premium-background.spec.ts"
   },
   "keywords": [
     "youtube",

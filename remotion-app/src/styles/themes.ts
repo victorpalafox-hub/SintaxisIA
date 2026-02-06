@@ -472,43 +472,43 @@ export const contentTextStyle = {
  * @since Prompt 20
  */
 export const backgroundAnimation = {
-  /** Rango de drift del ángulo del gradiente (grados) - Prompt 20.1: +67% */
-  gradientAngleDrift: [0, 25] as readonly [number, number],
-  /** Velocidad de movimiento del blob primario - Prompt 20.1: +20% */
-  parallaxSpeed: 0.006,
-  /** Velocidad de movimiento del blob secundario - Prompt 20.1: +33% */
-  parallaxSpeedSecondary: 0.004,
-  /** Rango de opacidad del grain [mínima, máxima] - Prompt 20.1: +40% */
-  grainOpacity: [0.04, 0.07] as readonly [number, number],
-  /** Fuerza del efecto vignette (0-1) - Prompt 20.1: reducido de 0.7 */
-  vignetteStrength: 0.55,
-  /** % desde centro donde empieza el vignette - Prompt 20.1: era 40% hardcoded */
-  vignetteTransparentStop: 55,
-  /** Opacidad del blob primario (SIN doble alpha) - Prompt 20.1: fix de 0.75% → 18% */
-  blobPrimaryOpacity: 0.18,
-  /** Opacidad del blob secundario (SIN doble alpha) - Prompt 20.1: fix de 0.41% → 12% */
-  blobSecondaryOpacity: 0.12,
-  /** Radio de blur de los blobs (px) - Prompt 20.1: más difuso, studio light */
-  blobBlur: 100,
-  /** Amplitud de drift de blobs en % - Prompt 20.1: centralizado (era 20/15 hardcoded) */
-  blobDriftAmplitude: { x: 25, y: 18 },
-  /** Multiplicador de parallax por sección - Prompt 20.1: content +25%, outro +67% */
+  /** Rango de drift del ángulo del gradiente (grados) - Prompt 31: +80% rotación */
+  gradientAngleDrift: [0, 45] as readonly [number, number],
+  /** Velocidad de movimiento del blob primario - Prompt 31: 2x */
+  parallaxSpeed: 0.012,
+  /** Velocidad de movimiento del blob secundario - Prompt 31: 2x */
+  parallaxSpeedSecondary: 0.008,
+  /** Rango de opacidad del grain [mínima, máxima] - Prompt 31: +50% */
+  grainOpacity: [0.06, 0.10] as readonly [number, number],
+  /** Fuerza del efecto vignette (0-1) - Prompt 31: menos oscuro en bordes */
+  vignetteStrength: 0.50,
+  /** % desde centro donde empieza el vignette - Prompt 31: centro más claro */
+  vignetteTransparentStop: 60,
+  /** Opacidad del blob primario - Prompt 31: +67% (era 0.18) */
+  blobPrimaryOpacity: 0.30,
+  /** Opacidad del blob secundario - Prompt 31: +83% (era 0.12) */
+  blobSecondaryOpacity: 0.22,
+  /** Radio de blur de los blobs (px) - Prompt 31: menos difuso, más definido */
+  blobBlur: 80,
+  /** Amplitud de drift de blobs en % - Prompt 31: +20% rango */
+  blobDriftAmplitude: { x: 30, y: 22 },
+  /** Multiplicador de parallax por sección - Prompt 31: hero +20%, outro +40% */
   sectionMultiplier: {
-    hero: 1.5,
+    hero: 1.8,
     content: 1.0,
-    outro: 0.5,
+    outro: 0.7,
   },
-  /** Micro-zoom senoidal del wrapper completo - Prompt 20.1 */
+  /** Micro-zoom senoidal del wrapper completo - Prompt 31: +67% breathing, ciclo 8s */
   microZoom: {
     min: 1.0,
-    max: 1.03,
-    /** Duración de un ciclo completo en frames (12s @ 30fps) */
-    cycleDuration: 360,
+    max: 1.05,
+    /** Duración de un ciclo completo en frames (8s @ 30fps) */
+    cycleDuration: 240,
   },
-  /** Boost de opacidad en transición a outro (+20%) - Prompt 20.1 */
+  /** Boost de opacidad en transición a outro - Prompt 31: +25%, más suave */
   transitionBoost: {
-    amount: 0.2,
-    durationFrames: 15,
+    amount: 0.25,
+    durationFrames: 20,
   },
 };
 
@@ -525,17 +525,17 @@ export const backgroundAnimation = {
  * @since Prompt 20
  */
 export const lightSweep = {
-  /** Frames entre cada barrido (~8s @ 30fps) */
-  intervalFrames: 240,
-  /** Duración del barrido en frames (~1.4s) - Prompt 20.1: más corto = micro-event */
-  durationFrames: 42,
-  /** Opacidad máxima del barrido (SIN doble alpha) - Prompt 20.1: fix de 0.75% → 12% */
-  maxOpacity: 0.12,
+  /** Frames entre cada barrido (~5s @ 30fps) - Prompt 31: era 240 */
+  intervalFrames: 150,
+  /** Duración del barrido en frames (~1.8s) - Prompt 31: +29% */
+  durationFrames: 54,
+  /** Opacidad máxima del barrido - Prompt 31: +50% (era 0.12) */
+  maxOpacity: 0.18,
   /** Ángulo del barrido (grados) */
   angle: 75,
-  /** Fuente de color: 'accent' usa tema, 'white' usa blanco - Prompt 20.1 */
+  /** Fuente de color: 'accent' usa tema, 'white' usa blanco */
   colorSource: 'accent' as const,
-  /** Mix blend mode para mezcla aditiva - Prompt 20.1 */
+  /** Mix blend mode para mezcla aditiva */
   blendMode: 'screen' as const,
 };
 
@@ -553,18 +553,45 @@ export const lightSweep = {
  * @since Prompt 20.1
  */
 export const subtleGrid = {
-  /** Opacidad base del grid */
-  opacity: 0.06,
+  /** Opacidad base del grid - Prompt 31: +67% (era 0.06) */
+  opacity: 0.10,
   /** Tamaño de celda en px */
   cellSize: 40,
   /** Ancho de línea en px */
   lineWidth: 1,
-  /** Velocidad de drift por frame (senoidal) */
-  driftSpeed: 0.003,
-  /** Amplitud total del drift en px */
-  driftAmplitude: 40,
+  /** Velocidad de drift por frame (senoidal) - Prompt 31: +67% */
+  driftSpeed: 0.005,
+  /** Amplitud total del drift en px - Prompt 31: +25% */
+  driftAmplitude: 50,
   /** Mix blend mode */
   blendMode: 'overlay' as const,
+};
+
+// ==========================================
+// CONFIGURACIÓN DE EFECTOS PREMIUM (Prompt 31)
+// ==========================================
+
+/**
+ * Efectos premium para BackgroundDirector
+ *
+ * Color pulse (hue-rotate en blobs) y accent glow spot (tercer blob)
+ * que agregan vida y profundidad al fondo.
+ *
+ * @since Prompt 31
+ */
+export const premiumBackground = {
+  /** Intensidad del color pulse (grados de hue-rotate) */
+  colorPulseRange: 10,
+  /** Velocidad del color pulse (rad/frame) */
+  colorPulseSpeed: 0.008,
+  /** Opacidad del accent glow spot */
+  accentGlowOpacity: 0.15,
+  /** Blur del accent glow spot (px) */
+  accentGlowBlur: 60,
+  /** Tamaño del accent glow spot (% del viewport) */
+  accentGlowSize: 25,
+  /** Radio de órbita del accent glow (% del viewport) */
+  accentGlowOrbit: { x: 20, y: 15 },
 };
 
 // ==========================================

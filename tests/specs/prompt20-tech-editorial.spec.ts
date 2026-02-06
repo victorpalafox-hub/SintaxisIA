@@ -215,8 +215,9 @@ test.describe('Prompt 20 - BackgroundDirector Components', () => {
   test('BackgroundDirector debe ajustar parallax por sección', () => {
     const content = readFile(BG_DIRECTOR_PATH);
     expect(content).toContain('sectionMultiplier');
-    expect(content).toContain('CONTENT_START');
-    expect(content).toContain('OUTRO_START');
+    // Prompt 31: secciones dinámicas reemplazan constantes hardcoded
+    expect(content).toContain('contentStart');
+    expect(content).toContain('outroStart');
     logger.info('[PASS] Parallax varía por sección (hero/content/outro)');
   });
 });

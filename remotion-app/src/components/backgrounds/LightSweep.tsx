@@ -1,19 +1,20 @@
 /**
- * @fileoverview LightSweep - Barrido de luz periódico
+ * @fileoverview LightSweep - Barrido de luz periódico dual
  *
- * Micro-evento visual: un barrido diagonal de luz que aparece
- * cada ~8 segundos para agregar dinamismo al fondo sin distraer.
+ * Micro-evento visual: barridos diagonales de luz que aparecen
+ * periódicamente para agregar dinamismo al fondo sin distraer.
  *
- * Solo renderiza el div durante los frames del barrido activo
+ * Prompt 31: Segundo sweep offset a 50% del intervalo con ángulo
+ * invertido y 70% de opacidad para mayor frecuencia visual.
+ *
+ * Solo renderiza los divs durante los frames del barrido activo
  * para optimizar performance.
  *
- * Prompt 20.1: Usa color accent del tema con blend mode screen.
- * Gradiente concentrado (35%/50%/65%) para efecto más premium.
- *
  * @author Sintaxis IA
- * @version 2.0.0
+ * @version 3.0.0
  * @since Prompt 20
  * @updated Prompt 20.1 - Fix double alpha, color temático, blend mode
+ * @updated Prompt 31 - Dual sweep con ángulo invertido para más dinamismo
  */
 
 import React from 'react';
@@ -21,10 +22,10 @@ import { AbsoluteFill, interpolate, useCurrentFrame } from 'remotion';
 import { lightSweep as lightSweepConfig, colors } from '../../styles/themes';
 
 /**
- * LightSweep - Barrido de luz diagonal periódico
+ * LightSweep - Barrido de luz diagonal periódico dual
  *
- * Aparece cada intervalFrames con una duración de durationFrames.
- * Usa una curva bell (0 -> max -> 0) para opacidad.
+ * Sweep primario cada intervalFrames + sweep secundario offset 50%.
+ * Cada uno usa una curva bell (0 -> max -> 0) para opacidad.
  *
  * @example
  * <LightSweep />
@@ -32,34 +33,56 @@ import { lightSweep as lightSweepConfig, colors } from '../../styles/themes';
 export const LightSweep: React.FC = () => {
   const frame = useCurrentFrame();
 
-  // Calcular fase dentro del ciclo de intervalo
-  const sweepPhase = frame % lightSweepConfig.intervalFrames;
-
-  // Solo renderizar durante los frames activos del barrido
-  if (sweepPhase >= lightSweepConfig.durationFrames) {
-    return null;
-  }
-
-  // Opacidad con curva bell: 0 -> maxOpacity -> 0
-  const opacity = interpolate(
-    sweepPhase,
-    [0, lightSweepConfig.durationFrames / 2, lightSweepConfig.durationFrames],
-    [0, lightSweepConfig.maxOpacity, 0],
-    { extrapolateRight: 'clamp' }
-  );
-
-  // Posición del barrido: se desplaza de -100% a +200%
-  const translateX = interpolate(
-    sweepPhase,
-    [0, lightSweepConfig.durationFrames],
-    [-100, 200],
-    { extrapolateRight: 'clamp' }
-  );
-
-  // Color del barrido: accent del tema o blanco (Prompt 20.1)
+  // Color del barrido: accent del tema o blanco
   const sweepColor = lightSweepConfig.colorSource === 'accent'
     ? colors.accent
     : '#FFFFFF';
+
+  // Calcular fase del sweep primario
+  const sweepPhase1 = frame % lightSweepConfig.intervalFrames;
+  const sweep1Active = sweepPhase1 < lightSweepConfig.durationFrames;
+
+  // Prompt 31: Segundo sweep offset a 50% del intervalo
+  const sweepPhase2 = (frame + Math.floor(lightSweepConfig.intervalFrames / 2)) % lightSweepConfig.intervalFrames;
+  const sweep2Active = sweepPhase2 < lightSweepConfig.durationFrames;
+
+  // Si ningún sweep está activo, no renderizar nada
+  if (!sweep1Active && !sweep2Active) {
+    return null;
+  }
+
+  // Opacidad y posición del sweep primario
+  const opacity1 = sweep1Active ? interpolate(
+    sweepPhase1,
+    [0, lightSweepConfig.durationFrames / 2, lightSweepConfig.durationFrames],
+    [0, lightSweepConfig.maxOpacity, 0],
+    { extrapolateRight: 'clamp' }
+  ) : 0;
+
+  const translateX1 = sweep1Active ? interpolate(
+    sweepPhase1,
+    [0, lightSweepConfig.durationFrames],
+    [-100, 200],
+    { extrapolateRight: 'clamp' }
+  ) : 0;
+
+  // Prompt 31: Opacidad y posición del sweep secundario (70% opacidad, ángulo invertido)
+  const opacity2 = sweep2Active ? interpolate(
+    sweepPhase2,
+    [0, lightSweepConfig.durationFrames / 2, lightSweepConfig.durationFrames],
+    [0, lightSweepConfig.maxOpacity * 0.7, 0],
+    { extrapolateRight: 'clamp' }
+  ) : 0;
+
+  const translateX2 = sweep2Active ? interpolate(
+    sweepPhase2,
+    [0, lightSweepConfig.durationFrames],
+    [-100, 200],
+    { extrapolateRight: 'clamp' }
+  ) : 0;
+
+  // Ángulo invertido para el sweep secundario (Prompt 31)
+  const invertedAngle = 180 - lightSweepConfig.angle;
 
   return (
     <AbsoluteFill style={{
@@ -67,18 +90,37 @@ export const LightSweep: React.FC = () => {
       overflow: 'hidden',
       mixBlendMode: lightSweepConfig.blendMode,
     }}>
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          transform: `translateX(${translateX}%)`,
-          background: `linear-gradient(${lightSweepConfig.angle}deg, transparent 35%, ${sweepColor} 50%, transparent 65%)`,
-          opacity,
-        }}
-      />
+      {/* Sweep primario (original) */}
+      {sweep1Active && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            transform: `translateX(${translateX1}%)`,
+            background: `linear-gradient(${lightSweepConfig.angle}deg, transparent 35%, ${sweepColor} 50%, transparent 65%)`,
+            opacity: opacity1,
+          }}
+        />
+      )}
+
+      {/* Prompt 31: Sweep secundario (ángulo invertido, 70% opacidad) */}
+      {sweep2Active && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            transform: `translateX(${translateX2}%)`,
+            background: `linear-gradient(${invertedAngle}deg, transparent 35%, ${sweepColor} 50%, transparent 65%)`,
+            opacity: opacity2,
+          }}
+        />
+      )}
     </AbsoluteFill>
   );
 };

@@ -8,8 +8,9 @@
  * La opacidad varía sutilmente con el frame para dar vida.
  *
  * @author Sintaxis IA
- * @version 1.0.0
+ * @version 2.0.0
  * @since Prompt 20
+ * @updated Prompt 31 - Frecuencia variable para textura más rica
  */
 
 import React from 'react';
@@ -40,13 +41,16 @@ export const GrainOverlay: React.FC = () => {
   // Usamos Math.floor(frame / 2) para cambiar cada 2 frames (15fps de grain = más natural)
   const seed = Math.floor(frame / 2) % 100;
 
+  // Prompt 31: Variación de frecuencia para textura más rica (0.60-0.70)
+  const baseFreq = 0.65 + Math.sin(frame * 0.01) * 0.05;
+
   return (
     <AbsoluteFill style={{ pointerEvents: 'none', opacity, mixBlendMode: 'overlay' }}>
       <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
         <filter id={`grain-${seed}`}>
           <feTurbulence
             type="fractalNoise"
-            baseFrequency={0.65}
+            baseFrequency={baseFreq}
             numOctaves={4}
             seed={seed}
             stitchTiles="stitch"

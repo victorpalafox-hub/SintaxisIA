@@ -20,11 +20,13 @@
  * - Outro (44-50s): 0.5x (calma)
  *
  * Prompt 20.1 - Fix double alpha, micro-zoom, SubtleGrid, transition boost
+ * Prompt 31 - Color pulse, accent glow, secciones dinámicas, boost general
  *
  * @author Sintaxis IA
- * @version 2.0.0
+ * @version 3.0.0
  * @since Prompt 20
  * @updated Prompt 20.1 - Background revival (fix visibilidad)
+ * @updated Prompt 31 - Premium background: color pulse, accent glow, secciones dinámicas
  */
 
 import React from 'react';
@@ -34,19 +36,19 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from 'remotion';
-import { colors, backgroundAnimation } from '../../styles/themes';
+import { colors, backgroundAnimation, premiumBackground } from '../../styles/themes';
 import { GrainOverlay } from './GrainOverlay';
 import { LightSweep } from './LightSweep';
 import { SubtleGrid } from './SubtleGrid';
 
 // ==========================================
-// CONSTANTES DE SECCIÓN (timing de escenas)
+// FRACCIONES DE SECCIÓN (Prompt 31: dinámicas, no hardcoded)
 // ==========================================
 
-/** Frame donde empieza la sección Content (8s * 30fps = 240) */
-const CONTENT_START = 240;
-/** Frame donde empieza la sección Outro (44s * 30fps = 1320) */
-const OUTRO_START = 1320;
+/** Fracción de la duración total dedicada a Hero (~8s de 50s = 16%) */
+const HERO_DURATION_FRACTION = 0.16;
+/** Fracción de la duración total dedicada a Outro (~5s de 50s = 10%) */
+const OUTRO_FRACTION = 0.10;
 
 /**
  * BackgroundDirector - Fondo animado persistente
@@ -69,13 +71,20 @@ export const BackgroundDirector: React.FC = () => {
   const { durationInFrames } = useVideoConfig();
 
   // ==========================================
+  // SECCIONES DINÁMICAS (Prompt 31: compatible con Prompt 30 duración dinámica)
+  // ==========================================
+
+  const contentStart = Math.round(durationInFrames * HERO_DURATION_FRACTION);
+  const outroStart = Math.round(durationInFrames * (1 - OUTRO_FRACTION));
+
+  // ==========================================
   // MULTIPLICADOR POR SECCIÓN
   // ==========================================
 
   // Determinar multiplicador de parallax basado en la sección actual
-  const sectionMultiplier = frame < CONTENT_START
+  const sectionMultiplier = frame < contentStart
     ? backgroundAnimation.sectionMultiplier.hero
-    : frame < OUTRO_START
+    : frame < outroStart
     ? backgroundAnimation.sectionMultiplier.content
     : backgroundAnimation.sectionMultiplier.outro;
 
@@ -114,11 +123,11 @@ export const BackgroundDirector: React.FC = () => {
   // TRANSITION BOOST (punch en transición a outro)
   // ==========================================
 
-  // +20% opacity durante 15 frames al llegar a OUTRO_START (Prompt 20.1)
+  // Prompt 31: boost en transición a outro (usa secciones dinámicas)
   const { transitionBoost } = backgroundAnimation;
   const boostOpacity = interpolate(
     frame,
-    [OUTRO_START - transitionBoost.durationFrames, OUTRO_START, OUTRO_START + transitionBoost.durationFrames],
+    [outroStart - transitionBoost.durationFrames, outroStart, outroStart + transitionBoost.durationFrames],
     [0, transitionBoost.amount, 0],
     { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
   );
@@ -138,6 +147,21 @@ export const BackgroundDirector: React.FC = () => {
     [-1, 1],
     [microZoom.min, microZoom.max]
   );
+
+  // ==========================================
+  // COLOR PULSE - hue shift sutil en blobs (Prompt 31)
+  // ==========================================
+
+  // Hue-rotate que oscila ±colorPulseRange grados para dar vida al color
+  const colorShift = Math.sin(frame * premiumBackground.colorPulseSpeed) * premiumBackground.colorPulseRange;
+
+  // ==========================================
+  // ACCENT GLOW SPOT - tercer blob de acento (Prompt 31)
+  // ==========================================
+
+  // Punto de luz que orbita lentamente dando profundidad
+  const accentX = 50 + Math.sin(frame * 0.005) * premiumBackground.accentGlowOrbit.x;
+  const accentY = 50 + Math.cos(frame * 0.004) * premiumBackground.accentGlowOrbit.y;
 
   // ==========================================
   // VIGNETTE ALPHA (desde config - Prompt 20.1)
@@ -164,7 +188,7 @@ export const BackgroundDirector: React.FC = () => {
         }}
       />
 
-      {/* CAPA 2: Parallax blob primario - SIN doble alpha (Prompt 20.1) */}
+      {/* CAPA 2: Parallax blob primario - color pulse (Prompt 31) */}
       <AbsoluteFill style={{ pointerEvents: 'none' }}>
         <div
           style={{
@@ -175,14 +199,14 @@ export const BackgroundDirector: React.FC = () => {
             height: '60%',
             borderRadius: '50%',
             background: `radial-gradient(circle, ${colors.primary} 0%, transparent 70%)`,
-            filter: `blur(${backgroundAnimation.blobBlur}px)`,
+            filter: `blur(${backgroundAnimation.blobBlur}px) hue-rotate(${colorShift}deg)`,
             opacity: blob1Opacity,
             transform: `translate(${blob1X}%, ${blob1Y}%)`,
           }}
         />
       </AbsoluteFill>
 
-      {/* CAPA 3: Parallax blob secundario - SIN doble alpha (Prompt 20.1) */}
+      {/* CAPA 3: Parallax blob secundario - color pulse (Prompt 31) */}
       <AbsoluteFill style={{ pointerEvents: 'none' }}>
         <div
           style={{
@@ -193,9 +217,27 @@ export const BackgroundDirector: React.FC = () => {
             height: '40%',
             borderRadius: '50%',
             background: `radial-gradient(circle, ${colors.secondary} 0%, transparent 70%)`,
-            filter: `blur(${backgroundAnimation.blobBlur}px)`,
+            filter: `blur(${backgroundAnimation.blobBlur}px) hue-rotate(${colorShift}deg)`,
             opacity: blob2Opacity,
             transform: `translate(${blob2X}%, ${blob2Y}%)`,
+          }}
+        />
+      </AbsoluteFill>
+
+      {/* CAPA 3.5: Accent glow spot - profundidad visual (Prompt 31) */}
+      <AbsoluteFill style={{ pointerEvents: 'none' }}>
+        <div
+          style={{
+            position: 'absolute',
+            top: `${accentY}%`,
+            left: `${accentX}%`,
+            width: `${premiumBackground.accentGlowSize}%`,
+            height: `${premiumBackground.accentGlowSize}%`,
+            borderRadius: '50%',
+            background: `radial-gradient(circle, ${colors.accent} 0%, transparent 70%)`,
+            filter: `blur(${premiumBackground.accentGlowBlur}px)`,
+            opacity: premiumBackground.accentGlowOpacity,
+            transform: 'translate(-50%, -50%)',
           }}
         />
       </AbsoluteFill>
