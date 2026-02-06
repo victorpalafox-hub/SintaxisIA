@@ -680,9 +680,9 @@ class VideoRenderingService {
       // Prompt 19.7: Timestamps de sincronización (opcional)
       audioSync,
       config: {
-        // Prompt 26: Duración dinámica basada en audio real
-        // Hero 8s + max(37s, audioDuration + 1s fade) + Outro 5s
-        duration: Math.ceil(8 + Math.max(37, request.audioDuration + 1) + 5),
+        // Prompt 30: Duración dinámica basada en audio real + breathing room
+        // Hero 8s + max(37s, audioDuration + 1s fade) + breathing 1s + Outro 5s
+        duration: Math.ceil(8 + Math.max(37, request.audioDuration + 1) + 1 + 5),
         fps: VIDEO_CONFIG.specs.fps,
         enhancedEffects: true,
       },

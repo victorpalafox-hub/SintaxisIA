@@ -21,6 +21,7 @@
  * @updated Prompt 19.11 - Crossfade entre escenas (30 frames overlap)
  * @updated Prompt 20 - BackgroundDirector como fondo persistente, escenas transparentes
  * @updated Prompt 27 - Audio bed desde frame 0, music separado de AudioMixer
+ * @updated Prompt 30 - Breathing room (1s) entre narración y outro, duración dinámica via calculateMetadata
  */
 
 import React from 'react';
@@ -123,7 +124,7 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
   // Activar efectos mejorados (default: true)
   const enhancedEffects = config?.enhancedEffects ?? true;
 
-  // Duración total en frames
+  // Prompt 30: Duración total en frames (ahora dinámica via calculateMetadata en Root.tsx)
   const durationInFrames = duration * fps;
 
   // ==========================================
@@ -143,11 +144,16 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
     : 0;
   const contentSceneDuration = Math.max(37 * fps, audioDurationFrames);
 
+  // Prompt 30: Buffer de respiración entre narración y outro
+  // Pausa natural de 1s para que el CTA no atropelle la voz
+  const BREATHING_ROOM_FRAMES = 30; // 1s @ 30fps
+
   // Puntos de inicio con overlap de crossfade (Prompt 19.11)
   // Cada escena downstream empieza crossfadeFrames antes que la anterior termine
   const heroStart = 0;
   const contentStart = heroSceneDuration - crossfadeFrames;        // 210
-  const outroStart = contentStart + contentSceneDuration;          // 1320
+  // Prompt 30: Outro empieza después de Content + breathing room
+  const outroStart = contentStart + contentSceneDuration + BREATHING_ROOM_FRAMES;
 
   // Duraciones de Sequence extendidas para crossfade (Prompt 19.11)
   // Hero mantiene su duración original (no necesita extensión)

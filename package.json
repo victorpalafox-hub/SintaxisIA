@@ -173,7 +173,10 @@
     "test:prompt28": "playwright test tests/specs/prompt28-images-editorial.spec.ts",
 
     "test:topic-segmentation": "playwright test tests/specs/prompt29-topic-segmentation.spec.ts",
-    "test:prompt29": "playwright test tests/specs/prompt29-topic-segmentation.spec.ts"
+    "test:prompt29": "playwright test tests/specs/prompt29-topic-segmentation.spec.ts",
+
+    "test:final-duration": "playwright test tests/specs/prompt30-final-duration-fix.spec.ts",
+    "test:prompt30": "playwright test tests/specs/prompt30-final-duration-fix.spec.ts"
   },
   "keywords": [
     "youtube",

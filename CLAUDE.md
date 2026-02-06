@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 1130 tests (1128 passing, 2 skipped)
+**Test Status**: 1153 tests (1151 passing, 2 skipped)
 
-**Last Updated**: 2026-02-06 (Prompt 29 - Segmentación topic-aware de imágenes)
+**Last Updated**: 2026-02-06 (Prompt 30 - Duración dinámica real + CTA después de narración)
 
 ## Prerequisites
 
@@ -67,7 +67,7 @@ npm run check
 | CI validation | `npm run ci:validate` |
 | News Manager | `npm run news:history / news:stats / news:help` |
 
-**Test suites**: 1130 tests en 46 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
+**Test suites**: 1153 tests en 47 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
 
 **Playwright config**: 4 workers local / 1 en CI, timeout 2min por test, retries solo en CI (2), reporters: HTML + JSON + JUnit.
 
@@ -164,7 +164,7 @@ if (isShortTimeout(timeout)) { /* manejar error */ }
 
 ```bash
 npm run check          # TypeScript sin errores
-npm test              # Tests pasando (1130 tests, 2 skipped)
+npm test              # Tests pasando (1153 tests, 2 skipped)
 npm run security:check # Sin vulnerabilidades críticas
 ```
 
@@ -457,7 +457,7 @@ output/
 | Gemini | `generateScript()` + Alex Torres Persona | 4/6 marcadores compliance |
 | ElevenLabs | `generateAudio()` + fallback Edge-TTS | 10k chars/mes |
 | YouTube | `uploadVideo()` + OAuth2 | 6 videos/día (quota 10k units) |
-| Video | Dinámico: Hero 8s + Content max(37s,audio+1s) + Outro 5s | 1080x1920, 30fps |
+| Video | Dinámico: Hero 8s + Content max(37s,audio+1s) + Breathing 1s + Outro 5s | 1080x1920, 30fps |
 | Output Manager | `saveAllOutputs()` + TikTok copy | slug max 50 chars |
 | Sequential Text | `splitIntoReadablePhrases()` + `getPhraseTiming()` | 60 chars/frase, fade 15 frames |
 | Whisper | `whisperService.transcribe()` + `groupIntoPhrases()` | Opcional (OPENAI_API_KEY), ~$0.006/min |
@@ -476,6 +476,7 @@ output/
 | MusicBed | `musicBed` config + `<Audio>` loop desde frame 0 | hero 22%, content 8%, fadeOut 60 frames |
 | ImageEditorial | `imageAnimation` width/height/borderRadius | 920x520, borderRadius 24, crossfade real |
 | TopicSegmentation | `findTopicBoundaries()`, `findMarkerPositions()` | 18 marcadores ES, targets 33%/66%, min 8s, score ≥0.3 |
+| DynamicDuration | `calculateMetadata` en Root.tsx, `BREATHING_ROOM_FRAMES` | Composition dinámica via props, 1s breathing room antes de outro |
 
 ## Prompt History (Resumen)
 
@@ -532,6 +533,7 @@ output/
 | 27 | Hero Audio Bed + Visual Hook | 23 | `musicBed` en themes.ts, BackgroundMusic Sequence, sceneZoom en HeroScene, `generate-news-bed.js` |
 | 28 | Imágenes Editoriales + Crossfade Real | 25 | imageAnimation width/height, ContentScene 920x520, crossfade dual, newsTitle en queries |
 | 29 | Segmentación Topic-Aware | 35 | TRANSITION_MARKERS, `findTopicBoundaries()`, marcadores ES→cortes 33%/66%, fallback uniforme |
+| 30 | Duración Dinámica + CTA Fix | 23 | `calculateMetadata` en Root.tsx, `BREATHING_ROOM_FRAMES`, duration +1s breathing |
 
 ## Pendientes
 
