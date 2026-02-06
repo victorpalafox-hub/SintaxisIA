@@ -10,6 +10,7 @@
  * @updated Prompt 19.1.6 - Eliminados sufijos genéricos, señal __LOGO__ para logos
  * @updated Prompt 23 - Traducción de keywords ES→EN via SmartQueryGenerator
  * @updated Prompt 28 - newsTitle param, empresa+título en TODAS las queries
+ * @updated Prompt 29 - Segmentación topic-aware con marcadores de transición
  */
 
 import { logger } from '../../utils/logger';
@@ -32,6 +33,52 @@ const SEGMENT_DURATION = 15;
  * Los cambios ocurren preferentemente en transiciones de sección.
  */
 const MAX_IMAGE_SEGMENTS = 3;
+
+// =============================================================================
+// TOPIC-AWARE SEGMENTATION (Prompt 29)
+// =============================================================================
+
+/**
+ * Marcadores de transición en español que señalan cambio de tópico.
+ * Cada marcador tiene un peso (weight) que indica su fuerza como punto de corte.
+ *
+ * @since Prompt 29
+ */
+const TRANSITION_MARKERS: Array<{ pattern: RegExp; weight: number }> = [
+  // Fuertes (1.0) - cambio explícito de tópico
+  { pattern: /\bpor otro lado\b/i, weight: 1.0 },
+  { pattern: /\bpor otra parte\b/i, weight: 1.0 },
+  { pattern: /\ben cambio\b/i, weight: 1.0 },
+  { pattern: /\bsin embargo\b/i, weight: 1.0 },
+  { pattern: /\bahora bien\b/i, weight: 1.0 },
+  { pattern: /\bno obstante\b/i, weight: 1.0 },
+  // Medios (0.7) - progresión de tópico
+  { pattern: /\bahora\b/i, weight: 0.7 },
+  { pattern: /\bademás\b/i, weight: 0.7 },
+  { pattern: /\blo interesante\b/i, weight: 0.7 },
+  { pattern: /\blo fascinante\b/i, weight: 0.7 },
+  { pattern: /\bmientras tanto\b/i, weight: 0.7 },
+  // Conclusión/opinión (0.8) - cambio de sección
+  { pattern: /\ben resumen\b/i, weight: 0.8 },
+  { pattern: /\bfinalmente\b/i, weight: 0.8 },
+  { pattern: /\ben conclusión\b/i, weight: 0.8 },
+  { pattern: /\bpersonalmente\b/i, weight: 0.8 },
+  { pattern: /\ben mi opinión\b/i, weight: 0.8 },
+  { pattern: /\bcreo que\b/i, weight: 0.6 },
+  { pattern: /\bme parece\b/i, weight: 0.6 },
+];
+
+/** Fracción de totalDuration como tolerancia de proximidad a target (15%) */
+const MARKER_PROXIMITY_TOLERANCE = 0.15;
+
+/** Duración mínima de un segmento en segundos (evita cambios bruscos) */
+const MIN_SEGMENT_DURATION_S = 8;
+
+/** Score mínimo para aceptar un corte topic-aware */
+const MIN_CUT_SCORE = 0.3;
+
+/** Paso de cuantización para boundaries (segundos limpios) */
+const BOUNDARY_QUANTIZE_STEP = 1.0;
 
 /**
  * Stopwords en español a filtrar
@@ -178,17 +225,38 @@ export class SceneSegmenterService {
     // Calcular número de segmentos
     // Prompt 25: Limitar a MAX_IMAGE_SEGMENTS para coherencia visual (2-3 cambios, no 4+)
     const numSegments = Math.min(MAX_IMAGE_SEGMENTS, Math.max(2, Math.ceil(totalDuration / SEGMENT_DURATION)));
-    const actualSegmentDuration = totalDuration / numSegments;
 
-    logger.info(`[SceneSegmenter] Creando ${numSegments} segmentos de ~${actualSegmentDuration.toFixed(1)}s (máx ${MAX_IMAGE_SEGMENTS})`);
+    logger.info(`[SceneSegmenter] Creando ${numSegments} segmentos (máx ${MAX_IMAGE_SEGMENTS})`);
 
-    // Mapear secciones del script a segmentos
+    // Prompt 29: Calcular boundaries (topic-aware o uniforme)
+    let boundaries: number[];
+
+    if (numSegments === 3) {
+      // Intentar segmentación topic-aware con marcadores de transición
+      const topicCuts = this.findTopicBoundaries(script, totalDuration);
+      if (topicCuts) {
+        boundaries = [0, topicCuts[0], topicCuts[1]];
+        logger.info(`[SceneSegmenter] Topic-aware boundaries: ${topicCuts[0]}s, ${topicCuts[1]}s`);
+      } else {
+        // Fallback: división uniforme
+        const d = totalDuration / 3;
+        boundaries = [0, Math.round(d), Math.round(2 * d)];
+        logger.info(`[SceneSegmenter] Fallback: división uniforme`);
+      }
+    } else {
+      // 2 segmentos (videos cortos): división uniforme
+      const d = totalDuration / numSegments;
+      boundaries = Array.from({ length: numSegments }, (_, i) => Math.round(i * d));
+      logger.info(`[SceneSegmenter] División uniforme (${numSegments} segmentos)`);
+    }
+
+    // Construir segmentos desde boundaries
     const sections = this.mapScriptToSections(script, totalDuration);
     const segments: SceneSegment[] = [];
 
-    for (let i = 0; i < numSegments; i++) {
-      const startSecond = Math.round(i * actualSegmentDuration);
-      const endSecond = Math.round((i + 1) * actualSegmentDuration);
+    for (let i = 0; i < boundaries.length; i++) {
+      const startSecond = boundaries[i];
+      const endSecond = i < boundaries.length - 1 ? boundaries[i + 1] : Math.round(totalDuration);
 
       // Encontrar qué sección(es) del script corresponden a este segmento
       const text = this.getTextForTimeRange(sections, startSecond, endSecond);
@@ -212,6 +280,142 @@ export class SceneSegmenterService {
     }
 
     return segments;
+  }
+
+  // ===========================================================================
+  // TOPIC-AWARE SEGMENTATION METHODS (Prompt 29)
+  // ===========================================================================
+
+  /**
+   * Busca marcadores de transición en el texto completo del script.
+   * Retorna posiciones (charIndex) y pesos de cada marcador encontrado.
+   *
+   * @param fullText - Texto concatenado del script (hook + body + opinion + cta)
+   * @returns Marcadores encontrados, ordenados por posición en el texto
+   *
+   * @since Prompt 29
+   */
+  private findMarkerPositions(fullText: string): Array<{ charIndex: number; weight: number; phrase: string }> {
+    const markers: Array<{ charIndex: number; weight: number; phrase: string }> = [];
+
+    for (const { pattern, weight } of TRANSITION_MARKERS) {
+      // Usar regex global para encontrar todas las ocurrencias
+      const globalPattern = new RegExp(pattern.source, 'gi');
+      let match: RegExpExecArray | null;
+
+      while ((match = globalPattern.exec(fullText)) !== null) {
+        markers.push({
+          charIndex: match.index,
+          weight,
+          phrase: match[0],
+        });
+      }
+    }
+
+    // Ordenar por posición en el texto
+    markers.sort((a, b) => a.charIndex - b.charIndex);
+
+    return markers;
+  }
+
+  /**
+   * Redondea un boundary a segundos limpios (múltiplo de BOUNDARY_QUANTIZE_STEP).
+   * Clamp entre min y max para evitar segmentos fuera de rango.
+   *
+   * @param seconds - Valor a cuantizar
+   * @param min - Valor mínimo permitido
+   * @param max - Valor máximo permitido
+   * @returns Valor cuantizado y clamped
+   *
+   * @since Prompt 29
+   */
+  private quantizeBoundary(seconds: number, min: number, max: number): number {
+    const quantized = Math.round(seconds / BOUNDARY_QUANTIZE_STEP) * BOUNDARY_QUANTIZE_STEP;
+    return Math.max(min, Math.min(max, quantized));
+  }
+
+  /**
+   * Algoritmo principal de segmentación topic-aware.
+   * Concatena el texto del script, busca marcadores de transición,
+   * y selecciona los mejores puntos de corte cerca de 33% y 66%.
+   *
+   * @param script - Script generado (hook, body, opinion, cta)
+   * @param totalDuration - Duración total en segundos
+   * @returns Tupla [cut1, cut2] en segundos, o null si no hay buenos candidatos
+   *
+   * @since Prompt 29
+   */
+  private findTopicBoundaries(script: GeneratedScript, totalDuration: number): [number, number] | null {
+    // Concatenar texto completo del script
+    const fullText = [script.hook, script.body, script.opinion, script.cta].join(' ');
+
+    if (fullText.length === 0) return null;
+
+    // Buscar marcadores de transición
+    const markers = this.findMarkerPositions(fullText);
+
+    if (markers.length === 0) {
+      logger.info('[SceneSegmenter] No se encontraron marcadores de transición');
+      return null;
+    }
+
+    logger.info(`[SceneSegmenter] ${markers.length} marcadores encontrados: ${markers.map(m => `"${m.phrase}"@${m.charIndex}`).join(', ')}`);
+
+    // Targets: 33% y 66% de la duración total
+    const target1 = totalDuration / 3;
+    const target2 = (2 * totalDuration) / 3;
+    const tolerance = totalDuration * MARKER_PROXIMITY_TOLERANCE;
+
+    // Puntuar cada marcador contra cada target
+    let bestForTarget1: { seconds: number; score: number } | null = null;
+    let bestForTarget2: { seconds: number; score: number } | null = null;
+
+    for (const marker of markers) {
+      // Convertir posición de carácter a tiempo (interpolación lineal)
+      const timePosition = (marker.charIndex / fullText.length) * totalDuration;
+
+      // Score para target 1
+      const dist1 = Math.abs(timePosition - target1);
+      if (dist1 <= tolerance) {
+        const score1 = marker.weight * (1 - dist1 / tolerance);
+        if (score1 >= MIN_CUT_SCORE && (!bestForTarget1 || score1 > bestForTarget1.score)) {
+          bestForTarget1 = { seconds: timePosition, score: score1 };
+        }
+      }
+
+      // Score para target 2
+      const dist2 = Math.abs(timePosition - target2);
+      if (dist2 <= tolerance) {
+        const score2 = marker.weight * (1 - dist2 / tolerance);
+        if (score2 >= MIN_CUT_SCORE && (!bestForTarget2 || score2 > bestForTarget2.score)) {
+          bestForTarget2 = { seconds: timePosition, score: score2 };
+        }
+      }
+    }
+
+    // Necesitamos ambos cortes para 3 segmentos
+    if (!bestForTarget1 || !bestForTarget2) {
+      logger.info(`[SceneSegmenter] Cortes insuficientes: target1=${bestForTarget1 ? 'OK' : 'MISS'}, target2=${bestForTarget2 ? 'OK' : 'MISS'}`);
+      return null;
+    }
+
+    // Cuantizar boundaries
+    const cut1 = this.quantizeBoundary(bestForTarget1.seconds, MIN_SEGMENT_DURATION_S, totalDuration - 2 * MIN_SEGMENT_DURATION_S);
+    const cut2 = this.quantizeBoundary(bestForTarget2.seconds, cut1 + MIN_SEGMENT_DURATION_S, totalDuration - MIN_SEGMENT_DURATION_S);
+
+    // Validar duraciones mínimas de los 3 segmentos
+    const seg1 = cut1;
+    const seg2 = cut2 - cut1;
+    const seg3 = totalDuration - cut2;
+
+    if (seg1 < MIN_SEGMENT_DURATION_S || seg2 < MIN_SEGMENT_DURATION_S || seg3 < MIN_SEGMENT_DURATION_S) {
+      logger.info(`[SceneSegmenter] Segmentos inválidos: ${seg1}s, ${seg2}s, ${seg3}s (mín ${MIN_SEGMENT_DURATION_S}s)`);
+      return null;
+    }
+
+    logger.info(`[SceneSegmenter] Topic-aware: cut1=${cut1}s (score ${bestForTarget1.score.toFixed(2)}), cut2=${cut2}s (score ${bestForTarget2.score.toFixed(2)})`);
+
+    return [cut1, cut2];
   }
 
   /**
