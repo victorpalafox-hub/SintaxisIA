@@ -279,8 +279,9 @@ test.describe('Prompt [N] - Nombre Feature', () => {
 ## Video Specs
 
 - 1080x1920 (9:16), 30 FPS
-- **Composición Producción** (`AINewsShort`): 50s, 1 noticia con efectos dinámicos
-  - Timing: Hero 8s + Content 37s + Outro 5s (Prompt 19.4), crossfade 1s entre escenas (Prompt 19.11)
+- **Composición Producción** (`AINewsShort`): Duración dinámica, 1 noticia con efectos dinámicos
+  - Timing: Hero 8s (silencioso) + Content max(37s, audioDuration+1s) + Outro 5s, crossfade 1s (Prompt 26)
+  - Audio retrasado: narración empieza con ContentScene, no durante HeroScene
   - Efectos: zoom, blur-to-focus, parallax, sombras editoriales
   - BackgroundDirector: fondo animado persistente (gradient drift + parallax blobs + grain + light sweep + vignette)
   - 3 imágenes: hero (logo), context (screenshot), outro (hardcoded)
@@ -456,7 +457,7 @@ output/
 | Gemini | `generateScript()` + Alex Torres Persona | 4/6 marcadores compliance |
 | ElevenLabs | `generateAudio()` + fallback Edge-TTS | 10k chars/mes |
 | YouTube | `uploadVideo()` + OAuth2 | 6 videos/día (quota 10k units) |
-| Video | 50s total: Hero 8s + Content 37s + Outro 5s | 1080x1920, 30fps |
+| Video | Dinámico: Hero 8s + Content max(37s,audio+1s) + Outro 5s | 1080x1920, 30fps |
 | Output Manager | `saveAllOutputs()` + TikTok copy | slug max 50 chars |
 | Sequential Text | `splitIntoReadablePhrases()` + `getPhraseTiming()` | 60 chars/frase, fade 15 frames |
 | Whisper | `whisperService.transcribe()` + `groupIntoPhrases()` | Opcional (OPENAI_API_KEY), ~$0.006/min |
@@ -470,7 +471,7 @@ output/
 | ImageScoring | `searchPexelsWithScoring()`, `scoreCandidate()` | 5 candidatos, 4 criterios (100pts), umbral 20 |
 | News Manager CLI | `news-manager-cli.ts` (10 comandos: history/active/expired/search/view/unlock/cleanup/clear/stats/help) | Peer de cli.ts, ts-node directo para args |
 | NewsEnricher | `enrichAll()`, `detectCompany()`, `detectType()` | 81 aliases, 8 type patterns, PASO 2 real |
-| AudioSync | `sceneOffsetSeconds`, `phraseTimestamps` pipeline | Offset 7s (contentStart/fps), lead 200ms, lag 150ms, max 3 img segments |
+| AudioSync | `Sequence(contentStart)`, `phraseTimestamps` pipeline | Audio retrasado a ContentScene, offset 0, lead 200ms, lag 150ms, max 3 img |
 | HeroFlash | `flashMaxOpacity`, `flashDurationFrames` | 0.15 opacity, 10 frames (~0.3s) |
 
 ## Prompt History (Resumen)
@@ -524,6 +525,7 @@ output/
 | 25 | Audio Sync Fix + Hook Visual | 34 | Frame offset, phraseTimestamps pipeline, flash overlay, MAX_IMAGE_SEGMENTS=3 |
 | 25.2 | Fix texto fade-out prematuro | - | phraseEndFrame + fadeOutFrames buffer en phrase-timing.ts |
 | 25.3 | Sync broadcast-grade | - | sceneStartSecond fix (8→7s crossfade), captionLeadMs/LagMs (200/150ms) |
+| 26 | Audio retrasado + Duración dinámica | - | AudioMixer en Sequence(contentStart), duración basada en audioDuration, HeroScene silenciosa |
 
 ## Pendientes
 

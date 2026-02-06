@@ -132,10 +132,15 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
   // Crossfade entre escenas (Prompt 19.11)
   const crossfadeFrames = sceneTransition.crossfadeFrames; // 30 frames = 1s
 
-  // Duraciones base de cada escena (sin cambios)
+  // Duraciones base de cada escena
   const heroSceneDuration = 8 * fps;        // 240 frames
-  const contentSceneDuration = 37 * fps;    // 1110 frames
   const outroSceneDuration = 5 * fps;       // 150 frames - Reducido de 10s en Prompt 19.4
+
+  // Prompt 26: ContentScene dura al menos 37s, o más si el audio es largo
+  const audioDurationFrames = audioSync?.audioDuration
+    ? Math.ceil(audioSync.audioDuration * fps) + 30  // +1s fade-out
+    : 0;
+  const contentSceneDuration = Math.max(37 * fps, audioDurationFrames);
 
   // Puntos de inicio con overlap de crossfade (Prompt 19.11)
   // Cada escena downstream empieza crossfadeFrames antes que la anterior termine
@@ -212,7 +217,7 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
             context: images.context,
           }}
           dynamicScenes={images.dynamicScenes}
-          sceneStartSecond={contentStart / fps}
+          sceneStartSecond={0}
           totalDuration={durationInFrames}
           fps={fps}
           dynamicEffects={enhancedEffects}
@@ -241,16 +246,18 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
       </Sequence>
 
       {/* ==========================================
-          AUDIO MIXER - Voz + Música con Ducking
+          AUDIO MIXER - Voz + Música con Ducking (Prompt 26)
           ==========================================
-          Mezcla inteligente:
-          - Voz TTS: 100% volumen (protagonista)
-          - Música: 15% base, ducking automático
+          Retrasado al inicio de ContentScene para que:
+          - HeroScene sea silenciosa (solo visual)
+          - Audio arranque sincronizado con el texto
       */}
-      <AudioMixer
-        voice={audio.voice}
-        music={audio.music}
-      />
+      <Sequence from={contentStart} name="Narration">
+        <AudioMixer
+          voice={audio.voice}
+          music={audio.music}
+        />
+      </Sequence>
     </AbsoluteFill>
   );
 };
