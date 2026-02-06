@@ -281,6 +281,12 @@ export const imageAnimation = {
   fadeOutFrames: 15,
   /** Frames de overlap en crossfade entre imágenes */
   crossfadeFrames: 20,
+  /** Ancho de imagen editorial en px (Prompt 28: era 600) */
+  width: 920,
+  /** Alto de imagen editorial en px (Prompt 28: era 400) */
+  height: 520,
+  /** Border radius de imagen editorial (Prompt 28: era 16) */
+  borderRadius: 24,
 };
 
 // ==========================================

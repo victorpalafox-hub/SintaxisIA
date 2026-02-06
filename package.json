@@ -167,7 +167,10 @@
     "test:prompt25": "playwright test tests/specs/prompt25-audio-sync-fix.spec.ts",
 
     "test:hero-audio-bed": "playwright test tests/specs/prompt27-hero-audio-bed.spec.ts",
-    "test:prompt27": "playwright test tests/specs/prompt27-hero-audio-bed.spec.ts"
+    "test:prompt27": "playwright test tests/specs/prompt27-hero-audio-bed.spec.ts",
+
+    "test:images-editorial": "playwright test tests/specs/prompt28-images-editorial.spec.ts",
+    "test:prompt28": "playwright test tests/specs/prompt28-images-editorial.spec.ts"
   },
   "keywords": [
     "youtube",

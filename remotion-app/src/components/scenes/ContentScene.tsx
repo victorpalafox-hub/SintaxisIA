@@ -23,6 +23,7 @@
  * @updated Prompt 19.11 - Fade-out para crossfade con OutroScene
  * @updated Prompt 20 - Migración a Tech Editorial: sombras sutiles, fondo transparente
  * @updated Prompt 25 - Audio sync: offset, timestamps como source of truth, crossfade imágenes
+ * @updated Prompt 28 - Imágenes editoriales grandes (920x520), crossfade real con imagen previa
  */
 
 import React, { useMemo } from 'react';
@@ -106,38 +107,50 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
   const currentSecond = sceneStartSecond + (frame / fps);
 
   /**
-   * Obtiene la imagen actual con progreso de transición crossfade (Prompt 25)
+   * Obtiene imagen actual y previa con progreso de crossfade (Prompt 28)
    *
-   * Si hay imágenes dinámicas (Prompt 19.1), busca la imagen del segmento actual.
-   * Si no, usa el comportamiento legacy (context image → hero fallback).
-   * Retorna un progreso de transición (0-1) para crossfade suave entre cambios.
+   * Retorna AMBAS imágenes (previa y actual) para un crossfade real:
+   * la imagen previa hace fade-out mientras la actual hace fade-in.
+   * Usa imageAnimation.crossfadeFrames en vez de hardcoded /20.
    */
-  const getImageWithTransition = (): { url: string | undefined; transitionProgress: number } => {
+  const getImageWithTransition = (): {
+    currentUrl: string | undefined;
+    previousUrl: string | undefined;
+    transitionProgress: number;
+  } => {
     if (!dynamicScenes || dynamicScenes.length === 0) {
-      return { url: images?.context || images?.hero, transitionProgress: 1 };
+      return { currentUrl: images?.context || images?.hero, previousUrl: undefined, transitionProgress: 1 };
     }
 
-    const currentScene = dynamicScenes.find(
+    const currentSceneIndex = dynamicScenes.findIndex(
       scene => currentSecond >= scene.startSecond && currentSecond < scene.endSecond
     );
 
-    if (!currentScene) {
+    if (currentSceneIndex === -1) {
       const lastScene = dynamicScenes[dynamicScenes.length - 1];
       const url = currentSecond >= lastScene.endSecond
         ? lastScene.imageUrl
         : dynamicScenes[0].imageUrl;
-      return { url, transitionProgress: 1 };
+      return { currentUrl: url, previousUrl: undefined, transitionProgress: 1 };
     }
 
-    // Prompt 25: Crossfade suave en los primeros 20 frames de cada segmento
-    const segmentFrame = (currentSecond - currentScene.startSecond) * fps;
-    const transitionProgress = Math.min(1, segmentFrame / 20);
+    const currentScene = dynamicScenes[currentSceneIndex];
+    // Prompt 28: Imagen previa para crossfade real
+    const previousScene = currentSceneIndex > 0 ? dynamicScenes[currentSceneIndex - 1] : undefined;
 
-    return { url: currentScene.imageUrl, transitionProgress };
+    // Prompt 28: Usar imageAnimation.crossfadeFrames (era hardcoded /20)
+    const segmentFrame = (currentSecond - currentScene.startSecond) * fps;
+    const transitionProgress = Math.min(1, segmentFrame / imageAnimation.crossfadeFrames);
+
+    return {
+      currentUrl: currentScene.imageUrl,
+      previousUrl: previousScene?.imageUrl,
+      transitionProgress,
+    };
   };
 
-  // Imagen actual a mostrar con su progreso de transición
-  const { url: contextImage, transitionProgress } = getImageWithTransition();
+  // Prompt 28: Imagen actual y previa para crossfade real
+  const { currentUrl: contextImage, previousUrl: previousImage, transitionProgress } = getImageWithTransition();
 
   // Prompt 25: Usar durationInFrames real del Sequence (no hardcoded 37*fps)
   const sceneDurationFrames = durationInFrames;
@@ -283,29 +296,70 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
           padding: `${spacing.safe.top}px ${spacing.safe.horizontal}px ${spacing.safe.bottom + 60}px`,
         }}
       >
-        {/* IMAGEN CONTEXT (si existe) */}
-        {contextImage && (
+        {/* IMAGEN CONTEXT - Prompt 28: Editorial grande (920x520) + crossfade real */}
+        {(contextImage || previousImage) && (
           <div
             style={{
+              position: 'relative',
+              width: imageAnimation.width,
+              height: imageAnimation.height,
               transform: `translateY(${parallaxY}px) scale(${imageScale})`,
-              // Prompt 25: imageOpacity * transitionProgress para crossfade entre imágenes
-              opacity: imageOpacity * transitionProgress,
-              borderRadius: 16,
-              overflow: 'hidden',
-              // Sombra editorial de elevación (Prompt 20)
-              boxShadow: editorialShadow.imageElevation,
             }}
           >
-            <SafeImage
-              src={contextImage}
-              width={600}
-              height={400}
-              style={{
-                width: 600,
-                height: 400,
-                objectFit: 'cover',
-              }}
-            />
+            {/* Imagen PREVIA (fade-out durante crossfade) - Prompt 28 */}
+            {previousImage && transitionProgress < 1 && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: imageAnimation.width,
+                  height: imageAnimation.height,
+                  opacity: imageOpacity * (1 - transitionProgress),
+                  borderRadius: imageAnimation.borderRadius,
+                  overflow: 'hidden',
+                  boxShadow: editorialShadow.imageElevation,
+                }}
+              >
+                <SafeImage
+                  src={previousImage}
+                  width={imageAnimation.width}
+                  height={imageAnimation.height}
+                  style={{
+                    width: imageAnimation.width,
+                    height: imageAnimation.height,
+                    objectFit: 'cover',
+                  }}
+                />
+              </div>
+            )}
+            {/* Imagen ACTUAL (fade-in durante crossfade) */}
+            {contextImage && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: imageAnimation.width,
+                  height: imageAnimation.height,
+                  opacity: imageOpacity * transitionProgress,
+                  borderRadius: imageAnimation.borderRadius,
+                  overflow: 'hidden',
+                  boxShadow: editorialShadow.imageElevation,
+                }}
+              >
+                <SafeImage
+                  src={contextImage}
+                  width={imageAnimation.width}
+                  height={imageAnimation.height}
+                  style={{
+                    width: imageAnimation.width,
+                    height: imageAnimation.height,
+                    objectFit: 'cover',
+                  }}
+                />
+              </div>
+            )}
           </div>
         )}
 

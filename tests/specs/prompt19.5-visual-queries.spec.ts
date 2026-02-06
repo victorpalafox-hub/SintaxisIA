@@ -85,7 +85,8 @@ test.describe('Prompt 19.5 - Estructura y Archivos', () => {
     const content = fs.readFileSync(SCENE_SEGMENTER_PATH, 'utf-8');
 
     expect(content).toContain('fullText?: string');
-    expect(content).toContain('generateSearchQuery(keywords, i, company, text)');
+    // Prompt 28: ahora incluye newsTitle como 5to parámetro
+    expect(content).toContain('generateSearchQuery(keywords, i, company, text, newsTitle)');
   });
 });
 
@@ -195,9 +196,9 @@ test.describe('Prompt 19.5 - Lógica de Priorización', () => {
   test('fallback a keywords cuando no hay conceptos visuales', async () => {
     logger.info('Verificando fallback a keywords');
 
-    // Debe haber comentario indicando fallback
-    // Prompt 23: El fallback ahora traduce keywords al inglés
-    expect(serviceContent).toContain('Fallback: Traducir keywords a ingl');
+    // Debe haber lógica de traducción de keywords como fallback
+    // Prompt 23/28: El fallback traduce keywords al inglés
+    expect(serviceContent).toContain('Traducir a ingl');
   });
 
   test('señal __LOGO__ se mantiene para segmento 0', async () => {
@@ -234,8 +235,8 @@ test.describe('Prompt 19.5 - Integración con segmentScript', () => {
 
     const content = fs.readFileSync(SCENE_SEGMENTER_PATH, 'utf-8');
 
-    // La llamada debe incluir el parámetro text
-    expect(content).toContain('generateSearchQuery(keywords, i, company, text)');
+    // La llamada debe incluir el parámetro text (Prompt 28: + newsTitle)
+    expect(content).toContain('generateSearchQuery(keywords, i, company, text, newsTitle)');
   });
 
   test('SceneSegment incluye searchQuery con formato correcto', async () => {

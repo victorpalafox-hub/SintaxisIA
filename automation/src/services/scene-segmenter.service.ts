@@ -9,6 +9,7 @@
  * @since Prompt 19.1
  * @updated Prompt 19.1.6 - Eliminados sufijos genéricos, señal __LOGO__ para logos
  * @updated Prompt 23 - Traducción de keywords ES→EN via SmartQueryGenerator
+ * @updated Prompt 28 - newsTitle param, empresa+título en TODAS las queries
  */
 
 import { logger } from '../../utils/logger';
@@ -163,12 +164,14 @@ export class SceneSegmenterService {
    * @param script - Script generado por Gemini
    * @param totalDuration - Duración total del audio en segundos
    * @param company - Nombre de la empresa (opcional, para contexto)
+   * @param newsTitle - Título de la noticia (Prompt 28: para queries más relevantes)
    * @returns Array de segmentos con keywords
    */
   segmentScript(
     script: GeneratedScript,
     totalDuration: number,
-    company?: string
+    company?: string,
+    newsTitle?: string
   ): SceneSegment[] {
     logger.info(`[SceneSegmenter] Segmentando script de ${totalDuration}s`);
 
@@ -193,8 +196,8 @@ export class SceneSegmenterService {
       // Extraer keywords del texto
       const keywords = this.extractKeywords(text, company);
 
-      // Generar query de búsqueda (Prompt 19.5: ahora incluye texto para conceptos visuales)
-      const searchQuery = this.generateSearchQuery(keywords, i, company, text);
+      // Generar query de búsqueda (Prompt 28: incluye newsTitle para relevancia)
+      const searchQuery = this.generateSearchQuery(keywords, i, company, text, newsTitle);
 
       segments.push({
         index: i,
@@ -352,22 +355,25 @@ export class SceneSegmenterService {
    *
    * Estrategia por segmento:
    * - Segmento 0: Señal especial __LOGO__ para usar cascade de logos (Clearbit/Logo.dev)
-   * - Otros segmentos: Prioriza conceptos visuales, fallback a keywords
+   * - Otros segmentos: Prioriza conceptos visuales, fallback a keywords + empresa + título
    *
    * @param keywords - Keywords extraídas
    * @param segmentIndex - Índice del segmento
    * @param company - Nombre de empresa
    * @param fullText - Texto completo del segmento (para extraer conceptos visuales)
+   * @param newsTitle - Título de la noticia (Prompt 28: para queries relevantes al tópico)
    * @returns Query específica o señal __LOGO__
    *
    * @updated Prompt 19.1.6 - Eliminados sufijos genéricos, integración con logo providers
    * @updated Prompt 19.5 - Prioriza conceptos visuales sobre keywords genéricas
+   * @updated Prompt 28 - Empresa + título en TODAS las queries para relevancia
    */
   private generateSearchQuery(
     keywords: string[],
     segmentIndex: number,
     company?: string,
-    fullText?: string
+    fullText?: string,
+    newsTitle?: string
   ): string {
     // Segmento 0: Señal especial para usar cascade de logos
     // image-orchestration.service.ts detectará esto y usará Clearbit/Logo.dev
@@ -379,17 +385,28 @@ export class SceneSegmenterService {
     if (fullText) {
       const visualConcepts = this.extractVisualConcepts(fullText);
       if (visualConcepts.length > 0) {
-        // Usar el primer concepto visual encontrado (ya es una query específica)
-        return visualConcepts[0];
+        // Prompt 28: Agregar empresa al concepto visual para más relevancia
+        const concept = visualConcepts[0];
+        return company ? `${company} ${concept}` : concept;
       }
     }
 
-    // Fallback: Traducir keywords a inglés y usar como query (Prompt 23)
-    // APIs de imágenes (Pexels, Unsplash) funcionan mejor con queries en inglés
-    const translated = this.queryGenerator.translateKeywords(keywords);
+    // Prompt 28: Extraer keywords del título (más relevante que el body)
+    const titleKeywords = newsTitle
+      ? this.extractKeywords(newsTitle, company).slice(0, 2)
+      : [];
+
+    // Prompt 28: Combinar keywords del título + keywords del segmento
+    // El título da contexto del tópico central, las keywords del segmento dan especificidad
+    const combinedKeywords = [...titleKeywords, ...keywords];
+    // Deduplicar
+    const uniqueKeywords = [...new Set(combinedKeywords)].slice(0, 5);
+
+    // Traducir a inglés (Prompt 23: APIs funcionan mejor en inglés)
+    const translated = this.queryGenerator.translateKeywords(uniqueKeywords);
     const queryKeywords = translated.slice(0, Math.min(3, translated.length));
 
-    // Si hay empresa y no está duplicada, incluirla al principio para contexto
+    // Prompt 28: Siempre incluir empresa para contexto (si existe y no está duplicada)
     if (company && !queryKeywords.some(k => k.toLowerCase() === company.toLowerCase())) {
       queryKeywords.unshift(company.toLowerCase());
       if (queryKeywords.length > 3) queryKeywords.pop();

@@ -291,7 +291,8 @@ export async function runPipeline(
 
       // Segmentar script y extraer keywords
       const segmenter = new SceneSegmenterService();
-      const segments = segmenter.segmentScript(generatedScript, estimatedDuration, news.company);
+      // Prompt 28: Pasar título de noticia para queries de imagen más relevantes
+      const segments = segmenter.segmentScript(generatedScript, estimatedDuration, news.company, news.title);
 
       console.log(`   📊 ${segments.length} segmentos creados`);
 
