@@ -129,23 +129,24 @@ test.describe('Prompt 19.11 - AINewsShort Crossfade Timing', () => {
     logger.info('outroDuration extendida para crossfade');
   });
 
-  test('base durations sin cambios (8 + 37 + 5 = 50)', async () => {
-    logger.info('Verificando duraciones base sin cambios');
+  test('base durations: Hero 8s, Outro 5s, Content min 37s (Prompt 26 dynamic)', async () => {
+    logger.info('Verificando duraciones base');
 
     const content = fs.readFileSync(AI_NEWS_SHORT_PATH, 'utf-8');
 
     const heroMatch = content.match(/heroSceneDuration\s*=\s*(\d+)\s*\*\s*fps/);
-    const contentMatch = content.match(/contentSceneDuration\s*=\s*(\d+)\s*\*\s*fps/);
     const outroMatch = content.match(/outroSceneDuration\s*=\s*(\d+)\s*\*\s*fps/);
 
     expect(heroMatch).toBeTruthy();
-    expect(contentMatch).toBeTruthy();
     expect(outroMatch).toBeTruthy();
 
-    const total = parseInt(heroMatch![1]) + parseInt(contentMatch![1]) + parseInt(outroMatch![1]);
-    expect(total).toBe(50);
+    expect(parseInt(heroMatch![1])).toBe(8);
+    expect(parseInt(outroMatch![1])).toBe(5);
 
-    logger.info('Duraciones base correctas: 8 + 37 + 5 = 50');
+    // Prompt 26: contentSceneDuration = Math.max(37 * fps, audioDurationFrames)
+    expect(content).toMatch(/contentSceneDuration\s*=\s*Math\.max\(37\s*\*\s*fps/);
+
+    logger.info('Duraciones base correctas: Hero 8s, Content min 37s, Outro 5s');
   });
 
   test('Hero Sequence usa heroDuration', async () => {
@@ -478,15 +479,16 @@ test.describe('Prompt 19.11 - Regresion', () => {
     logger.info('AudioMixer presente');
   });
 
-  test('3 Sequences siguen presentes', async () => {
-    logger.info('Verificando 3 Sequences');
+  test('4 Sequences presentes (Hero, Content, Outro, Narration)', async () => {
+    logger.info('Verificando 4 Sequences');
 
     const content = fs.readFileSync(AI_NEWS_SHORT_PATH, 'utf-8');
 
     const matches = content.match(/<Sequence/g);
     expect(matches).toBeTruthy();
-    expect(matches!.length).toBe(3);
+    // Prompt 26: 4 Sequences - Hero, Content, Outro + AudioMixer (Narration)
+    expect(matches!.length).toBe(4);
 
-    logger.info('3 Sequences presentes');
+    logger.info('4 Sequences presentes');
   });
 });

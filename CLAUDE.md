@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Test Status**: 1047 tests (1045 passing, 2 skipped)
 
-**Last Updated**: 2026-02-05 (Prompt 25 - Audio Sync Fix)
+**Last Updated**: 2026-02-06 (Prompt 26 - Audio retrasado + Duración dinámica)
 
 ## Prerequisites
 
@@ -533,5 +533,5 @@ output/
 - Integrar `youtubeService` en orchestrator (paso 11) - actualmente usa mock
 
 ### Roadmap
-- **#26 End-to-End Pipeline** - Integración YouTubeService + producción completa
-- **#27 OCR + Thumbnails** - Extracción de texto de imágenes
+- **#27 End-to-End Pipeline** - Integración YouTubeService en orchestrator + producción completa
+- **#28 OCR + Thumbnails** - Extracción de texto de imágenes

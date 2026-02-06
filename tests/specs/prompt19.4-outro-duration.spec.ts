@@ -63,11 +63,12 @@ test.describe('Prompt 19.4 - AINewsShort.tsx Configuración', () => {
     logger.logTestEnd('heroSceneDuration = 8 * fps', 'passed', 0);
   });
 
-  test('contentSceneDuration = 37 * fps (sin cambio)', async () => {
-    logger.logTestStart('contentSceneDuration = 37 * fps');
+  test('contentSceneDuration usa Math.max(37 * fps, audioDurationFrames) (Prompt 26)', async () => {
+    logger.logTestStart('contentSceneDuration dynamic');
     const content = fs.readFileSync(AI_NEWS_SHORT_PATH, 'utf-8');
-    expect(content).toMatch(/contentSceneDuration\s*=\s*37\s*\*\s*fps/);
-    logger.logTestEnd('contentSceneDuration = 37 * fps', 'passed', 0);
+    // Prompt 26: contentSceneDuration es dinámico, al menos 37*fps
+    expect(content).toMatch(/contentSceneDuration\s*=\s*Math\.max\(37\s*\*\s*fps/);
+    logger.logTestEnd('contentSceneDuration dynamic', 'passed', 0);
   });
 
 });
@@ -167,37 +168,39 @@ test.describe('Prompt 19.4 - Regresión', () => {
     logger.logTestEnd('HeroScene 8s sin cambios', 'passed', 0);
   });
 
-  test('ContentScene 37s sin cambios', async () => {
-    logger.logTestStart('ContentScene 37s sin cambios');
+  test('ContentScene base 37s con duración dinámica (Prompt 26)', async () => {
+    logger.logTestStart('ContentScene dynamic duration');
     const content = fs.readFileSync(AI_NEWS_SHORT_PATH, 'utf-8');
-    // Verificar que Content sigue siendo 37 segundos
-    expect(content).toMatch(/contentSceneDuration\s*=\s*37\s*\*\s*fps/);
-    // Verificar comentario de timing (Prompt 19.11: crossfade cambia inicio a 7s)
+    // Prompt 26: contentSceneDuration = Math.max(37 * fps, audioDurationFrames)
+    // Mínimo sigue siendo 37s, pero puede ser mayor si audio es más largo
+    expect(content).toMatch(/contentSceneDuration\s*=\s*Math\.max\(37\s*\*\s*fps/);
+    // Verificar comentario de timing (crossfade cambia inicio a 7s)
     expect(content).toMatch(/Content:\s*7-45s/);
-    logger.logTestEnd('ContentScene 37s sin cambios', 'passed', 0);
+    logger.logTestEnd('ContentScene dynamic duration', 'passed', 0);
   });
 
-  test('Total duration = 50s (8 + 37 + 5)', async () => {
-    logger.logTestStart('Total duration = 50s');
+  test('Default duration >= 50s (Hero 8 + Content min 37 + Outro 5)', async () => {
+    logger.logTestStart('Default duration >= 50s');
     const content = fs.readFileSync(AI_NEWS_SHORT_PATH, 'utf-8');
 
-    // Extraer valores de duración
+    // Extraer valores fijos de duración
     const heroMatch = content.match(/heroSceneDuration\s*=\s*(\d+)\s*\*\s*fps/);
-    const contentMatch = content.match(/contentSceneDuration\s*=\s*(\d+)\s*\*\s*fps/);
     const outroMatch = content.match(/outroSceneDuration\s*=\s*(\d+)\s*\*\s*fps/);
 
     expect(heroMatch).toBeTruthy();
-    expect(contentMatch).toBeTruthy();
     expect(outroMatch).toBeTruthy();
 
     const hero = parseInt(heroMatch![1]);
-    const contentDur = parseInt(contentMatch![1]);
     const outro = parseInt(outroMatch![1]);
-    const total = hero + contentDur + outro;
 
-    expect(total).toBe(50);  // 8 + 37 + 5 = 50
+    expect(hero).toBe(8);
+    expect(outro).toBe(5);
 
-    logger.logTestEnd('Total duration = 50s', 'passed', 0);
+    // Prompt 26: contentSceneDuration = Math.max(37 * fps, audioDurationFrames)
+    // Mínimo base es 37s, total mínimo es 8 + 37 + 5 = 50s
+    expect(content).toMatch(/contentSceneDuration\s*=\s*Math\.max\(37\s*\*\s*fps/);
+
+    logger.logTestEnd('Default duration >= 50s', 'passed', 0);
   });
 
 });

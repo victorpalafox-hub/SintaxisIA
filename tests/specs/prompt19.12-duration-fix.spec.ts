@@ -118,15 +118,16 @@ test.describe('Prompt 19.12 - theme.ts Duration', () => {
 test.describe('Prompt 19.12 - video-rendering.service.ts Duration', () => {
   const logger = new TestLogger({ testName: 'Prompt19.12-Rendering' });
 
-  test('video-rendering.service.ts debe usar duration fijo de 50', async () => {
-    await logger.info('Validando duration en video-rendering.service.ts');
+  test('video-rendering.service.ts debe usar duración dinámica basada en audio (Prompt 26)', async () => {
+    await logger.info('Validando duration dinámico en video-rendering.service.ts');
 
     const content = fs.readFileSync(VIDEO_RENDERING_PATH, 'utf-8');
 
-    // Debe usar duration: 50 fijo, no calculado desde audioDuration
-    expect(content).toContain('duration: 50');
+    // Prompt 26: Duración dinámica = Math.ceil(8 + Math.max(37, audioDuration + 1) + 5)
+    // Hero 8s + max(37s, audioDuration + 1s fade) + Outro 5s
+    expect(content).toMatch(/duration:\s*Math\.ceil\(8\s*\+\s*Math\.max\(37/);
 
-    await logger.info(`✅ video-rendering.service.ts usa duration: ${EXPECTED_DURATION_SECONDS}`);
+    await logger.info('✅ video-rendering.service.ts usa duración dinámica (min 50s)');
   });
 
   test('video-rendering.service.ts NO debe usar audioDuration + buffer para config.duration', async () => {
@@ -148,31 +149,29 @@ test.describe('Prompt 19.12 - video-rendering.service.ts Duration', () => {
 test.describe('Prompt 19.12 - AINewsShort Scene Timing', () => {
   const logger = new TestLogger({ testName: 'Prompt19.12-Scenes' });
 
-  test('AINewsShort.tsx duraciones de escena suman 50s (8+37+5)', async () => {
-    await logger.info('Validando suma de duraciones de escenas');
+  test('AINewsShort.tsx duraciones: Hero 8s, Outro 5s, Content min 37s (Prompt 26 dynamic)', async () => {
+    await logger.info('Validando duraciones de escenas');
 
     const content = fs.readFileSync(AI_NEWS_SHORT_PATH, 'utf-8');
 
-    // Verificar duraciones individuales
+    // Verificar duraciones fijas
     const heroMatch = content.match(/heroSceneDuration\s*=\s*(\d+)\s*\*\s*fps/);
-    const contentMatch = content.match(/contentSceneDuration\s*=\s*(\d+)\s*\*\s*fps/);
     const outroMatch = content.match(/outroSceneDuration\s*=\s*(\d+)\s*\*\s*fps/);
 
     expect(heroMatch).toBeTruthy();
-    expect(contentMatch).toBeTruthy();
     expect(outroMatch).toBeTruthy();
 
     const heroSeconds = Number(heroMatch![1]);
-    const contentSeconds = Number(contentMatch![1]);
     const outroSeconds = Number(outroMatch![1]);
 
-    // Hero 8s + Content 37s + Outro 5s = 50s
     expect(heroSeconds).toBe(8);
-    expect(contentSeconds).toBe(37);
     expect(outroSeconds).toBe(5);
-    expect(heroSeconds + contentSeconds + outroSeconds).toBe(EXPECTED_DURATION_SECONDS);
 
-    await logger.info(`✅ Escenas: ${heroSeconds}s + ${contentSeconds}s + ${outroSeconds}s = ${heroSeconds + contentSeconds + outroSeconds}s`);
+    // Prompt 26: contentSceneDuration = Math.max(37 * fps, audioDurationFrames)
+    // Duración mínima total = 8 + 37 + 5 = 50s
+    expect(content).toMatch(/contentSceneDuration\s*=\s*Math\.max\(37\s*\*\s*fps/);
+
+    await logger.info(`✅ Escenas: Hero ${heroSeconds}s + Content min 37s + Outro ${outroSeconds}s = min ${EXPECTED_DURATION_SECONDS}s`);
   });
 
   test('AINewsShort.tsx último Sequence termina en frame 1500', async () => {
