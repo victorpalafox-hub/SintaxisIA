@@ -470,7 +470,7 @@ output/
 | ImageScoring | `searchPexelsWithScoring()`, `scoreCandidate()` | 5 candidatos, 4 criterios (100pts), umbral 20 |
 | News Manager CLI | `news-manager-cli.ts` (10 comandos: history/active/expired/search/view/unlock/cleanup/clear/stats/help) | Peer de cli.ts, ts-node directo para args |
 | NewsEnricher | `enrichAll()`, `detectCompany()`, `detectType()` | 81 aliases, 8 type patterns, PASO 2 real |
-| AudioSync | `sceneOffsetSeconds`, `phraseTimestamps` pipeline | Offset ~7s, source of truth Whisper, max 3 img segments |
+| AudioSync | `sceneOffsetSeconds`, `phraseTimestamps` pipeline | Offset 7s (contentStart/fps), lead 200ms, lag 150ms, max 3 img segments |
 | HeroFlash | `flashMaxOpacity`, `flashDurationFrames` | 0.15 opacity, 10 frames (~0.3s) |
 
 ## Prompt History (Resumen)
@@ -523,6 +523,7 @@ output/
 | 24 | NewsData.io Integration | 44 | `newsdata.config.ts`, `news-enricher.service.ts`, PASO 2 real, 81 company aliases |
 | 25 | Audio Sync Fix + Hook Visual | 34 | Frame offset, phraseTimestamps pipeline, flash overlay, MAX_IMAGE_SEGMENTS=3 |
 | 25.2 | Fix texto fade-out prematuro | - | phraseEndFrame + fadeOutFrames buffer en phrase-timing.ts |
+| 25.3 | Sync broadcast-grade | - | sceneStartSecond fix (8→7s crossfade), captionLeadMs/LagMs (200/150ms) |
 
 ## Pendientes
 

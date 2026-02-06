@@ -214,9 +214,12 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
       // Prompt 19.7: Timestamps de audio para sincronización real
       phraseTimestamps: audioSync?.phraseTimestamps,
       fps,
-      // Prompt 25: Offset para compensar que ContentScene empieza en segundo ~8
-      // Sin esto, frame 0 = segundo 0, pero el audio ya está en segundo ~8
+      // Prompt 25: Offset para compensar que ContentScene empieza en segundo ~7
+      // Sin esto, frame 0 = segundo 0, pero el audio ya está en segundo ~7
       sceneOffsetSeconds: sceneStartSecond,
+      // Prompt 25.3: Lead/lag perceptual para sincronización broadcast-grade
+      captionLeadMs: 200,
+      captionLagMs: 150,
     }
   );
 

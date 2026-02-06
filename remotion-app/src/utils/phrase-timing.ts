@@ -65,6 +65,10 @@ export interface TimingConfig {
    *  Sin este offset, el texto va ~7s adelantado respecto al audio.
    */
   sceneOffsetSeconds?: number;
+  /** Milisegundos que el texto aparece ANTES del audio (default: 200ms) */
+  captionLeadMs?: number;
+  /** Milisegundos que el texto permanece DESPUÉS del audio (default: 150ms) */
+  captionLagMs?: number;
 }
 
 // =============================================================================
@@ -73,6 +77,8 @@ export interface TimingConfig {
 
 const DEFAULT_FADE_IN_FRAMES = 15;   // 0.5s @ 30fps
 const DEFAULT_FADE_OUT_FRAMES = 15;  // 0.5s @ 30fps
+const DEFAULT_CAPTION_LEAD_MS = 200; // Texto aparece 200ms antes del audio
+const DEFAULT_CAPTION_LAG_MS = 150;  // Texto permanece 150ms después del audio
 
 // =============================================================================
 // FUNCIÓN PRINCIPAL
@@ -154,8 +160,12 @@ export function getPhraseTiming(
     const sceneOffset = config.sceneOffsetSeconds ?? 0;
     const currentSecond = (currentFrame / fps) + sceneOffset;
 
-    // Encontrar qué frase corresponde al tiempo actual
-    currentPhraseIndex = findPhraseIndexByTime(phraseTimestamps, currentSecond);
+    // Prompt 25.3: Lead/lag perceptual para sincronización broadcast-grade
+    const leadSeconds = (config.captionLeadMs ?? DEFAULT_CAPTION_LEAD_MS) / 1000;
+    const lagSeconds = (config.captionLagMs ?? DEFAULT_CAPTION_LAG_MS) / 1000;
+
+    // Encontrar qué frase corresponde al tiempo actual (con lead: texto aparece antes)
+    currentPhraseIndex = findPhraseIndexByTime(phraseTimestamps, currentSecond, leadSeconds);
 
     // Obtener timestamps de la frase actual
     // Convertir a frames locales de escena restando el offset
@@ -163,11 +173,11 @@ export function getPhraseTiming(
     // causando relativeFrame negativo → opacity 0 → texto invisible
     const timestamp = phraseTimestamps[currentPhraseIndex];
     const sceneOffsetFrames = Math.round(sceneOffset * fps);
-    phraseStartFrame = Math.round(timestamp.startSeconds * fps) - sceneOffsetFrames;
-    // Prompt 25.2: Extender phraseEndFrame con buffer de fade-out para que el texto
-    // permanezca visible al 100% hasta que el audio termine, y LUEGO haga fade-out
+
+    phraseStartFrame = Math.max(0, Math.round((timestamp.startSeconds - leadSeconds) * fps) - sceneOffsetFrames);
+    // Prompt 25.2: fadeOut buffer + Prompt 25.3: lag perceptual
     const fadeOut = config.fadeOutFrames ?? 15;
-    phraseEndFrame = Math.round(timestamp.endSeconds * fps) - sceneOffsetFrames + fadeOut;
+    phraseEndFrame = Math.min(totalFrames, Math.round((timestamp.endSeconds + lagSeconds) * fps) - sceneOffsetFrames + fadeOut);
 
   } else {
     // Fallback: Distribución uniforme (comportamiento original)
@@ -222,19 +232,22 @@ export function getPhraseTiming(
  */
 function findPhraseIndexByTime(
   timestamps: PhraseTimestamp[],
-  currentSecond: number
+  currentSecond: number,
+  leadSeconds: number = 0
 ): number {
   // Buscar la frase cuyo rango contiene el tiempo actual
+  // Lead: el texto aparece leadSeconds antes del audio real
   for (let i = 0; i < timestamps.length; i++) {
     const ts = timestamps[i];
+    const effectiveStart = ts.startSeconds - leadSeconds;
 
-    // Si estamos dentro del rango de esta frase
-    if (currentSecond >= ts.startSeconds && currentSecond < ts.endSeconds) {
+    // Si estamos dentro del rango de esta frase (con lead aplicado al inicio)
+    if (currentSecond >= effectiveStart && currentSecond < ts.endSeconds) {
       return i;
     }
 
     // Si es la última frase y estamos después de su inicio
-    if (i === timestamps.length - 1 && currentSecond >= ts.startSeconds) {
+    if (i === timestamps.length - 1 && currentSecond >= effectiveStart) {
       return i;
     }
   }

@@ -212,7 +212,7 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
             context: images.context,
           }}
           dynamicScenes={images.dynamicScenes}
-          sceneStartSecond={heroSceneDuration / fps}
+          sceneStartSecond={contentStart / fps}
           totalDuration={durationInFrames}
           fps={fps}
           dynamicEffects={enhancedEffects}
