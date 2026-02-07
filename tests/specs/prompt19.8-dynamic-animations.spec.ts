@@ -89,19 +89,19 @@ test.describe('Prompt 19.8 - Parallax y Zoom Full-Duration', () => {
 test.describe('Prompt 19.8 - Per-Phrase Slide-Up', () => {
   const logger = new TestLogger({ testName: 'Prompt19.8-PhraseSlide' });
 
-  test('phraseTextY usa phraseStartFrame para slide relativo', async () => {
-    logger.info('Verificando per-phrase slide-up');
+  test('blockTextY usa currentStartFrame para slide relativo (Prompt 33)', async () => {
+    logger.info('Verificando per-block slide-up');
 
     const content = fs.readFileSync(CONTENT_SCENE_PATH, 'utf-8');
 
-    // Debe calcular frame relativo a la frase actual
-    expect(content).toContain('phraseTiming.phraseStartFrame');
-    expect(content).toContain('phraseRelativeFrame');
-    expect(content).toContain('phraseTextY');
+    // Debe calcular frame relativo al bloque actual (Prompt 33: editorial blocks)
+    expect(content).toContain('currentStartFrame');
+    expect(content).toContain('blockRelativeFrame');
+    expect(content).toContain('blockTextY');
 
-    // Debe usar config centralizada
-    expect(content).toContain('contentAnimation.phraseSlideFrames');
-    expect(content).toContain('contentAnimation.phraseSlideDistance');
+    // Debe usar config centralizada (Prompt 33: editorialText)
+    expect(content).toContain('editorialText.slideFrames');
+    expect(content).toContain('editorialText.slideDistance');
 
     logger.info('Per-phrase slide-up implementado');
   });
@@ -111,8 +111,8 @@ test.describe('Prompt 19.8 - Per-Phrase Slide-Up', () => {
 
     const content = fs.readFileSync(CONTENT_SCENE_PATH, 'utf-8');
 
-    // Debe usar phraseTextY (no textY) en el transform
-    expect(content).toContain('translateY(${phraseTextY}px)');
+    // Debe usar blockTextY (Prompt 33, antes phraseTextY) en el transform
+    expect(content).toContain('translateY(${blockTextY}px)');
 
     // No debe tener el textY anterior (one-shot)
     expect(content).not.toContain('translateY(${textY}px)');
@@ -252,7 +252,7 @@ test.describe('Prompt 19.8 - Guards y Compatibilidad', () => {
 
     const content = fs.readFileSync(CONTENT_SCENE_PATH, 'utf-8');
 
-    expect(content).toMatch(/phraseTextY\s*=?\s*dynamicEffects/);
+    expect(content).toMatch(/blockTextY\s*=?\s*dynamicEffects/);
 
     logger.info('Guard de dynamicEffects presente en phraseTextY');
   });
@@ -277,8 +277,8 @@ test.describe('Prompt 19.8 - Guards y Compatibilidad', () => {
 
     const content = fs.readFileSync(CONTENT_SCENE_PATH, 'utf-8');
 
-    // Debe mantener la multiplicacion baseOpacity * phraseTiming.opacity
-    expect(content).toContain('baseOpacity * phraseTiming.opacity');
+    // Debe mantener la multiplicacion baseOpacity * currentOpacity (Prompt 33)
+    expect(content).toContain('baseOpacity * currentOpacity');
 
     logger.info('Composicion de opacidad mantenida');
   });

@@ -82,9 +82,9 @@ test.describe('Prompt 19.2.6 - ContentScene Sin Bullet Points', () => {
 
 test.describe('Prompt 19.2.6 - Texto Secuencial (Regresión)', () => {
 
-  test('Mantiene currentPhrase', async () => {
+  test('Mantiene currentBlock (Prompt 33: editorial blocks)', async () => {
     const content = fs.readFileSync(CONTENT_SCENE_PATH, 'utf-8');
-    expect(content).toContain('currentPhrase');
+    expect(content).toContain('currentBlock');
   });
 
   test('Mantiene splitIntoReadablePhrases', async () => {
@@ -102,11 +102,11 @@ test.describe('Prompt 19.2.6 - Texto Secuencial (Regresión)', () => {
     expect(content).toContain('textAnimation');
   });
 
-  test('Mantiene renderizado de frase actual', async () => {
+  test('Mantiene renderizado de bloque actual (Prompt 33)', async () => {
     const content = fs.readFileSync(CONTENT_SCENE_PATH, 'utf-8');
 
-    // El componente debe renderizar currentPhrase.text
-    expect(content).toContain('currentPhrase?.text');
+    // El componente debe renderizar currentBlock.lines (Prompt 33: editorial blocks)
+    expect(content).toContain('currentBlock?.lines');
   });
 
 });

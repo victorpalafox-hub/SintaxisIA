@@ -24,6 +24,7 @@
  * @updated Prompt 20 - Migración a Tech Editorial: sombras sutiles, fondo transparente
  * @updated Prompt 25 - Audio sync: offset, timestamps como source of truth, crossfade imágenes
  * @updated Prompt 28 - Imágenes editoriales grandes (920x520), crossfade real con imagen previa
+ * @updated Prompt 33 - Texto editorial con jerarquía (headline/support/punch), bloques agrupados
  */
 
 import React, { useMemo } from 'react';
@@ -34,10 +35,10 @@ import {
   useVideoConfig,
   Easing,
 } from 'remotion';
-import { colors, spacing, textAnimation, imageAnimation, contentTextStyle, contentAnimation, sceneTransition, editorialShadow } from '../../styles/themes';
+import { colors, spacing, textAnimation, imageAnimation, contentTextStyle, contentAnimation, sceneTransition, editorialShadow, editorialText } from '../../styles/themes';
 import { ProgressBar } from '../ui/ProgressBar';
 import { SafeImage } from '../elements/SafeImage';
-import { splitIntoReadablePhrases, getPhraseTiming } from '../../utils';
+import { splitIntoReadablePhrases, getPhraseTiming, getBlockTiming, buildEditorialBlocks } from '../../utils';
 import type { ContentSceneProps } from '../../types/video.types';
 
 /**
@@ -215,42 +216,69 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
     });
   }, [description, audioSync]);
 
-  // Calcular frase actual y opacity para transiciones
-  // Prompt 19.7: Usa timestamps de Whisper si están disponibles para sincronización precisa
-  const phraseTiming = getPhraseTiming(
-    frame,
-    sceneDurationFrames,
-    phrases.length,
-    {
-      fadeInFrames: textAnimation.fadeInFrames,
-      fadeOutFrames: textAnimation.fadeOutFrames,
-      // Prompt 19.7: Timestamps de audio para sincronización real
-      phraseTimestamps: audioSync?.phraseTimestamps,
-      fps,
-      // Prompt 25: Offset para compensar que ContentScene empieza en segundo ~7
-      // Sin esto, frame 0 = segundo 0, pero el audio ya está en segundo ~7
-      sceneOffsetSeconds: sceneStartSecond,
-      // Prompt 25.3: Lead/lag perceptual para sincronización broadcast-grade
-      captionLeadMs: 200,
-      captionLagMs: 150,
+  // ==========================================
+  // BLOQUES EDITORIALES (Prompt 33)
+  // ==========================================
+
+  // Construir bloques editoriales que agrupan frases cercanas y cortas
+  // con jerarquía visual (headline/support/punch)
+  const blocks = useMemo(() => {
+    if (audioSync?.phraseTimestamps && audioSync.phraseTimestamps.length > 0) {
+      return buildEditorialBlocks(audioSync.phraseTimestamps, fps);
     }
-  );
+    // Fallback sin Whisper: cada frase = 1 bloque support (comportamiento pre-Prompt 33)
+    return phrases.map((p, i) => ({
+      lines: [p.text],
+      weight: 'support' as const,
+      phraseIndices: [i],
+      startSeconds: 0,
+      endSeconds: 0,
+    }));
+  }, [audioSync, phrases, fps]);
 
-  // Obtener frase actual a mostrar
-  const currentPhrase = phrases[phraseTiming.currentPhraseIndex];
+  // Timing: con Whisper usa getBlockTiming, sin Whisper usa getPhraseTiming (fallback)
+  const hasWhisper = !!(audioSync?.phraseTimestamps && audioSync.phraseTimestamps.length > 0);
+
+  const timingConfig = {
+    fadeInFrames: textAnimation.fadeInFrames,
+    fadeOutFrames: textAnimation.fadeOutFrames,
+    phraseTimestamps: audioSync?.phraseTimestamps,
+    fps,
+    sceneOffsetSeconds: sceneStartSecond,
+    captionLeadMs: 200,
+    captionLagMs: 150,
+  };
+
+  // Prompt 33: Block timing para bloques editoriales (con Whisper)
+  const blockTiming = hasWhisper
+    ? getBlockTiming(frame, blocks, sceneDurationFrames, timingConfig)
+    : null;
+
+  // Fallback: phrase timing uniforme (sin Whisper, compatible pre-Prompt 33)
+  const phraseTiming = !hasWhisper
+    ? getPhraseTiming(frame, sceneDurationFrames, phrases.length, timingConfig)
+    : null;
+
+  // Bloque o frase actual
+  const currentBlockIndex = blockTiming?.currentBlockIndex ?? phraseTiming?.currentPhraseIndex ?? 0;
+  const currentBlock = blocks[currentBlockIndex];
+  const currentStartFrame = blockTiming?.blockStartFrame ?? phraseTiming?.phraseStartFrame ?? 0;
+  const currentOpacity = blockTiming?.opacity ?? phraseTiming?.opacity ?? 1;
+
+  // Estilo editorial basado en el peso del bloque
+  const blockStyle = editorialText[currentBlock?.weight ?? 'support'];
 
   // ==========================================
-  // EFECTOS DE TEXTO (Prompt 19.8)
+  // EFECTOS DE TEXTO (Prompt 19.8 + Prompt 33)
   // ==========================================
 
-  // Per-phrase slide-up: cada frase entra con su propio slide-up
-  // Usa phraseStartFrame de getPhraseTiming() para animar relativo a cada frase
-  const phraseRelativeFrame = frame - phraseTiming.phraseStartFrame;
-  const phraseTextY = dynamicEffects
+  // Per-block slide-up: cada bloque entra con su propio slide-up
+  const blockRelativeFrame = frame - currentStartFrame;
+  const blockTextY = dynamicEffects
     ? interpolate(
-        phraseRelativeFrame,
-        [0, contentAnimation.phraseSlideFrames],
-        [contentAnimation.phraseSlideDistance, 0],
+        blockRelativeFrame,
+        [0, editorialText.slideFrames],
+        [editorialText.slideDistance, 0],
         {
           extrapolateRight: 'clamp',
           easing: Easing.bezier(0.16, 1, 0.3, 1),
@@ -269,8 +297,8 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
     }
   );
 
-  // Opacity final: combina fade de escena con transición de frase
-  const descriptionOpacity = baseOpacity * phraseTiming.opacity;
+  // Opacity final: combina fade de escena con transición de bloque
+  const descriptionOpacity = baseOpacity * currentOpacity;
 
   // ==========================================
   // RENDER
@@ -363,37 +391,44 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
           </div>
         )}
 
-        {/* DESCRIPCION - Texto Secuencial (Prompt 19.2, actualizado 19.2.7) */}
+        {/* DESCRIPCION - Bloques Editoriales (Prompt 33, antes: Texto Secuencial Prompt 19.2) */}
         <div
           style={{
-            transform: `translateY(${phraseTextY}px)`,
+            transform: `translateY(${blockTextY}px)`,
             opacity: descriptionOpacity,
-            fontFamily: contentTextStyle.fontFamily,
-            fontWeight: contentTextStyle.fontWeight,
-            fontSize: contentTextStyle.fontSize,
-            color: colors.text.secondary,
             textAlign: 'center',
-            lineHeight: contentTextStyle.lineHeight,
-            // Sombra editorial de profundidad (Prompt 20)
             textShadow: editorialShadow.textDepth,
-            // Más ancho si no hay imagen (centralizado en themes.ts Prompt 19.2.7)
             maxWidth: contextImage
               ? contentTextStyle.maxWidthWithImage
               : contentTextStyle.maxWidthWithoutImage,
             padding: `0 ${contentTextStyle.paddingHorizontal}px`,
-            // Altura mínima calculada para 3 líneas (Prompt 19.2.7)
             minHeight: contentTextStyle.minHeight,
             display: 'flex',
+            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            // Margen inferior (Prompt 19.2.7)
+            gap: '8px',
             marginBottom: contextImage
               ? contentTextStyle.marginBottomWithImage
               : contentTextStyle.marginBottomWithoutImage,
           }}
         >
-          {/* Mostrar frase actual o descripción completa como fallback */}
-          {currentPhrase?.text || description}
+          {/* Prompt 33: Renderizar líneas del bloque editorial con estilo por peso */}
+          {currentBlock?.lines.map((line, i) => (
+            <div
+              key={`${currentBlockIndex}-${i}`}
+              style={{
+                fontFamily: contentTextStyle.fontFamily,
+                fontSize: blockStyle.fontSize,
+                fontWeight: blockStyle.fontWeight,
+                color: blockStyle.color,
+                letterSpacing: blockStyle.letterSpacing,
+                lineHeight: 1.3,
+              }}
+            >
+              {line}
+            </div>
+          )) || description}
         </div>
 
         {/* BULLET POINTS eliminados en Prompt 19.2.6

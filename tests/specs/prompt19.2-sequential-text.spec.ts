@@ -80,7 +80,7 @@ test.describe('Prompt 19.2 - Archivos y Estructura', () => {
     const filePath = path.join(COMPONENTS_PATH, 'ContentScene.tsx');
     const content = fs.readFileSync(filePath, 'utf-8');
 
-    expect(content).toContain("import { splitIntoReadablePhrases, getPhraseTiming }");
+    expect(content).toContain("splitIntoReadablePhrases, getPhraseTiming");
     expect(content).toContain('textAnimation');
   });
 
@@ -276,12 +276,12 @@ test.describe('Prompt 19.2 - ContentScene Integration', () => {
     expect(content).toContain('phraseTiming');
   });
 
-  test('ContentScene muestra currentPhrase', async () => {
+  test('ContentScene muestra currentBlock (Prompt 33: editorial blocks)', async () => {
     const filePath = path.join(COMPONENTS_PATH, 'ContentScene.tsx');
     const content = fs.readFileSync(filePath, 'utf-8');
 
-    expect(content).toContain('currentPhrase');
-    expect(content).toMatch(/currentPhrase\?.text/);
+    expect(content).toContain('currentBlock');
+    expect(content).toMatch(/currentBlock\?.lines/);
   });
 
   test('ContentScene tiene sceneDurationFrames', async () => {
@@ -307,16 +307,16 @@ test.describe('Prompt 19.2 - ContentScene Integration', () => {
     const content = fs.readFileSync(filePath, 'utf-8');
 
     expect(content).toContain('baseOpacity');
-    expect(content).toContain('phraseTiming.opacity');
-    expect(content).toMatch(/baseOpacity\s*\*\s*phraseTiming\.opacity/);
+    expect(content).toContain('currentOpacity');
+    expect(content).toMatch(/baseOpacity\s*\*\s*currentOpacity/);
   });
 
   test('ContentScene tiene fallback a description completa', async () => {
     const filePath = path.join(COMPONENTS_PATH, 'ContentScene.tsx');
     const content = fs.readFileSync(filePath, 'utf-8');
 
-    // Fallback: currentPhrase?.text || description
-    expect(content).toMatch(/currentPhrase\?.text\s*\|\|\s*description/);
+    // Fallback: lines render || description (Prompt 33: editorial blocks with fallback)
+    expect(content).toContain('|| description');
   });
 
 });
@@ -406,8 +406,8 @@ test.describe('Prompt 19.2 - Anti-Patterns Evitados', () => {
     expect(content).not.toContain('details.map');
     expect(content).not.toContain('bulletOpacity');
 
-    // Pero el texto secuencial sigue funcionando
-    expect(content).toContain('currentPhrase');
+    // Pero el texto secuencial sigue funcionando (Prompt 33: currentBlock)
+    expect(content).toContain('currentBlock');
   });
 
 });

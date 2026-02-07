@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 1209 tests (1207 passing, 2 skipped)
+**Test Status**: 1255 tests (1253 passing, 2 skipped)
 
-**Last Updated**: 2026-02-06 (Prompt 32.1 - Fix Title Card 3s + Audio fade-out + Fondo premium vibrante + Render timeout)
+**Last Updated**: 2026-02-06 (Prompt 33 - Texto Editorial Humano: jerarquía tipográfica, bloques agrupados, ritmo visual)
 
 ## Prerequisites
 
@@ -478,6 +478,7 @@ output/
 | TopicSegmentation | `findTopicBoundaries()`, `findMarkerPositions()` | 18 marcadores ES, targets 33%/66%, min 8s, score ≥0.3 |
 | DynamicDuration | `calculateMetadata` en Root.tsx, `BREATHING_ROOM_FRAMES` | Composition dinámica via props, 1s breathing room antes de outro |
 | TitleCard | `TitleCardScene.tsx`, `title-derivation.ts`, `deriveTitleCardText()`, `deriveBadge()` | Overlay 3s (90 frames), fade-out 15f, badge contextual, hero image background, max 7 palabras |
+| EditorialText | `text-editorial.ts`, `editorialText` config, `getBlockTiming()` | Bloques 1-2 líneas, headline/support/punch, gap ≤0.6s agrupa, pause 6f antes punch, min 18f |
 
 ## Prompt History (Resumen)
 
@@ -538,6 +539,7 @@ output/
 | 31 | Fondo Premium "con vida" | 25 | Boost configs 2-3x, color pulse hue-rotate, accent glow blob, dual LightSweep, GrainOverlay variable, secciones dinámicas |
 | 32 | Title Card / Thumbnail Topic-Aware | 31 | `TitleCardScene.tsx`, `title-derivation.ts`, overlay 0.5s, badge contextual, SafeImage hero background |
 | 32.1 | Fix Title Card + Audio + Fondo + Timeout | - | TitleCard 3s fade-out, voice fade-out 30f, gradientes azul-navy, accent blob, timeout 20x |
+| 33 | Texto Editorial Humano | 46 | `text-editorial.ts`, `editorialText` config, bloques headline/support/punch, getBlockTiming, agrupación de frases |
 
 ## Pendientes
 

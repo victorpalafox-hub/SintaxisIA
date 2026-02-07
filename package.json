@@ -182,7 +182,9 @@
     "test:prompt31": "playwright test tests/specs/prompt31-premium-background.spec.ts",
 
     "test:titlecard": "playwright test tests/specs/prompt32-titlecard-topic-aware.spec.ts",
-    "test:prompt32": "playwright test tests/specs/prompt32-titlecard-topic-aware.spec.ts"
+    "test:prompt32": "playwright test tests/specs/prompt32-titlecard-topic-aware.spec.ts",
+    "test:editorial": "playwright test tests/specs/prompt33-editorial-text.spec.ts",
+    "test:prompt33": "playwright test tests/specs/prompt33-editorial-text.spec.ts"
   },
   "keywords": [
     "youtube",

@@ -17,7 +17,15 @@ export {
 export {
   getPhraseTiming,
   getPhraseTimingDebug,
+  getBlockTiming,
   type PhraseTiming,
+  type BlockTiming,
   type TimingConfig,
   type PhraseTimestamp,
 } from './phrase-timing';
+
+export {
+  buildEditorialBlocks,
+  type EditorialTextBlock,
+  type EditorialWeight,
+} from './text-editorial';

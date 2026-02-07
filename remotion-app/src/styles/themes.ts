@@ -460,6 +460,52 @@ export const contentTextStyle = {
 };
 
 // ==========================================
+// CONFIGURACIÓN DE TEXTO EDITORIAL (Prompt 33)
+// ==========================================
+
+/**
+ * Jerarquía tipográfica para bloques editoriales
+ *
+ * Tres pesos visuales que crean ritmo humano:
+ * - headline: apertura, nombres propios, versiones (grande, bold, blanco)
+ * - support: explicación, contexto (mediano, medium, off-white)
+ * - punch: impacto, preguntas, remates (el más grande, extra-bold, accent)
+ *
+ * @since Prompt 33
+ */
+export const editorialText = {
+  /** Apertura y frases con peso informativo */
+  headline: {
+    fontSize: 78,
+    fontWeight: 700 as const,
+    color: '#FFFFFF',
+    letterSpacing: -0.5,
+  },
+  /** Contexto y explicación */
+  support: {
+    fontSize: 66,
+    fontWeight: 500 as const,
+    color: 'rgba(255,255,255,0.88)',
+    letterSpacing: 0,
+  },
+  /** Impacto, preguntas retóricas, remates */
+  punch: {
+    fontSize: 84,
+    fontWeight: 800 as const,
+    color: '#38BDF8',
+    letterSpacing: -1,
+  },
+  /** Frames de pausa visual antes de un bloque punch (0.2s @ 30fps) */
+  pauseFramesBeforePunch: 6,
+  /** Frames de gap mínimo entre bloques */
+  blockGap: 8,
+  /** Distancia de slide-up en px */
+  slideDistance: 20,
+  /** Duración del slide-up en frames */
+  slideFrames: 18,
+};
+
+// ==========================================
 // CONFIGURACIÓN DE FONDO ANIMADO (Prompt 20)
 // ==========================================
 

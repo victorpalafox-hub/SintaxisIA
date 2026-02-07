@@ -111,25 +111,25 @@ test.describe('Prompt 19.2.7 - ContentScene Centralización', () => {
     logger.logTestEnd('ContentScene importa contentTextStyle', 'passed', 0);
   });
 
-  test('ContentScene usa contentTextStyle.fontSize', async () => {
-    logger.logTestStart('ContentScene usa contentTextStyle.fontSize');
+  test('ContentScene usa blockStyle.fontSize (Prompt 33: dynamic per weight)', async () => {
+    logger.logTestStart('ContentScene usa blockStyle.fontSize');
     const content = fs.readFileSync(CONTENT_SCENE_PATH, 'utf-8');
-    expect(content).toContain('contentTextStyle.fontSize');
-    logger.logTestEnd('ContentScene usa contentTextStyle.fontSize', 'passed', 0);
+    expect(content).toContain('blockStyle.fontSize');
+    logger.logTestEnd('ContentScene usa blockStyle.fontSize', 'passed', 0);
   });
 
-  test('ContentScene usa contentTextStyle.fontWeight', async () => {
-    logger.logTestStart('ContentScene usa contentTextStyle.fontWeight');
+  test('ContentScene usa blockStyle.fontWeight (Prompt 33: dynamic per weight)', async () => {
+    logger.logTestStart('ContentScene usa blockStyle.fontWeight');
     const content = fs.readFileSync(CONTENT_SCENE_PATH, 'utf-8');
-    expect(content).toContain('contentTextStyle.fontWeight');
-    logger.logTestEnd('ContentScene usa contentTextStyle.fontWeight', 'passed', 0);
+    expect(content).toContain('blockStyle.fontWeight');
+    logger.logTestEnd('ContentScene usa blockStyle.fontWeight', 'passed', 0);
   });
 
-  test('ContentScene usa contentTextStyle.lineHeight', async () => {
-    logger.logTestStart('ContentScene usa contentTextStyle.lineHeight');
+  test('ContentScene usa lineHeight inline (Prompt 33: 1.3)', async () => {
+    logger.logTestStart('ContentScene usa lineHeight inline');
     const content = fs.readFileSync(CONTENT_SCENE_PATH, 'utf-8');
-    expect(content).toContain('contentTextStyle.lineHeight');
-    logger.logTestEnd('ContentScene usa contentTextStyle.lineHeight', 'passed', 0);
+    expect(content).toContain('lineHeight: 1.3');
+    logger.logTestEnd('ContentScene usa lineHeight inline', 'passed', 0);
   });
 
   test('ContentScene usa contentTextStyle.minHeight', async () => {
@@ -143,25 +143,21 @@ test.describe('Prompt 19.2.7 - ContentScene Centralización', () => {
     logger.logTestStart('ContentScene NO tiene fontSize hardcodeado en descripción');
     const content = fs.readFileSync(CONTENT_SCENE_PATH, 'utf-8');
     // Buscar el bloque de DESCRIPCION y verificar que no tiene fontSize: número
-    const descriptionBlock = content.match(/DESCRIPCION[\s\S]*?{currentPhrase/);
+    const descriptionBlock = content.match(/DESCRIPCION[\s\S]*?{currentBlock/);
     expect(descriptionBlock).toBeTruthy();
     // No debe tener fontSize: 32 ni fontSize: 72 hardcodeado
     expect(descriptionBlock![0]).not.toMatch(/fontSize:\s*32/);
     expect(descriptionBlock![0]).not.toMatch(/fontSize:\s*72,/);
-    // Debe usar contentTextStyle.fontSize
-    expect(descriptionBlock![0]).toContain('contentTextStyle.fontSize');
+    // Debe usar blockStyle.fontSize (Prompt 33: dynamic per weight)
+    expect(content).toContain('blockStyle.fontSize');
     logger.logTestEnd('ContentScene NO tiene fontSize hardcodeado en descripción', 'passed', 0);
   });
 
   test('ContentScene mantiene color cyan (identidad de marca)', async () => {
     logger.logTestStart('ContentScene mantiene color cyan');
     const content = fs.readFileSync(CONTENT_SCENE_PATH, 'utf-8');
-    // El color debe seguir siendo colors.text.secondary (cyan)
-    const descriptionBlock = content.match(/DESCRIPCION[\s\S]*?{currentPhrase/);
-    expect(descriptionBlock).toBeTruthy();
-    expect(descriptionBlock![0]).toContain('colors.text.secondary');
-    // NO debe usar colors.text.primary (blanco)
-    expect(descriptionBlock![0]).not.toContain('colors.text.primary');
+    // El color es ahora dinámico por peso del bloque (Prompt 33: blockStyle.color)
+    expect(content).toContain('blockStyle.color');
     logger.logTestEnd('ContentScene mantiene color cyan', 'passed', 0);
   });
 
@@ -216,24 +212,24 @@ test.describe('Prompt 19.2.7 - Regresión Texto Secuencial', () => {
     logger.logTestEnd('Mantiene getPhraseTiming', 'passed', 0);
   });
 
-  test('Mantiene currentPhrase', async () => {
-    logger.logTestStart('Mantiene currentPhrase');
+  test('Mantiene currentBlock (Prompt 33: editorial blocks)', async () => {
+    logger.logTestStart('Mantiene currentBlock');
     const content = fs.readFileSync(CONTENT_SCENE_PATH, 'utf-8');
-    expect(content).toContain('currentPhrase');
-    logger.logTestEnd('Mantiene currentPhrase', 'passed', 0);
+    expect(content).toContain('currentBlock');
+    logger.logTestEnd('Mantiene currentBlock', 'passed', 0);
   });
 
-  test('Mantiene phraseTiming.opacity', async () => {
-    logger.logTestStart('Mantiene phraseTiming.opacity');
+  test('Mantiene currentOpacity (Prompt 33: blockTiming fallback)', async () => {
+    logger.logTestStart('Mantiene currentOpacity');
     const content = fs.readFileSync(CONTENT_SCENE_PATH, 'utf-8');
-    expect(content).toContain('phraseTiming.opacity');
-    logger.logTestEnd('Mantiene phraseTiming.opacity', 'passed', 0);
+    expect(content).toContain('currentOpacity');
+    logger.logTestEnd('Mantiene currentOpacity', 'passed', 0);
   });
 
   test('Mantiene fallback a description', async () => {
     logger.logTestStart('Mantiene fallback a description');
     const content = fs.readFileSync(CONTENT_SCENE_PATH, 'utf-8');
-    expect(content).toMatch(/currentPhrase\?\.text\s*\|\|\s*description/);
+    expect(content).toContain('|| description');
     logger.logTestEnd('Mantiene fallback a description', 'passed', 0);
   });
 

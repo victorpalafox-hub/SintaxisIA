@@ -8,6 +8,7 @@
  * @version 1.1.0
  * @since Prompt 19.2
  * @updated Prompt 19.7 - Soporte para timestamps reales de Whisper
+ * @updated Prompt 33 - getBlockTiming() para bloques editoriales
  */
 
 import { interpolate } from 'remotion';
@@ -323,6 +324,138 @@ export function getPhraseTimingDebug(
     phraseStartSecond: timing.phraseStartFrame / fps,
     phraseEndSecond: timing.phraseEndFrame / fps,
     percentComplete: (currentFrame / totalFrames) * 100,
+  };
+}
+
+// =============================================================================
+// BLOCK TIMING - Prompt 33
+// =============================================================================
+
+/**
+ * Resultado del cálculo de timing para bloques editoriales
+ * @since Prompt 33
+ */
+export interface BlockTiming {
+  /** Índice del bloque actual (0-based) */
+  currentBlockIndex: number;
+  /** Opacidad calculada para transición (0-1) */
+  opacity: number;
+  /** Frame de inicio del bloque actual */
+  blockStartFrame: number;
+  /** Frame de fin del bloque actual */
+  blockEndFrame: number;
+  /** Indica si estamos en medio de una transición */
+  isTransitioning: boolean;
+}
+
+/** Interfaz mínima de bloque editorial para evitar import circular */
+interface EditorialBlock {
+  startSeconds: number;
+  endSeconds: number;
+  weight: string;
+}
+
+/**
+ * Calcula timing y opacity para bloques editoriales
+ *
+ * Misma lógica que getPhraseTiming modo Whisper, pero opera sobre
+ * bloques que pueden contener 1-2 frases agrupadas.
+ * Agrega pausa visual antes de bloques "punch".
+ *
+ * @param currentFrame - Frame actual de la escena (relativo al inicio)
+ * @param blocks - Bloques editoriales con startSeconds/endSeconds
+ * @param totalFrames - Duración total de la escena en frames
+ * @param config - Configuración de timing (lead/lag, fade, offset)
+ * @returns Timing del bloque actual
+ *
+ * @since Prompt 33
+ */
+export function getBlockTiming(
+  currentFrame: number,
+  blocks: EditorialBlock[],
+  totalFrames: number,
+  config: TimingConfig = {}
+): BlockTiming {
+  const {
+    fadeInFrames = DEFAULT_FADE_IN_FRAMES,
+    fadeOutFrames = DEFAULT_FADE_OUT_FRAMES,
+    fps = 30,
+  } = config;
+
+  // Sin bloques → default
+  if (!blocks || blocks.length === 0) {
+    return {
+      currentBlockIndex: 0,
+      opacity: 1,
+      isTransitioning: false,
+      blockStartFrame: 0,
+      blockEndFrame: totalFrames,
+    };
+  }
+
+  // Convertir frame actual a segundos con offset de escena
+  const sceneOffset = config.sceneOffsetSeconds ?? 0;
+  const currentSecond = (currentFrame / fps) + sceneOffset;
+
+  // Lead/lag perceptual (Prompt 25.3)
+  const leadSeconds = (config.captionLeadMs ?? DEFAULT_CAPTION_LEAD_MS) / 1000;
+  const lagSeconds = (config.captionLagMs ?? DEFAULT_CAPTION_LAG_MS) / 1000;
+
+  // Encontrar bloque actual por tiempo
+  let currentBlockIndex = 0;
+  for (let i = 0; i < blocks.length; i++) {
+    const block = blocks[i];
+    const effectiveStart = block.startSeconds - leadSeconds;
+    if (currentSecond >= effectiveStart && currentSecond < block.endSeconds) {
+      currentBlockIndex = i;
+      break;
+    }
+    if (i === blocks.length - 1 && currentSecond >= effectiveStart) {
+      currentBlockIndex = i;
+    }
+  }
+  // Fallback: antes de todo → primer bloque
+  if (currentSecond < blocks[0].startSeconds) {
+    currentBlockIndex = 0;
+  }
+
+  // Convertir timestamps a frames locales
+  const block = blocks[currentBlockIndex];
+  const sceneOffsetFrames = Math.round(sceneOffset * fps);
+
+  let blockStartFrame = Math.max(0,
+    Math.round((block.startSeconds - leadSeconds) * fps) - sceneOffsetFrames
+  );
+  const blockEndFrame = Math.max(blockStartFrame + 1,
+    Math.min(totalFrames,
+      Math.round((block.endSeconds + lagSeconds) * fps) - sceneOffsetFrames + fadeOutFrames
+    )
+  );
+
+  // Pausa visual antes de bloques "punch" (Prompt 33: puntuación visual)
+  // Importar pauseFramesBeforePunch desde themes se haría vía config,
+  // pero para evitar import circular usamos el valor directamente
+  const PAUSE_BEFORE_PUNCH = 6;
+  if (block.weight === 'punch' && currentBlockIndex > 0) {
+    blockStartFrame = Math.min(blockStartFrame + PAUSE_BEFORE_PUNCH, blockEndFrame - 1);
+  }
+
+  // Frame relativo y opacity
+  const relativeFrame = currentFrame - blockStartFrame;
+  const blockDuration = blockEndFrame - blockStartFrame;
+
+  const opacity = calculateOpacity(relativeFrame, blockDuration, fadeInFrames, fadeOutFrames);
+
+  const isTransitioning =
+    relativeFrame < fadeInFrames ||
+    relativeFrame > blockDuration - fadeOutFrames;
+
+  return {
+    currentBlockIndex,
+    opacity,
+    blockStartFrame,
+    blockEndFrame,
+    isTransitioning,
   };
 }
 
