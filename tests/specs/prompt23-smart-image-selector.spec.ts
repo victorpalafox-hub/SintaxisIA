@@ -59,14 +59,16 @@ test.describe('PROMPT 23: Estructura y Archivos', () => {
     expect(content).not.toContain('TestLogger');
   });
 
-  test('smart-image.config exporta SPANISH_TO_ENGLISH, IMAGE_SCORING_CONFIG, QUERY_CONFIG, FALLBACK_THEME', async () => {
+  test('smart-image.config exporta SPANISH_TO_ENGLISH, IMAGE_SCORING_CONFIG, QUERY_CONFIG, GENERIC_PENALTY_PATTERNS (Prompt 35)', async () => {
     const filePath = path.join(CONFIG_PATH, 'smart-image.config.ts');
     const content = fs.readFileSync(filePath, 'utf-8');
 
     expect(content).toContain('export const SPANISH_TO_ENGLISH');
     expect(content).toContain('export const IMAGE_SCORING_CONFIG');
     expect(content).toContain('export const QUERY_CONFIG');
-    expect(content).toContain('export const FALLBACK_THEME');
+    // Prompt 35: FALLBACK_THEME removido, reemplazado por GENERIC_PENALTY_PATTERNS
+    expect(content).not.toContain('export const FALLBACK_THEME');
+    expect(content).toContain('export const GENERIC_PENALTY_PATTERNS');
   });
 
 });
@@ -348,16 +350,18 @@ test.describe('PROMPT 23: Image Orchestration - Retry y Scoring', () => {
     expect(content).toContain('queryGenerator');
   });
 
-  test('cascade de contenido tiene al menos 6 pasos', async () => {
+  test('cascade de contenido tiene al menos 6 pasos (Prompt 35 - null fallback)', async () => {
     const filePath = path.join(SERVICES_PATH, 'image-orchestration.service.ts');
     const content = fs.readFileSync(filePath, 'utf-8');
 
     // Contar pasos en searchWithFallback
-    // Minimo: Pexels+scoring, Unsplash, Google, Alt1, Alt2, Simplified, UIAvatars
+    // Minimo: Pexels+scoring, Unsplash, Google, Alt1, Alt2, Simplified, null
     expect(content).toContain('searchPexelsWithScoring');
     expect(content).toContain('searchUnsplash');
     expect(content).toContain('searchGoogle');
-    expect(content).toContain('generateFallbackImage');
+    // Prompt 35: generateFallbackImage removido, cascade termina con null
+    expect(content).not.toContain('generateFallbackImage');
+    expect(content).toContain("'none'");
 
     // Debe haber al menos 6 puntos de retorno en el cascade
     const returnStatements = content.match(/return this\.createSceneImage/g);
@@ -515,27 +519,35 @@ test.describe('PROMPT 23: Tipos SmartQueryResult y PexelsCandidate', () => {
 
 test.describe('PROMPT 23: Configuracion de Scoring', () => {
 
-  test('IMAGE_SCORING_CONFIG tiene pesos que suman 100', async () => {
+  test('IMAGE_SCORING_CONFIG tiene pesos con genericPenalty (Prompt 35 - gate + penalty)', async () => {
     const filePath = path.join(CONFIG_PATH, 'smart-image.config.ts');
     const content = fs.readFileSync(filePath, 'utf-8');
 
-    // Extraer valores de los pesos
+    // Extraer valores de los pesos (Prompt 35: ya no suman 100, genericPenalty es restante)
     const textRelevance = content.match(/textRelevance\s*:\s*(\d+)/);
     const orientationBonus = content.match(/orientationBonus\s*:\s*(\d+)/);
     const resolution = content.match(/resolution\s*:\s*(\d+)/);
     const positionBonus = content.match(/positionBonus\s*:\s*(\d+)/);
+    const genericPenalty = content.match(/genericPenalty\s*:\s*(\d+)/);
 
     expect(textRelevance).not.toBeNull();
     expect(orientationBonus).not.toBeNull();
     expect(resolution).not.toBeNull();
     expect(positionBonus).not.toBeNull();
+    expect(genericPenalty).not.toBeNull();
 
-    const total = parseInt(textRelevance![1]) +
-                  parseInt(orientationBonus![1]) +
-                  parseInt(resolution![1]) +
-                  parseInt(positionBonus![1]);
+    // Prompt 35: textRelevance=50, orientationBonus=6, resolution=6, positionBonus=4, genericPenalty=20
+    // Los pesos base suman 66, genericPenalty es una penalizacion restante
+    const baseTotal = parseInt(textRelevance![1]) +
+                      parseInt(orientationBonus![1]) +
+                      parseInt(resolution![1]) +
+                      parseInt(positionBonus![1]);
 
-    expect(total).toBe(100);
+    expect(baseTotal).toBeLessThan(100);
+    expect(parseInt(genericPenalty![1])).toBeGreaterThanOrEqual(10);
+
+    // Prompt 35: minTextRelevance gate
+    expect(content).toContain('minTextRelevance');
   });
 
   test('candidateCount es 5 (obtener 5 imagenes para evaluar)', async () => {
@@ -563,39 +575,39 @@ test.describe('PROMPT 23: Configuracion de Scoring', () => {
 // SUITE 10: FALLBACK THEME (TECH EDITORIAL)
 // =============================================================================
 
-test.describe('PROMPT 23: Fallback Theme Tech Editorial', () => {
+test.describe('PROMPT 23→35: Generic Penalty Patterns (reemplaza Fallback Theme)', () => {
 
-  test('FALLBACK_THEME usa colores Tech Editorial (no cyberpunk)', async () => {
+  test('GENERIC_PENALTY_PATTERNS detecta imagenes genericas (Prompt 35)', async () => {
     const filePath = path.join(CONFIG_PATH, 'smart-image.config.ts');
     const content = fs.readFileSync(filePath, 'utf-8');
 
-    // Tech Editorial: background oscuro (#0F172A), primary blue (#4A9EFF)
-    expect(content).toContain("'0F172A'");
-    expect(content).toContain("'4A9EFF'");
+    // Prompt 35: FALLBACK_THEME removido, reemplazado por GENERIC_PENALTY_PATTERNS
+    expect(content).not.toContain('FALLBACK_THEME');
+    expect(content).toContain('GENERIC_PENALTY_PATTERNS');
 
-    // NO debe tener colores cyberpunk
-    expect(content).not.toContain('00F0FF');
-    expect(content).not.toContain('FF00FF');
+    // Debe tener patrones RegExp para detectar imagenes genericas
+    expect(content).toMatch(/RegExp\[\]/);
   });
 
-  test('image-orchestration usa FALLBACK_THEME del config (no colores hardcodeados)', async () => {
+  test('image-orchestration usa GENERIC_PENALTY_PATTERNS del config (Prompt 35)', async () => {
     const filePath = path.join(SERVICES_PATH, 'image-orchestration.service.ts');
     const content = fs.readFileSync(filePath, 'utf-8');
 
-    // Debe importar FALLBACK_THEME
-    expect(content).toContain('FALLBACK_THEME');
-    // Debe usar en generateFallbackImage
-    expect(content).toContain('FALLBACK_THEME.backgroundColor');
-    expect(content).toContain('FALLBACK_THEME.textColor');
+    // Prompt 35: FALLBACK_THEME removido, usa GENERIC_PENALTY_PATTERNS
+    expect(content).not.toContain('FALLBACK_THEME');
+    expect(content).toContain('GENERIC_PENALTY_PATTERNS');
+    // Debe importar desde config
+    expect(content).toMatch(/import\s*\{[^}]*GENERIC_PENALTY_PATTERNS[^}]*\}\s*from/);
   });
 
-  test('FALLBACK_THEME tiene imageSize de al menos 400px', async () => {
-    const filePath = path.join(CONFIG_PATH, 'smart-image.config.ts');
+  test('scoring aplica genericPenalty a imagenes con alt text generico (Prompt 35)', async () => {
+    const filePath = path.join(SERVICES_PATH, 'image-orchestration.service.ts');
     const content = fs.readFileSync(filePath, 'utf-8');
 
-    const match = content.match(/imageSize\s*:\s*(\d+)/);
-    expect(match).not.toBeNull();
-    expect(parseInt(match![1])).toBeGreaterThanOrEqual(400);
+    // Debe usar genericPenalty en scoreCandidate
+    expect(content).toContain('genericPenalty');
+    // Debe restar puntos cuando alt text es generico
+    expect(content).toMatch(/score\s*-=\s*weights\.genericPenalty/);
   });
 
 });

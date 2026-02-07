@@ -163,27 +163,10 @@ export class SmartQueryGenerator {
       }
     }
 
-    // Si aún faltan alternativas, usar fallback temático
-    if (alternatives.length < maxAlts) {
-      const fallback = this.getRandomFallbackTopic();
-      if (!alternatives.includes(fallback)) {
-        alternatives.push(fallback);
-      }
-    }
+    // Prompt 35: eliminado fallback temático genérico (producía queries como
+    // "digital transformation abstract" que traían imágenes irrelevantes)
 
     return alternatives.slice(0, maxAlts);
-  }
-
-  /**
-   * Selecciona un topic fallback aleatorio de la lista configurada.
-   * Útil cuando no hay suficientes keywords para generar alternativas.
-   *
-   * @returns Topic en inglés para búsqueda de imágenes
-   */
-  private getRandomFallbackTopic(): string {
-    const topics = QUERY_CONFIG.fallbackTopics;
-    const index = Math.floor(Math.random() * topics.length);
-    return topics[index];
   }
 
   /**

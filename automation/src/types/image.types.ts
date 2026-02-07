@@ -163,7 +163,8 @@ export type SceneImageSource =
   | 'google'
   | 'clearbit'
   | 'logodev'
-  | 'fallback';
+  | 'fallback'
+  | 'none';
 
 /**
  * Segmento de script con keywords extraídas
@@ -206,13 +207,13 @@ export interface SceneImage {
   /** Segundo de fin donde mostrar la imagen */
   endSecond: number;
 
-  /** URL de la imagen */
-  imageUrl: string;
+  /** URL de la imagen (null si no se encontró imagen relevante - Prompt 35) */
+  imageUrl: string | null;
 
   /** Query usada para encontrar la imagen */
   query: string;
 
-  /** Proveedor que encontró la imagen */
+  /** Proveedor que encontró la imagen ('none' si no se encontró - Prompt 35) */
   source: SceneImageSource;
 
   /** Si la imagen está cacheada localmente */

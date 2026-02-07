@@ -31,12 +31,12 @@ export interface SceneImage {
   startSecond: number;
   /** Segundo de fin del segmento */
   endSecond: number;
-  /** URL de la imagen */
-  imageUrl: string;
+  /** URL de la imagen (null si no se encontró imagen relevante - Prompt 35) */
+  imageUrl: string | null;
   /** Query usada para buscar la imagen */
   query: string;
-  /** Proveedor de la imagen */
-  source: 'pexels' | 'unsplash' | 'google' | 'fallback';
+  /** Proveedor de la imagen ('none' si no se encontró - Prompt 35) */
+  source: 'pexels' | 'unsplash' | 'google' | 'fallback' | 'none';
   /** Si la imagen está cacheada */
   cached: boolean;
 }

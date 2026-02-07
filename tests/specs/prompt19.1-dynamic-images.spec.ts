@@ -221,12 +221,16 @@ test.describe('Prompt 19.1 - ImageOrchestrationService Contenido', () => {
     expect(content).toContain('searchWithFallback');
   });
 
-  test('ImageOrchestrationService tiene fallback UI Avatars', async () => {
+  test('ImageOrchestrationService tiene fallback null (Prompt 35 - sin UI Avatars)', async () => {
     const filePath = path.join(SERVICES_PATH, 'image-orchestration.service.ts');
     const content = fs.readFileSync(filePath, 'utf-8');
 
-    expect(content).toContain('ui-avatars.com');
-    expect(content).toContain('generateFallbackImage');
+    // Prompt 35: UI Avatars removido, fallback retorna null imageUrl
+    expect(content).not.toContain('ui-avatars.com');
+    expect(content).not.toContain('generateFallbackImage');
+    // El cascade termina retornando null cuando no encuentra imagen
+    expect(content).toContain('return this.createSceneImage');
+    expect(content).toContain("'none'");
   });
 
 });

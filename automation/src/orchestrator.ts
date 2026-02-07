@@ -312,7 +312,7 @@ export async function runPipeline(
           source: (dynamicImages.scenes[0]?.source as 'clearbit' | 'logodev' | 'google' | 'unsplash' | 'ui-avatars') || 'ui-avatars',
           cached: false,
         },
-        context: dynamicImages.scenes[1] ? {
+        context: dynamicImages.scenes[1]?.imageUrl ? {
           url: dynamicImages.scenes[1].imageUrl,
           source: (dynamicImages.scenes[1].source as 'google' | 'unsplash' | 'opengraph' | 'hero-duplicate') || 'google',
           cached: false,

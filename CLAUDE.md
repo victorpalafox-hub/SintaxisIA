@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 1303 tests (1301 passing, 2 skipped)
+**Test Status**: 1356 tests (1354 passing, 2 skipped)
 
-**Last Updated**: 2026-02-06 (Prompt 34 - Sistema de Énfasis Visual: scale, dimming, letterSpacing en momentos de impacto)
+**Last Updated**: 2026-02-06 (Prompt 35 - Fix imágenes genéricas: gate textRelevance, penalty genérico, null fallback, sin UI Avatars)
 
 ## Prerequisites
 
@@ -67,7 +67,7 @@ npm run check
 | CI validation | `npm run ci:validate` |
 | News Manager | `npm run news:history / news:stats / news:help` |
 
-**Test suites**: 1303 tests en 51 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
+**Test suites**: 1356 tests en 52 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
 
 **Playwright config**: 4 workers local / 1 en CI, timeout 2min por test, retries solo en CI (2), reporters: HTML + JSON + JUnit.
 
@@ -468,7 +468,7 @@ output/
 | EditorialShadow | textDepth, imageElevation, logoBrandTint | Reemplaza glows neón (Prompt 20) |
 | Anti-Duplicación | `PublishedNewsTracker` + `selectTopNewsExcluding()` | 3 capas: ID, titulo 80%, empresa+producto 7d |
 | SmartQuery | `translateKeywords()`, `generateQueries()` | 170+ ES→EN, max 3 kw/query, 2 alternativas |
-| ImageScoring | `searchPexelsWithScoring()`, `scoreCandidate()` | 5 candidatos, 4 criterios (100pts), umbral 20 |
+| ImageScoring | `searchPexelsWithScoring()`, `scoreCandidate()` | 5 candidatos, gate textRelevance≥8, penalty genérico -20, umbral 35, null si no relevante |
 | News Manager CLI | `news-manager-cli.ts` (10 comandos: history/active/expired/search/view/unlock/cleanup/clear/stats/help) | Peer de cli.ts, ts-node directo para args |
 | NewsEnricher | `enrichAll()`, `detectCompany()`, `detectType()` | 81 aliases, 8 type patterns, PASO 2 real |
 | AudioSync | `Sequence(contentStart)`, `phraseTimestamps` pipeline | Audio retrasado a ContentScene, offset 0, lead 200ms, lag 150ms, max 3 img |
@@ -542,6 +542,7 @@ output/
 | 32.1 | Fix Title Card + Audio + Fondo + Timeout | - | TitleCard 3s fade-out, voice fade-out 30f, gradientes azul-navy, accent blob, timeout 20x |
 | 33 | Texto Editorial Humano | 46 | `text-editorial.ts`, `editorialText` config, bloques headline/support/punch, getBlockTiming, agrupación de frases |
 | 34 | Sistema de Énfasis Visual | 48 | `visual-emphasis.ts`, `visualEmphasis` config, detectEmphasis, scale/dimming/letterSpacing en momentos de impacto |
+| 35 | Fix Imágenes Genéricas | 53 | Gate textRelevance en `scoreCandidate()`, `GENERIC_PENALTY_PATTERNS`, pesos rebalanceados, null fallback (sin UI Avatars), `imageUrl: string \| null` |
 
 ## Pendientes
 

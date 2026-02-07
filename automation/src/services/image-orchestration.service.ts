@@ -5,14 +5,15 @@
  * Implementa rate limiting y fallbacks robustos.
  *
  * Cascade de proveedores:
- * 1. Para logos (__LOGO__): Clearbit → Logo.dev → Google → Pexels → UI Avatars
- * 2. Para contenido: Pexels(scoring) → Unsplash → Google → Alt1 → Alt2 → Simplified → UI Avatars
+ * 1. Para logos (__LOGO__): Clearbit → Logo.dev → Google → Pexels → null
+ * 2. Para contenido: Pexels(scoring+gate) → Unsplash → Google → Alt1 → Alt2 → Simplified → null
  *
  * @author Sintaxis IA
- * @version 1.2.0
+ * @version 1.3.0
  * @since Prompt 19.1
  * @updated Prompt 19.1.6 - Integración Clearbit/Logo.dev, eliminado sufijo 'technology'
  * @updated Prompt 23 - Scoring inteligente + retry con queries alternativas
+ * @updated Prompt 35 - Gate textRelevance, penalty generico, null en vez de UI Avatars
  */
 
 import { logger } from '../../utils/logger';
@@ -22,7 +23,7 @@ import { searchUnsplash } from '../image-providers/unsplash-provider';
 import { searchGoogle } from '../image-providers/google-provider';
 import { searchClearbit, searchLogodev } from '../image-providers';
 import { SmartQueryGenerator } from './smart-query-generator';
-import { IMAGE_SCORING_CONFIG, FALLBACK_THEME } from '../config/smart-image.config';
+import { IMAGE_SCORING_CONFIG, GENERIC_PENALTY_PATTERNS } from '../config/smart-image.config';
 import type { SceneSegment, SceneImage, SceneImageSource, DynamicImagesResult, PexelsCandidate } from '../types/image.types';
 
 // =============================================================================
@@ -34,11 +35,6 @@ import type { SceneSegment, SceneImage, SceneImageSource, DynamicImagesResult, P
  * 350ms = ~3 requests/segundo (seguro para free tiers)
  */
 const RATE_LIMIT_DELAY_MS = 350;
-
-/**
- * URL base para fallback de UI Avatars
- */
-const UI_AVATARS_BASE = 'https://ui-avatars.com/api';
 
 // =============================================================================
 // SERVICIO PRINCIPAL
@@ -113,20 +109,21 @@ export class ImageOrchestrationService {
    * Detecta señal __LOGO__ para usar cascade especial de logos.
    * Para contenido, usa scoring inteligente y queries alternativas.
    *
-   * Cascade contenido (Prompt 23):
-   * 1. Pexels con scoring (query principal)
+   * Cascade contenido (Prompt 23, actualizado Prompt 35):
+   * 1. Pexels con scoring + gate (query principal)
    * 2. Unsplash (query principal)
    * 3. Google (query principal)
-   * 4. Pexels con scoring (alternativa 1)
-   * 5. Pexels con scoring (alternativa 2)
-   * 6. Pexels con scoring (query simplificada)
-   * 7. UI Avatars fallback (mejorado)
+   * 4. Pexels con scoring + gate (alternativa 1)
+   * 5. Pexels con scoring + gate (alternativa 2)
+   * 6. Pexels con scoring + gate (query simplificada)
+   * 7. null (sin imagen — Prompt 35: mejor sin imagen que imagen genérica)
    *
    * @param segment - Segmento a buscar
-   * @returns Imagen encontrada (nunca falla, tiene fallback garantizado)
+   * @returns Imagen encontrada o SceneImage con imageUrl=null si no hay imagen relevante
    *
    * @updated Prompt 19.1.6 - Detecta __LOGO__ para Clearbit/Logo.dev
    * @updated Prompt 23 - Scoring + queries alternativas
+   * @updated Prompt 35 - Retorna null en vez de UI Avatars
    */
   private async searchWithFallback(segment: SceneSegment): Promise<SceneImage> {
     const { index, startSecond, endSecond, searchQuery, keywords } = segment;
@@ -182,9 +179,9 @@ export class ImageOrchestrationService {
       }
     }
 
-    // 7. Fallback garantizado: UI Avatars mejorado (Prompt 23)
-    const fallbackUrl = this.generateFallbackImage(keywords, index);
-    return this.createSceneImage(index, startSecond, endSecond, fallbackUrl, searchQuery, 'fallback');
+    // 7. Prompt 35: No forzar imagen genérica — retornar null
+    logger.info(`[ImageOrchestration] Sin imagen relevante para segmento ${index}, retornando null`);
+    return this.createSceneImage(index, startSecond, endSecond, null, searchQuery, 'none');
   }
 
   /**
@@ -226,7 +223,7 @@ export class ImageOrchestrationService {
     }
 
     if (bestCandidate && bestScore >= IMAGE_SCORING_CONFIG.minimumScore) {
-      logger.info(`[ImageOrchestration] Pexels scoring: mejor=${bestScore.toFixed(0)}/100 (${bestCandidate.alt.substring(0, 40)})`);
+      logger.info(`[ImageOrchestration] Pexels scoring: mejor=${bestScore.toFixed(0)}/66 (${bestCandidate.alt.substring(0, 40)})`);
       return bestCandidate.url;
     }
 
@@ -235,18 +232,25 @@ export class ImageOrchestrationService {
   }
 
   /**
-   * Calcula score de un candidato de Pexels (0-100)
+   * Calcula score de un candidato de Pexels (0-66)
+   *
+   * Prompt 35: textRelevance es GATE obligatorio. Si el score de relevancia
+   * textual es menor a minTextRelevance, retorna 0 inmediatamente.
+   * Esto hace IMPOSIBLE que una imagen sin keywords relevantes pase el filtro.
    *
    * Criterios:
-   * - textRelevance (50pts): cuántas keywords aparecen en alt text
-   * - orientationBonus (25pts): portrait preferido para YouTube Shorts
-   * - resolution (15pts): resolución por ancho
-   * - positionBonus (10pts): posición en resultados de Pexels
+   * - textRelevance (50pts): cuántas keywords aparecen en alt text (GATE)
+   * - orientationBonus (6pts): portrait preferido para YouTube Shorts
+   * - resolution (6pts): resolución por ancho
+   * - positionBonus (4pts): posición en resultados de Pexels
+   * - genericPenalty (-20pts): penalización por alt text genérico
    *
    * @param candidate - Candidato a evaluar
    * @param queryKeywords - Keywords para matching
    * @param position - Posición en resultados (0 = primero)
-   * @returns Score 0-100
+   * @returns Score 0-66 (0 si no pasa el gate de textRelevance)
+   *
+   * @updated Prompt 35 - Gate + penalty + pesos rebalanceados
    */
   private scoreCandidate(
     candidate: PexelsCandidate,
@@ -254,28 +258,35 @@ export class ImageOrchestrationService {
     position: number
   ): number {
     const weights = IMAGE_SCORING_CONFIG.weights;
-    let score = 0;
 
     // 1. Relevancia textual (50pts): keywords en alt text
+    let textScore = 0;
     if (candidate.alt && queryKeywords.length > 0) {
       const altLower = candidate.alt.toLowerCase();
       const matchCount = queryKeywords.filter(kw =>
         altLower.includes(kw.toLowerCase())
       ).length;
       const matchRatio = matchCount / queryKeywords.length;
-      score += matchRatio * weights.textRelevance;
+      textScore = matchRatio * weights.textRelevance;
     }
 
-    // 2. Orientación (25pts): portrait preferido
+    // GATE (Prompt 35): Si textRelevance < minimo, rechazar inmediatamente
+    if (textScore < IMAGE_SCORING_CONFIG.minTextRelevance) {
+      return 0;
+    }
+
+    let score = textScore;
+
+    // 2. Orientación (6pts): portrait preferido
     if (candidate.height > candidate.width) {
-      score += weights.orientationBonus; // Portrait: full points
+      score += weights.orientationBonus;
     } else if (candidate.height === candidate.width) {
-      score += weights.orientationBonus * 0.5; // Square: half points
+      score += weights.orientationBonus * 0.5;
     } else {
-      score += weights.orientationBonus * 0.4; // Landscape: some points
+      score += weights.orientationBonus * 0.4;
     }
 
-    // 3. Resolución (15pts): escala lineal por ancho
+    // 3. Resolución (6pts): escala lineal por ancho
     const minW = IMAGE_SCORING_CONFIG.minimumWidth;
     const idealW = IMAGE_SCORING_CONFIG.idealWidth;
     if (candidate.width >= idealW) {
@@ -285,11 +296,20 @@ export class ImageOrchestrationService {
       score += ratio * weights.resolution;
     }
 
-    // 4. Posición en resultados (10pts): primeros = más relevantes
+    // 4. Posición en resultados (4pts): primeros = más relevantes
     const positionScore = Math.max(0, 1 - (position * 0.2));
     score += positionScore * weights.positionBonus;
 
-    return score;
+    // 5. PENALTY (Prompt 35): Imágenes genéricas (-20pts)
+    if (candidate.alt) {
+      const altText = candidate.alt.toLowerCase();
+      const isGeneric = GENERIC_PENALTY_PATTERNS.some(pattern => pattern.test(altText));
+      if (isGeneric) {
+        score -= weights.genericPenalty;
+      }
+    }
+
+    return Math.max(0, score);
   }
 
   /**
@@ -348,20 +368,21 @@ export class ImageOrchestrationService {
       }
     }
 
-    // 5. UI Avatars (fallback garantizado)
-    logger.info(`[ImageOrchestration] Usando fallback UI Avatars para: ${company}`);
-    const fallbackUrl = this.generateFallbackImage([company, ...keywords], index);
-    return this.createSceneImage(index, startSecond, endSecond, fallbackUrl, logoQuery, 'fallback');
+    // 5. Prompt 35: No forzar imagen genérica — retornar null
+    logger.info(`[ImageOrchestration] Sin logo relevante para: ${company}, retornando null`);
+    return this.createSceneImage(index, startSecond, endSecond, null, logoQuery, 'none');
   }
 
   /**
    * Crea objeto SceneImage
+   *
+   * @updated Prompt 35 - imageUrl puede ser null (sin imagen relevante)
    */
   private createSceneImage(
     sceneIndex: number,
     startSecond: number,
     endSecond: number,
-    imageUrl: string,
+    imageUrl: string | null,
     query: string,
     source: SceneImageSource
   ): SceneImage {
@@ -374,28 +395,6 @@ export class ImageOrchestrationService {
       source,
       cached: false,
     };
-  }
-
-  /**
-   * Genera imagen fallback mejorada con UI Avatars (Prompt 23)
-   *
-   * Usa nombre de empresa o topic como texto (no solo la inicial)
-   * y colores del tema Tech Editorial.
-   *
-   * @param keywords - Keywords para generar texto
-   * @param index - Índice para variación
-   * @returns URL de imagen fallback
-   *
-   * @updated Prompt 23 - Usa nombre completo y colores Tech Editorial
-   */
-  private generateFallbackImage(keywords: string[], index: number): string {
-    // Usar las primeras 2-3 letras de la primera keyword (más descriptivo que una sola inicial)
-    const text = keywords.length > 0
-      ? keywords[0].substring(0, 3).toUpperCase()
-      : 'AI';
-
-    // Generar URL con colores Tech Editorial (Prompt 23)
-    return `${UI_AVATARS_BASE}/?name=${encodeURIComponent(text)}&size=${FALLBACK_THEME.imageSize}&background=${FALLBACK_THEME.backgroundColor}&color=${FALLBACK_THEME.textColor}&bold=${FALLBACK_THEME.bold}&format=png`;
   }
 
   /**

@@ -186,7 +186,9 @@
     "test:editorial": "playwright test tests/specs/prompt33-editorial-text.spec.ts",
     "test:prompt33": "playwright test tests/specs/prompt33-editorial-text.spec.ts",
     "test:emphasis": "playwright test tests/specs/prompt34-visual-emphasis.spec.ts",
-    "test:prompt34": "playwright test tests/specs/prompt34-visual-emphasis.spec.ts"
+    "test:prompt34": "playwright test tests/specs/prompt34-visual-emphasis.spec.ts",
+    "test:image-filter": "playwright test tests/specs/prompt35-image-editorial-filter.spec.ts",
+    "test:prompt35": "playwright test tests/specs/prompt35-image-editorial-filter.spec.ts"
   },
   "keywords": [
     "youtube",

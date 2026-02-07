@@ -117,9 +117,9 @@ test.describe('Prompt 19.1.6 - image-orchestration Actualizado', () => {
     expect(content).toMatch(/import\s*\{[^}]*searchLogodev[^}]*\}\s*from/);
   });
 
-  test('tiene versión 1.2.0', async () => {
+  test('tiene versión 1.3.0', async () => {
     const content = fs.readFileSync(IMAGE_ORCHESTRATION_PATH, 'utf-8');
-    expect(content).toContain('@version 1.2.0');
+    expect(content).toContain('@version 1.3.0');
   });
 
 });

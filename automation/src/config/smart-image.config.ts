@@ -11,8 +11,9 @@
  * - Colores de fallback (Tech Editorial theme)
  *
  * @author Sintaxis IA
- * @version 1.0.0
+ * @version 1.1.0
  * @since Prompt 23
+ * @updated Prompt 35 - Gate textRelevance, pesos rebalanceados, penalty generico, sin UI Avatars
  */
 
 // =============================================================================
@@ -275,22 +276,34 @@ export const IMAGE_SCORING_CONFIG = {
   /** Numero de candidatos a obtener de Pexels para scoring */
   candidateCount: 5,
 
-  /** Score minimo para aceptar una imagen (0-100) */
-  minimumScore: 20,
+  /** Score minimo para aceptar una imagen (0-66) @updated Prompt 35 */
+  minimumScore: 35,
 
   /**
-   * Pesos de scoring (deben sumar 100)
+   * Score minimo de textRelevance para que una imagen sea considerada (GATE)
+   * Si el score de textRelevance es menor a este valor, la imagen es rechazada
+   * inmediatamente con score = 0, sin importar orientacion, resolucion o posicion.
    *
-   * - textRelevance: cuantas keywords de la query aparecen en el alt text
-   * - orientationBonus: portrait preferido para YouTube Shorts
-   * - resolution: resolucion (mayor = mejor)
-   * - positionBonus: posicion en resultados de Pexels (primeros = mas relevantes)
+   * 8 pts ≈ 16% match minimo (1 keyword de 6)
+   *
+   * @since Prompt 35
+   */
+  minTextRelevance: 8,
+
+  /**
+   * Pesos de scoring
+   *
+   * Score maximo teorico = 66 (50+6+6+4), penalty puede restar hasta 20.
+   * Los pesos ya no suman 100 porque genericPenalty es restante.
+   *
+   * @updated Prompt 35 - Rebalanceados para priorizar textRelevance
    */
   weights: {
     textRelevance: 50,
-    orientationBonus: 25,
-    resolution: 15,
-    positionBonus: 10,
+    orientationBonus: 6,
+    resolution: 6,
+    positionBonus: 4,
+    genericPenalty: 20,
   },
 
   /** Resolucion minima aceptable (ancho en px) */
@@ -313,35 +326,33 @@ export const QUERY_CONFIG = {
 
   /** Keywords maximas por query (APIs trabajan mejor con queries cortas) */
   maxKeywordsPerQuery: 3,
-
-  /**
-   * Fallback topics cuando todo falla (en ingles, tematicos de tech/IA).
-   * Se selecciona uno aleatorio para evitar repeticion.
-   */
-  fallbackTopics: [
-    'artificial intelligence technology',
-    'tech innovation futuristic',
-    'digital transformation abstract',
-    'modern technology workspace',
-    'data science visualization',
-  ],
 };
 
 // =============================================================================
-// CONFIGURACION DE FALLBACK (UI Avatars)
+// PATRONES DE IMAGENES GENERICAS (Prompt 35)
 // =============================================================================
 
 /**
- * Colores para UI Avatars fallback - Tech Editorial theme (Prompt 20)
- * Se usan cuando ningun proveedor retorna imagen valida
+ * Patrones que identifican imagenes genericas de stock (robots, circuitos, etc.)
+ * Si el alt text de una imagen matchea alguno de estos patrones,
+ * se aplica una penalizacion de `weights.genericPenalty` puntos.
+ *
+ * @since Prompt 35
  */
-export const FALLBACK_THEME = {
-  /** Fondo oscuro (Tech Editorial background) */
-  backgroundColor: '0F172A',
-  /** Texto azul primario (Tech Editorial primary) */
-  textColor: '4A9EFF',
-  /** Tamano de la imagen generada */
-  imageSize: 800,
-  /** Si el texto se muestra en negrita */
-  bold: true,
-};
+export const GENERIC_PENALTY_PATTERNS: RegExp[] = [
+  /\brobot\b/i,
+  /\bcircuit\b/i,
+  /\bfuturist/i,
+  /\babstract\b/i,
+  /\bcyber/i,
+  /\bneon\b/i,
+  /\bhologram/i,
+  /\bdigital brain/i,
+  /\bai concept/i,
+  /\btechnology background/i,
+  /\bmatrix\b/i,
+  /\bvirtual reality\b/i,
+  /\bdata stream/i,
+  /\bglowing\b/i,
+  /\b3d render/i,
+];

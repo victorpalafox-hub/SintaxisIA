@@ -26,6 +26,7 @@
  * @updated Prompt 28 - Imágenes editoriales grandes (920x520), crossfade real con imagen previa
  * @updated Prompt 33 - Texto editorial con jerarquía (headline/support/punch), bloques agrupados
  * @updated Prompt 34 - Énfasis visual: scale, dimming, letterSpacing en momentos de impacto
+ * @updated Prompt 35 - Handle imageUrl null (sin imagen genérica, null → undefined)
  */
 
 import React, { useMemo } from 'react';
@@ -130,9 +131,10 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
 
     if (currentSceneIndex === -1) {
       const lastScene = dynamicScenes[dynamicScenes.length - 1];
+      // Prompt 35: imageUrl puede ser null, convertir a undefined
       const url = currentSecond >= lastScene.endSecond
-        ? lastScene.imageUrl
-        : dynamicScenes[0].imageUrl;
+        ? lastScene.imageUrl ?? undefined
+        : dynamicScenes[0].imageUrl ?? undefined;
       return { currentUrl: url, previousUrl: undefined, transitionProgress: 1 };
     }
 
@@ -145,8 +147,9 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
     const transitionProgress = Math.min(1, segmentFrame / imageAnimation.crossfadeFrames);
 
     return {
-      currentUrl: currentScene.imageUrl,
-      previousUrl: previousScene?.imageUrl,
+      // Prompt 35: imageUrl puede ser null, convertir a undefined
+      currentUrl: currentScene.imageUrl ?? undefined,
+      previousUrl: previousScene?.imageUrl ?? undefined,
       transitionProgress,
     };
   };
