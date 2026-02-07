@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 1255 tests (1253 passing, 2 skipped)
+**Test Status**: 1303 tests (1301 passing, 2 skipped)
 
-**Last Updated**: 2026-02-06 (Prompt 33 - Texto Editorial Humano: jerarquía tipográfica, bloques agrupados, ritmo visual)
+**Last Updated**: 2026-02-06 (Prompt 34 - Sistema de Énfasis Visual: scale, dimming, letterSpacing en momentos de impacto)
 
 ## Prerequisites
 
@@ -67,7 +67,7 @@ npm run check
 | CI validation | `npm run ci:validate` |
 | News Manager | `npm run news:history / news:stats / news:help` |
 
-**Test suites**: 1209 tests en 49 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
+**Test suites**: 1303 tests en 51 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
 
 **Playwright config**: 4 workers local / 1 en CI, timeout 2min por test, retries solo en CI (2), reporters: HTML + JSON + JUnit.
 
@@ -479,6 +479,7 @@ output/
 | DynamicDuration | `calculateMetadata` en Root.tsx, `BREATHING_ROOM_FRAMES` | Composition dinámica via props, 1s breathing room antes de outro |
 | TitleCard | `TitleCardScene.tsx`, `title-derivation.ts`, `deriveTitleCardText()`, `deriveBadge()` | Overlay 3s (90 frames), fade-out 15f, badge contextual, hero image background, max 7 palabras |
 | EditorialText | `text-editorial.ts`, `editorialText` config, `getBlockTiming()` | Bloques 1-2 líneas, headline/support/punch, gap ≤0.6s agrupa, pause 6f antes punch, min 18f |
+| VisualEmphasis | `visual-emphasis.ts`, `visualEmphasis` config, `detectEmphasis()` | Max 3 momentos (1 hard + 2 soft), scale 1.08/1.03, dimming overlay, ramp 10f, min 4 bloques |
 
 ## Prompt History (Resumen)
 
@@ -540,6 +541,7 @@ output/
 | 32 | Title Card / Thumbnail Topic-Aware | 31 | `TitleCardScene.tsx`, `title-derivation.ts`, overlay 0.5s, badge contextual, SafeImage hero background |
 | 32.1 | Fix Title Card + Audio + Fondo + Timeout | - | TitleCard 3s fade-out, voice fade-out 30f, gradientes azul-navy, accent blob, timeout 20x |
 | 33 | Texto Editorial Humano | 46 | `text-editorial.ts`, `editorialText` config, bloques headline/support/punch, getBlockTiming, agrupación de frases |
+| 34 | Sistema de Énfasis Visual | 48 | `visual-emphasis.ts`, `visualEmphasis` config, detectEmphasis, scale/dimming/letterSpacing en momentos de impacto |
 
 ## Pendientes
 

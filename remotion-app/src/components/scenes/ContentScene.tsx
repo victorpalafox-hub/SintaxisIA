@@ -25,6 +25,7 @@
  * @updated Prompt 25 - Audio sync: offset, timestamps como source of truth, crossfade imágenes
  * @updated Prompt 28 - Imágenes editoriales grandes (920x520), crossfade real con imagen previa
  * @updated Prompt 33 - Texto editorial con jerarquía (headline/support/punch), bloques agrupados
+ * @updated Prompt 34 - Énfasis visual: scale, dimming, letterSpacing en momentos de impacto
  */
 
 import React, { useMemo } from 'react';
@@ -35,10 +36,10 @@ import {
   useVideoConfig,
   Easing,
 } from 'remotion';
-import { colors, spacing, textAnimation, imageAnimation, contentTextStyle, contentAnimation, sceneTransition, editorialShadow, editorialText } from '../../styles/themes';
+import { colors, spacing, textAnimation, imageAnimation, contentTextStyle, contentAnimation, sceneTransition, editorialShadow, editorialText, visualEmphasis } from '../../styles/themes';
 import { ProgressBar } from '../ui/ProgressBar';
 import { SafeImage } from '../elements/SafeImage';
-import { splitIntoReadablePhrases, getPhraseTiming, getBlockTiming, buildEditorialBlocks } from '../../utils';
+import { splitIntoReadablePhrases, getPhraseTiming, getBlockTiming, buildEditorialBlocks, detectEmphasis, getEmphasisForBlock } from '../../utils';
 import type { ContentSceneProps } from '../../types/video.types';
 
 /**
@@ -236,6 +237,13 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
     }));
   }, [audioSync, phrases, fps]);
 
+  // ==========================================
+  // ÉNFASIS VISUAL (Prompt 34)
+  // ==========================================
+
+  // Detectar momentos de énfasis una sola vez (determinístico, sin IA)
+  const emphasisMap = useMemo(() => detectEmphasis(blocks), [blocks]);
+
   // Timing: con Whisper usa getBlockTiming, sin Whisper usa getPhraseTiming (fallback)
   const hasWhisper = !!(audioSync?.phraseTimestamps && audioSync.phraseTimestamps.length > 0);
 
@@ -286,6 +294,32 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
       )
     : 0;
 
+  // Énfasis visual del bloque actual (Prompt 34)
+  const currentEmphasis = getEmphasisForBlock(emphasisMap, currentBlockIndex);
+  const emphasisConfig = currentEmphasis !== 'none'
+    ? visualEmphasis[currentEmphasis]
+    : null;
+
+  // Ramp: transición suave al entrar en bloque con énfasis
+  const emphasisRamp = emphasisConfig && dynamicEffects
+    ? interpolate(
+        blockRelativeFrame,
+        [0, emphasisConfig.rampFrames],
+        [0, 1],
+        { extrapolateRight: 'clamp', easing: Easing.bezier(0.33, 1, 0.68, 1) }
+      )
+    : 0;
+
+  const emphasisScale = emphasisConfig
+    ? interpolate(emphasisRamp, [0, 1], [1, emphasisConfig.scale])
+    : 1;
+
+  const emphasisDimOpacity = emphasisConfig
+    ? emphasisRamp * emphasisConfig.bgDimOpacity
+    : 0;
+
+  const emphasisLetterSpacing = emphasisConfig?.letterSpacing ?? null;
+
   // Opacity de entrada inicial de escena (fade in los primeros 40 frames)
   const baseOpacity = interpolate(
     frame,
@@ -312,6 +346,22 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
         opacity: finalOpacity,
       }}
     >
+      {/* Overlay de dimming para énfasis visual (Prompt 34) */}
+      {emphasisDimOpacity > 0 && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: `rgba(0, 0, 0, ${emphasisDimOpacity})`,
+            zIndex: visualEmphasis.dimZIndex,
+            pointerEvents: 'none' as const,
+          }}
+        />
+      )}
+
       {/* Contenedor principal con espacio para barra de progreso */}
       <AbsoluteFill
         style={{
@@ -394,7 +444,7 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
         {/* DESCRIPCION - Bloques Editoriales (Prompt 33, antes: Texto Secuencial Prompt 19.2) */}
         <div
           style={{
-            transform: `translateY(${blockTextY}px)`,
+            transform: `translateY(${blockTextY}px) scale(${emphasisScale})`,
             opacity: descriptionOpacity,
             textAlign: 'center',
             textShadow: editorialShadow.textDepth,
@@ -422,7 +472,7 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
                 fontSize: blockStyle.fontSize,
                 fontWeight: blockStyle.fontWeight,
                 color: blockStyle.color,
-                letterSpacing: blockStyle.letterSpacing,
+                letterSpacing: emphasisLetterSpacing ?? blockStyle.letterSpacing,
                 lineHeight: 1.3,
               }}
             >

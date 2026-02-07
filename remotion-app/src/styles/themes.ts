@@ -506,6 +506,47 @@ export const editorialText = {
 };
 
 // ==========================================
+// CONFIGURACIÓN DE ÉNFASIS VISUAL (Prompt 34)
+// ==========================================
+
+/**
+ * Efectos de énfasis visual para momentos de impacto
+ *
+ * Se aplica a bloques editoriales detectados como momentos memorables.
+ * HARD: punch blocks con escala grande y dimming de fondo.
+ * SOFT: headlines/setup con escala sutil.
+ * NONE: comportamiento actual sin cambios (Prompt 33).
+ *
+ * @since Prompt 34
+ */
+export const visualEmphasis = {
+  /** Énfasis fuerte: punch blocks de impacto */
+  hard: {
+    /** Escala del texto (1.08 = 8% más grande) */
+    scale: 1.08,
+    /** Opacidad del overlay oscuro sobre el fondo (0.35 = 65% brillo) */
+    bgDimOpacity: 0.35,
+    /** Letter spacing override (más compacto = más impactante) */
+    letterSpacing: -1.5,
+    /** Frames de ramp-up para entrar en énfasis */
+    rampFrames: 10,
+  },
+  /** Énfasis suave: headlines y setup blocks */
+  soft: {
+    /** Escala del texto (1.03 = 3% más grande) */
+    scale: 1.03,
+    /** Opacidad del overlay oscuro */
+    bgDimOpacity: 0.15,
+    /** Sin override de letterSpacing (usa el del peso editorial) */
+    letterSpacing: null as number | null,
+    /** Frames de ramp-up */
+    rampFrames: 8,
+  },
+  /** Z-index del overlay de dimming (entre background y texto) */
+  dimZIndex: 1,
+};
+
+// ==========================================
 // CONFIGURACIÓN DE FONDO ANIMADO (Prompt 20)
 // ==========================================
 

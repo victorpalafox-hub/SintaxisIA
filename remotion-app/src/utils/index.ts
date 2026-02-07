@@ -29,3 +29,11 @@ export {
   type EditorialTextBlock,
   type EditorialWeight,
 } from './text-editorial';
+
+export {
+  detectEmphasis,
+  getEmphasisForBlock,
+  type EmphasisLevel,
+  type BlockEmphasis,
+  type EmphasisMap,
+} from './visual-emphasis';
