@@ -285,15 +285,27 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
   // ==========================================
 
   // Per-block slide-up: cada bloque entra con su propio slide-up
+  // Prompt 40-Fix4: Slide y easing diferenciados por peso editorial
   const blockRelativeFrame = frame - currentStartFrame;
+  const blockWeight = currentBlock?.weight || 'headline';
+  const weightSlideDistance = editorialText[blockWeight]?.slideDistance ?? editorialText.slideDistance;
+  const weightSlideFrames = editorialText[blockWeight]?.slideFrames ?? editorialText.slideFrames;
+
+  // Easing diferenciado: punch explosivo, support suave, headline estándar
+  const slideEasing = blockWeight === 'punch'
+    ? Easing.bezier(0.22, 1.2, 0.36, 1)   // Overshoot sutil — punch "explota"
+    : blockWeight === 'support'
+    ? Easing.bezier(0.25, 0.1, 0.25, 1)    // Ease-out suave — support "se desliza"
+    : Easing.bezier(0.16, 1, 0.3, 1);      // Original — headline
+
   const blockTextY = dynamicEffects
     ? interpolate(
         blockRelativeFrame,
-        [0, editorialText.slideFrames],
-        [editorialText.slideDistance, 0],
+        [0, weightSlideFrames],
+        [weightSlideDistance, 0],
         {
           extrapolateRight: 'clamp',
-          easing: Easing.bezier(0.16, 1, 0.3, 1),
+          easing: slideEasing,
         }
       )
     : 0;

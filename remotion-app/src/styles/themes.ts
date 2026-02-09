@@ -482,6 +482,9 @@ export const editorialText = {
     fontWeight: 700 as const,
     color: '#F5F7FA',
     letterSpacing: -0.5,
+    // Prompt 40-Fix4: Slide estándar — ritmo informativo normal
+    slideDistance: 20,
+    slideFrames: 18,
   },
   /** Contexto y explicación (Prompt 39-Fix3: 66→54, mayor separación visual) */
   support: {
@@ -489,6 +492,9 @@ export const editorialText = {
     fontWeight: 500 as const,
     color: '#C9CED6',
     letterSpacing: 0,
+    // Prompt 40-Fix4: Más suave y lento — contexto, no impacto
+    slideDistance: 12,
+    slideFrames: 22,
   },
   /** Impacto, preguntas retóricas, remates */
   punch: {
@@ -496,14 +502,19 @@ export const editorialText = {
     fontWeight: 800 as const,
     color: '#4DA3FF',
     letterSpacing: -1,
+    // Prompt 40-Fix4: Rápido y dramático — entrada con energía
+    slideDistance: 30,
+    slideFrames: 12,
   },
-  /** Frames de pausa visual antes de un bloque punch (0.2s @ 30fps) */
-  pauseFramesBeforePunch: 6,
+  /** Frames de pausa visual antes de un bloque punch (Prompt 40-Fix4: 6→10 pausa dramática) */
+  pauseFramesBeforePunch: 10,
+  /** Frames de respiración después de un bloque punch (Prompt 40-Fix4) */
+  pauseFramesAfterPunch: 8,
   /** Frames de gap mínimo entre bloques */
   blockGap: 8,
-  /** Distancia de slide-up en px */
+  /** Distancia de slide-up en px (legacy, los per-weight tienen prioridad) */
   slideDistance: 20,
-  /** Duración del slide-up en frames */
+  /** Duración del slide-up en frames (legacy, los per-weight tienen prioridad) */
   slideFrames: 18,
 };
 

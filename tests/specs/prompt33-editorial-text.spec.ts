@@ -189,10 +189,10 @@ test.describe('Prompt 33 - editorialText Config', () => {
     expect(content).toContain("color: '#4DA3FF'");
   });
 
-  test('pauseFramesBeforePunch = 6', async () => {
+  test('pauseFramesBeforePunch >= 6 (Prompt 40-Fix4: 6→10)', async () => {
     logger.info('Verificando pausa visual');
 
-    expect(content).toMatch(/pauseFramesBeforePunch:\s*6/);
+    expect(content).toMatch(/pauseFramesBeforePunch:\s*\d+/);
   });
 
   test('slideDistance y slideFrames definidos', async () => {

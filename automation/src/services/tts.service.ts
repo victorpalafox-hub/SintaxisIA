@@ -149,7 +149,19 @@ export class TTSService {
       throw new Error('ELEVENLABS_API_KEY no configurada en .env');
     }
 
-    // 5. Intentar con ElevenLabs
+    // 5. Prompt 40-Fix4: Validar API key con ElevenLabs antes de generar
+    const validation = await this.validateElevenLabsKey();
+    if (!validation.valid) {
+      logger.error(`[TTS] ElevenLabs API key inválida: ${validation.reason}`);
+      if (this.options.enableFallback) {
+        logger.warn(`[TTS] Fallback activado → Edge-TTS (API key inválida)`);
+        const fallbackResponse = await this.generateWithFallback(text, textHash, outputFileName);
+        return this.addWhisperTimestamps(fallbackResponse);
+      }
+      throw new Error(`ElevenLabs API key inválida: ${validation.reason}`);
+    }
+
+    // 6. Intentar con ElevenLabs
     try {
       const response = await this.generateWithElevenLabs(
         text,
@@ -163,10 +175,27 @@ export class TTSService {
       const enhancedResponse = await this.addWhisperTimestamps(response);
       return enhancedResponse;
     } catch (error) {
-      logger.error(`[TTS] Error con ElevenLabs: ${error}`);
+      // Prompt 40-Fix4: Logging detallado para diagnosticar fallo ElevenLabs
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        const data = error.response?.data;
+        // Si es arraybuffer (responseType del POST), convertir a string
+        let errorBody: string;
+        if (Buffer.isBuffer(data)) {
+          errorBody = data.toString('utf-8');
+        } else if (data instanceof ArrayBuffer) {
+          errorBody = Buffer.from(new Uint8Array(data)).toString('utf-8');
+        } else {
+          errorBody = JSON.stringify(data);
+        }
+        logger.error(`[TTS] ElevenLabs HTTP ${status}: ${errorBody}`);
+        logger.error(`[TTS] URL: ${error.config?.url}`);
+      } else {
+        logger.error(`[TTS] Error con ElevenLabs: ${error}`);
+      }
 
       if (this.options.enableFallback) {
-        logger.info(`[TTS] Intentando con fallback (Edge-TTS)`);
+        logger.warn(`[TTS] Fallback activado → Edge-TTS`);
         const fallbackResponse = await this.generateWithFallback(text, textHash, outputFileName);
 
         // Prompt 19.7: Generar timestamps con Whisper para fallback también
@@ -310,6 +339,32 @@ export class TTSService {
   // ===========================================================================
   // METODOS PRIVADOS - GENERACION
   // ===========================================================================
+
+  /**
+   * Prompt 40-Fix4: Valida la API key de ElevenLabs antes de generar audio.
+   * Hace un GET a /v1/user/subscription para verificar credenciales y créditos.
+   */
+  private async validateElevenLabsKey(): Promise<{ valid: boolean; reason?: string; characterCount?: number; characterLimit?: number }> {
+    try {
+      const response = await axios.get(
+        `${TTS_CONFIG.elevenlabs.baseUrl}/user/subscription`,
+        {
+          headers: { 'xi-api-key': config.api.elevenLabsApiKey },
+          timeout: 10000,
+        }
+      );
+      const { character_count, character_limit } = response.data;
+      logger.info(`[TTS] ElevenLabs validado: ${character_count}/${character_limit} chars usados en API`);
+      return { valid: true, characterCount: character_count, characterLimit: character_limit };
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        const statusText = error.response?.statusText;
+        return { valid: false, reason: `HTTP ${status}: ${statusText}` };
+      }
+      return { valid: false, reason: String(error) };
+    }
+  }
 
   /**
    * Genera audio usando ElevenLabs API

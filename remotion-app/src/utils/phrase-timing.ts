@@ -432,12 +432,17 @@ export function getBlockTiming(
     )
   );
 
-  // Pausa visual antes de bloques "punch" (Prompt 33: puntuación visual)
-  // Importar pauseFramesBeforePunch desde themes se haría vía config,
-  // pero para evitar import circular usamos el valor directamente
-  const PAUSE_BEFORE_PUNCH = 6;
+  // Pausa visual antes de bloques "punch" (Prompt 33 + Prompt 40-Fix4: 6→10 pausa dramática)
+  const PAUSE_BEFORE_PUNCH = 10;
   if (block.weight === 'punch' && currentBlockIndex > 0) {
     blockStartFrame = Math.min(blockStartFrame + PAUSE_BEFORE_PUNCH, blockEndFrame - 1);
+  }
+
+  // Prompt 40-Fix4: Pausa después de punch — respiración para que el impacto se asiente
+  const PAUSE_AFTER_PUNCH = 8;
+  const prevBlock = currentBlockIndex > 0 ? blocks[currentBlockIndex - 1] : null;
+  if (prevBlock?.weight === 'punch' && block.weight !== 'punch') {
+    blockStartFrame = Math.min(blockStartFrame + PAUSE_AFTER_PUNCH, blockEndFrame - 1);
   }
 
   // Frame relativo y opacity

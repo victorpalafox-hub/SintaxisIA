@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 1453 tests (1451 passing, 2 skipped)
+**Test Status**: 1477 tests (1475 passing, 2 skipped)
 
-**Last Updated**: 2026-02-09 (Prompt 39-Fix3 - Jerarquía tipográfica fija: headline 72, support 54, punch 84, fuente única editorialText)
+**Last Updated**: 2026-02-09 (Prompt 40-Fix4 - Ritmo humano: slide/easing por peso, pausas dramáticas, fix ElevenLabs fallback silencioso)
 
 ## Prerequisites
 
@@ -67,7 +67,7 @@ npm run check
 | CI validation | `npm run ci:validate` |
 | News Manager | `npm run news:history / news:stats / news:help` |
 
-**Test suites**: 1453 tests en 56 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
+**Test suites**: 1477 tests en 57 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
 
 **Playwright config**: 4 workers local / 1 en CI, timeout 2min por test, retries solo en CI (2), reporters: HTML + JSON + JUnit.
 
@@ -164,7 +164,7 @@ if (isShortTimeout(timeout)) { /* manejar error */ }
 
 ```bash
 npm run check          # TypeScript sin errores
-npm test              # Tests pasando (1453 tests, 2 skipped)
+npm test              # Tests pasando (1477 tests, 2 skipped)
 npm run security:check # Sin vulnerabilidades críticas
 ```
 
@@ -479,7 +479,7 @@ output/
 | TopicSegmentation | `findTopicBoundaries()`, `findMarkerPositions()` | 18 marcadores ES, targets 33%/66%, min 8s, score ≥0.3 |
 | DynamicDuration | `calculateMetadata` en Root.tsx, `BREATHING_ROOM_FRAMES` | Composition dinámica via props, 1s breathing room antes de outro |
 | TitleCard | `TitleCardScene.tsx`, `title-derivation.ts`, `deriveTitleCardText()`, `deriveBadge()` | Overlay 3s (90 frames), fade-out 15f, badge contextual, hero image background, max 7 palabras |
-| EditorialText | `text-editorial.ts`, `editorialText` config, `getBlockTiming()` | Bloques 1-2 líneas, headline 72px/support 54px/punch 84px (Prompt 39-Fix3), gap ≤0.6s agrupa, pause 6f antes punch, min 18f |
+| EditorialText | `text-editorial.ts`, `editorialText` config, `getBlockTiming()` | Bloques 1-2 líneas, headline 72px/support 54px/punch 84px, slide por peso (20/12/30px), easing diferenciado, pause 10f antes + 8f después punch |
 | VisualEmphasis | `visual-emphasis.ts`, `visualEmphasis` config, `detectEmphasis()` | Max 3 momentos (1 hard + 2 soft), scale 1.08/1.03, dimming overlay, ramp 10f, min 4 bloques |
 
 ## Prompt History (Resumen)
@@ -549,6 +549,7 @@ output/
 | 37-Fix1 | Voz desde frame 0 (anti-silencio) | 6 | Narration from=0, music ducked siempre, sceneStartSecond=contentStart/fps |
 | 38-Fix2 | Regla dura imagenes (render) | 22 | SafeImage sin placeholder (hasError+null), ContentScene no reuse imagen previa |
 | 39-Fix3 | Jerarquía tipográfica fija | 18 | headline 78→72, support 66→54, punch 84, HeroScene/OutroScene via editorialText |
+| 40-Fix4 | Ritmo humano + Fix ElevenLabs | 24 | Slide/easing por peso (punch rápido, support suave), pausas dramáticas 10f/8f, validateElevenLabsKey, logging detallado axios |
 
 ## Pendientes
 

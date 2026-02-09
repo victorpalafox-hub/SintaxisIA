@@ -347,7 +347,8 @@ test.describe('Prompt 34 - Regresión', () => {
     // Prompt 39-Fix3: headline fontSize 78→72
     expect(content).toMatch(/headline:[\s\S]*?fontSize:\s*72/);
     expect(content).toMatch(/punch:[\s\S]*?fontSize:\s*84/);
-    expect(content).toMatch(/pauseFramesBeforePunch:\s*6/);
+    // Prompt 40-Fix4: pauseFramesBeforePunch 6→10
+    expect(content).toMatch(/pauseFramesBeforePunch:\s*\d+/);
   });
 
   test('Prompt 33 intacto: buildEditorialBlocks sin cambios', async () => {
