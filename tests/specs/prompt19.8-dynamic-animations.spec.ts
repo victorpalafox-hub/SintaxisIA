@@ -133,8 +133,8 @@ test.describe('Prompt 19.8 - Glow Pulse (Migrated to Editorial Shadows - Prompt 
 
     const content = fs.readFileSync(CONTENT_SCENE_PATH, 'utf-8');
 
-    // Debe usar editorialShadow.textDepth (estatico)
-    expect(content).toContain('textShadow: editorialShadow.textDepth');
+    // Debe usar editorialShadow.textDepth (condicional por peso desde Prompt 36)
+    expect(content).toContain('editorialShadow.textDepth');
 
     // NO debe contener textGlow (variable dinamica eliminada)
     expect(content).not.toContain('textGlow');

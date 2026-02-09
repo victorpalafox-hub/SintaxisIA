@@ -412,6 +412,18 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
                     objectFit: 'cover',
                   }}
                 />
+                {/* Prompt 36: Overlay editorial para integración visual */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    background: 'linear-gradient(to bottom, rgba(0,0,0,0.25), rgba(0,0,0,0.55))',
+                    borderRadius: imageAnimation.borderRadius,
+                  }}
+                />
               </div>
             )}
             {/* Imagen ACTUAL (fade-in durante crossfade) */}
@@ -439,6 +451,18 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
                     objectFit: 'cover',
                   }}
                 />
+                {/* Prompt 36: Overlay editorial para integración visual */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    background: 'linear-gradient(to bottom, rgba(0,0,0,0.25), rgba(0,0,0,0.55))',
+                    borderRadius: imageAnimation.borderRadius,
+                  }}
+                />
               </div>
             )}
           </div>
@@ -450,7 +474,8 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
             transform: `translateY(${blockTextY}px) scale(${emphasisScale})`,
             opacity: descriptionOpacity,
             textAlign: 'center',
-            textShadow: editorialShadow.textDepth,
+            // Prompt 36: Solo headline/punch tienen shadow, support sin shadow (body text limpio)
+            textShadow: currentBlock?.weight !== 'support' ? editorialShadow.textDepth : 'none',
             maxWidth: contextImage
               ? contentTextStyle.maxWidthWithImage
               : contentTextStyle.maxWidthWithoutImage,

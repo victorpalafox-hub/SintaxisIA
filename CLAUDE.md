@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 1356 tests (1354 passing, 2 skipped)
+**Test Status**: 1386 tests (1384 passing, 2 skipped)
 
-**Last Updated**: 2026-02-06 (Prompt 35 - Fix imágenes genéricas: gate textRelevance, penalty genérico, null fallback, sin UI Avatars)
+**Last Updated**: 2026-02-09 (Prompt 36 - Polish editorial premium: colores, sombras sutiles, glows eliminados, accent unificado #4DA3FF)
 
 ## Prerequisites
 
@@ -67,7 +67,7 @@ npm run check
 | CI validation | `npm run ci:validate` |
 | News Manager | `npm run news:history / news:stats / news:help` |
 
-**Test suites**: 1356 tests en 52 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
+**Test suites**: 1386 tests en 53 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
 
 **Playwright config**: 4 workers local / 1 en CI, timeout 2min por test, retries solo en CI (2), reporters: HTML + JSON + JUnit.
 
@@ -164,7 +164,7 @@ if (isShortTimeout(timeout)) { /* manejar error */ }
 
 ```bash
 npm run check          # TypeScript sin errores
-npm test              # Tests pasando (1209 tests, 2 skipped)
+npm test              # Tests pasando (1386 tests, 2 skipped)
 npm run security:check # Sin vulnerabilidades críticas
 ```
 
@@ -543,6 +543,7 @@ output/
 | 33 | Texto Editorial Humano | 46 | `text-editorial.ts`, `editorialText` config, bloques headline/support/punch, getBlockTiming, agrupación de frases |
 | 34 | Sistema de Énfasis Visual | 48 | `visual-emphasis.ts`, `visualEmphasis` config, detectEmphasis, scale/dimming/letterSpacing en momentos de impacto |
 | 35 | Fix Imágenes Genéricas | 53 | Gate textRelevance en `scoreCandidate()`, `GENERIC_PENALTY_PATTERNS`, pesos rebalanceados, null fallback (sin UI Avatars), `imageUrl: string \| null` |
+| 36 | Polish Editorial Premium | 30 | Colores premium (#F5F7FA/#C9CED6/#0B0D10), accent unificado #4DA3FF, glows=0, sombras sutiles, overlay editorial imágenes, shadow condicional |
 
 ## Pendientes
 

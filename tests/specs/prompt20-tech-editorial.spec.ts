@@ -94,11 +94,11 @@ test.describe('Prompt 20 - Tech Editorial Theme', () => {
     logger.info('[PASS] activeTheme = techEditorialTheme');
   });
 
-  test('debe usar paleta azul profesional (#4A9EFF)', () => {
+  test('debe usar paleta azul editorial premium (#4DA3FF)', () => {
     const content = readFile(THEMES_PATH);
-    // techEditorialTheme debe tener el azul como primary
-    expect(content).toMatch(/primary:\s*'#4A9EFF'/);
-    logger.info('[PASS] Paleta azul profesional configurada');
+    // techEditorialTheme debe tener el azul premium como primary (Prompt 36)
+    expect(content).toMatch(/primary:\s*'#4DA3FF'/);
+    logger.info('[PASS] Paleta azul editorial premium configurada');
   });
 
   test('debe tener theme.ts actualizado con colores editoriales', () => {
@@ -308,11 +308,11 @@ test.describe('Prompt 20 - Migración Escenas', () => {
 test.describe('Prompt 20 - Migración de Colores', () => {
   const logger = new TestLogger({ testName: 'Prompt20-Colors' });
 
-  test('SafeImage placeholder debe usar 4A9EFF', () => {
+  test('SafeImage placeholder debe usar 4DA3FF (Prompt 36)', () => {
     const content = readFile(SAFE_IMAGE_PATH);
-    expect(content).toContain('background=4A9EFF');
+    expect(content).toContain('background=4DA3FF');
     expect(content).not.toContain('background=00F0FF');
-    logger.info('[PASS] SafeImage placeholder actualizado');
+    logger.info('[PASS] SafeImage placeholder actualizado (Prompt 36)');
   });
 
   test('AINewsShort default hero URL debe usar 4A9EFF', () => {

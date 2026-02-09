@@ -52,41 +52,41 @@ test.describe('Prompt 19.10 - heroAnimation Config', () => {
     logger.info('heroAnimation config completa');
   });
 
-  test('contentAnimation.textGlowMax >= 15', async () => {
-    logger.info('Verificando textGlowMax intensificado');
+  test('contentAnimation.textGlowMax = 0 (Prompt 36: glows eliminados)', async () => {
+    logger.info('Verificando textGlowMax eliminado (Prompt 36 editorial premium)');
 
     const content = fs.readFileSync(THEMES_PATH, 'utf-8');
 
     const match = content.match(/textGlowMax:\s*(\d+)/);
     expect(match).toBeTruthy();
     const value = parseInt(match![1]);
-    expect(value).toBeGreaterThanOrEqual(15);
+    expect(value).toBe(0);
 
     logger.info(`textGlowMax: ${value}`);
   });
 
-  test('contentAnimation.imageGlowMax >= 12', async () => {
-    logger.info('Verificando imageGlowMax intensificado');
+  test('contentAnimation.imageGlowMax = 0 (Prompt 36: glows eliminados)', async () => {
+    logger.info('Verificando imageGlowMax eliminado (Prompt 36 editorial premium)');
 
     const content = fs.readFileSync(THEMES_PATH, 'utf-8');
 
     const match = content.match(/imageGlowMax:\s*(\d+)/);
     expect(match).toBeTruthy();
     const value = parseInt(match![1]);
-    expect(value).toBeGreaterThanOrEqual(12);
+    expect(value).toBe(0);
 
     logger.info(`imageGlowMax: ${value}`);
   });
 
-  test('outroAnimation.glowMax >= 60', async () => {
-    logger.info('Verificando outroAnimation.glowMax intensificado');
+  test('outroAnimation.glowMax = 0 (Prompt 36: glows eliminados)', async () => {
+    logger.info('Verificando outroAnimation.glowMax eliminado (Prompt 36 editorial premium)');
 
     const content = fs.readFileSync(THEMES_PATH, 'utf-8');
 
     const match = content.match(/glowMax:\s*(\d+)/);
     expect(match).toBeTruthy();
     const value = parseInt(match![1]);
-    expect(value).toBeGreaterThanOrEqual(60);
+    expect(value).toBe(0);
 
     logger.info(`outroAnimation.glowMax: ${value}`);
   });

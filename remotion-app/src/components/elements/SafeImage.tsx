@@ -219,7 +219,7 @@ function generatePlaceholder(
     `https://ui-avatars.com/api/?` +
     `name=${encodeURIComponent(initial)}` +
     `&size=${size}` +
-    `&background=4A9EFF` + // Azul editorial
+    `&background=4DA3FF` + // Azul editorial premium (Prompt 36)
     `&color=000000` + // Negro
     `&bold=true` +
     `&format=png`

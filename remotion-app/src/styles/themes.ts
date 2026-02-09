@@ -168,21 +168,22 @@ export const minimalistTheme: Theme = {
  * Sombras sutiles en lugar de glows neón, paleta fría azul-slate.
  *
  * Paleta:
- * - Azul (#4A9EFF): Color principal, profesional
+ * - Azul (#4DA3FF): Color principal editorial premium
  * - Slate (#64748B): Color secundario, neutro
- * - Sky (#38BDF8): Acento sutil
+ * - Azul (#4DA3FF): Accent unificado (1 accent por escena)
  *
  * @since Prompt 20
+ * @updated Prompt 36 - Polish editorial premium: colores, sombras, sin glows
  */
 export const techEditorialTheme: Theme = {
   name: 'Tech Editorial',
   colors: {
-    primary: '#4A9EFF',      // Azul profesional
+    primary: '#4DA3FF',      // Azul editorial premium (Prompt 36)
     secondary: '#64748B',    // Slate gray
-    accent: '#38BDF8',       // Sky blue sutil
+    accent: '#4DA3FF',       // Unificado con primary (Prompt 36: 1 accent por escena)
     background: {
-      dark: '#0F1419',       // Navy-charcoal profundo
-      darker: '#0A0D12',     // Casi negro con undertone azul
+      dark: '#0B0D10',       // Base editorial oscuro (Prompt 36)
+      darker: '#12151C',     // Elevado editorial (Prompt 36)
       gradient: {
         start: '#0C1220',    // Azul profundo saturado
         middle: '#141E30',   // Azul-navy real
@@ -190,14 +191,14 @@ export const techEditorialTheme: Theme = {
       },
     },
     text: {
-      primary: '#F0F6FC',    // Off-white (menos agresivo que #FFF)
-      secondary: '#8B949E',  // Gris profesional
-      muted: '#484F58',      // Gris sutil
+      primary: '#F5F7FA',    // Blanco premium editorial (Prompt 36)
+      secondary: '#C9CED6',  // Gris claro legible (Prompt 36)
+      muted: '#9AA1AC',      // Gris editorial medio (Prompt 36)
     },
     overlay: {
-      light: '#4A9EFF08',    // Azul 8%
-      medium: '#4A9EFF15',   // Azul 15%
-      strong: '#4A9EFF25',   // Azul 25%
+      light: '#4DA3FF08',    // Azul editorial 8% (Prompt 36)
+      medium: '#4DA3FF15',   // Azul editorial 15% (Prompt 36)
+      strong: '#4DA3FF25',   // Azul editorial 25% (Prompt 36)
     },
   },
   spacing: {
@@ -306,12 +307,12 @@ export const contentAnimation = {
   parallaxKeyframes: [0, -15, -8, -20] as readonly number[],
   /** Rango de zoom sutil [inicio, fin] */
   zoomRange: [1.0, 1.05] as readonly [number, number],
-  /** Intensidad máxima del glow de texto (px) - aumentado Prompt 19.10 */
-  textGlowMax: 15,
+  /** Intensidad máxima del glow de texto (px) - Prompt 36: eliminado (editorial, no gamer) */
+  textGlowMax: 0,
   /** Ciclo del glow de texto (frames, 4s @ 30fps) */
   textGlowCycle: 120,
-  /** Intensidad máxima del glow de imagen (px) - aumentado Prompt 19.10 */
-  imageGlowMax: 12,
+  /** Intensidad máxima del glow de imagen (px) - Prompt 36: eliminado */
+  imageGlowMax: 0,
   /** Ciclo del glow de imagen (frames, 6s @ 30fps) */
   imageGlowCycle: 180,
   /** Distancia de slide-up por frase (px) */
@@ -337,8 +338,8 @@ export const outroAnimation = {
   springDamping: 80,
   /** Stiffness del spring del logo */
   springStiffness: 150,
-  /** Intensidad máxima del glow del logo (px) - aumentado Prompt 19.10 */
-  glowMax: 60,
+  /** Intensidad máxima del glow del logo (px) - Prompt 36: eliminado */
+  glowMax: 0,
   /** Ciclo del glow pulsante (frames, 3s @ 30fps) */
   glowCycle: 90,
   /** Frames para fade-out al final de la escena */
@@ -368,12 +369,12 @@ export const heroAnimation = {
   springStiffness: 200,
   /** Mass del spring */
   springMass: 0.5,
-  /** Keyframes del glow [frames] - intensificados Prompt 19.10 */
+  /** Keyframes del glow [frames] - Prompt 36: mantenidos para estructura */
   glowKeyframes: [30, 60, 90, 120] as readonly number[],
-  /** Valores del glow [px] - intensificados Prompt 19.10 */
-  glowValues: [0, 30, 15, 22] as readonly number[],
-  /** Multiplicador de glow para imagen (boxShadow) */
-  imageGlowMultiplier: 2,
+  /** Valores del glow [px] - Prompt 36: eliminados (editorial premium) */
+  glowValues: [0, 0, 0, 0] as readonly number[],
+  /** Multiplicador de glow para imagen (boxShadow) - Prompt 36: eliminado */
+  imageGlowMultiplier: 0,
   /** Opacidad máxima del flash de impacto inicial (0-1, 0 = desactivado) @since Prompt 25 */
   flashMaxOpacity: 0.15,
   /** Frames de duración del flash de impacto (0.3s @ 30fps) @since Prompt 25 */
@@ -478,21 +479,21 @@ export const editorialText = {
   headline: {
     fontSize: 78,
     fontWeight: 700 as const,
-    color: '#FFFFFF',
+    color: '#F5F7FA',
     letterSpacing: -0.5,
   },
   /** Contexto y explicación */
   support: {
     fontSize: 66,
     fontWeight: 500 as const,
-    color: 'rgba(255,255,255,0.88)',
+    color: '#C9CED6',
     letterSpacing: 0,
   },
   /** Impacto, preguntas retóricas, remates */
   punch: {
     fontSize: 84,
     fontWeight: 800 as const,
-    color: '#38BDF8',
+    color: '#4DA3FF',
     letterSpacing: -1,
   },
   /** Frames de pausa visual antes de un bloque punch (0.2s @ 30fps) */
@@ -744,10 +745,10 @@ export const titleCard = {
  * @since Prompt 20
  */
 export const editorialShadow = {
-  /** Sombra de profundidad para texto principal */
-  textDepth: '0 2px 8px rgba(0,0,0,0.6), 0 1px 3px rgba(0,0,0,0.3)',
-  /** Sombra de elevación para imágenes */
-  imageElevation: '0 8px 32px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)',
+  /** Sombra de profundidad para texto headline/punch (Prompt 36: más sutil) */
+  textDepth: '0px 2px 8px rgba(0,0,0,0.45)',
+  /** Sombra de elevación para imágenes (Prompt 36: integración editorial) */
+  imageElevation: '0px 12px 40px rgba(0,0,0,0.35)',
   /** Sombra con tinte de marca para logo/branding */
   logoBrandTint: (color: string) => `0 4px 24px ${color}25, 0 8px 32px rgba(0,0,0,0.3)`,
   /** Sombra para barra de progreso */
