@@ -628,16 +628,54 @@ class VideoRenderingService {
       console.log(`   ℹ️  Using URL fallback for hero image: ${request.imagePath.substring(0, 50)}...`);
     }
 
-    // Prompt 19.7: Preparar audioSync si hay timestamps disponibles
+    // Prompt 37: Corregir audioDuration usando Whisper como source of truth
+    // Whisper transcribe el audio real y produce timestamps precisos.
+    // Si TTS reporta duración incorrecta (e.g., fallback bitrate), Whisper la corrige.
+    const whisperEndSeconds = request.phraseTimestamps && request.phraseTimestamps.length > 0
+      ? request.phraseTimestamps[request.phraseTimestamps.length - 1].endSeconds
+      : null;
+
+    // YouTube Shorts: máximo 60s total → Hero(8) + Content + Breathing(1) + Outro(5) = 14 + Content
+    // Content = max(37, audio+1), así que audio max = 60 - 14 - 1 = 45s
+    const MAX_SHORT_SECONDS = 60;
+    const STRUCTURE_OVERHEAD_SECONDS = 15; // Hero(8) + Breathing(1) + Outro(5) + fade(1)
+    const MAX_AUDIO_SECONDS = MAX_SHORT_SECONDS - STRUCTURE_OVERHEAD_SECONDS; // 45s
+
+    const uncappedAudioDuration = whisperEndSeconds && whisperEndSeconds > request.audioDuration
+      ? Math.ceil(whisperEndSeconds) + 1  // +1s de margen
+      : request.audioDuration;
+
+    const effectiveAudioDuration = Math.min(uncappedAudioDuration, MAX_AUDIO_SECONDS);
+
+    if (whisperEndSeconds && whisperEndSeconds > request.audioDuration * 1.5) {
+      console.log(`   ⚠️  audioDuration corregido: TTS reportó ${request.audioDuration.toFixed(1)}s, Whisper indica ${whisperEndSeconds.toFixed(1)}s`);
+    }
+    if (uncappedAudioDuration > MAX_AUDIO_SECONDS) {
+      console.log(`   ⚠️  audioDuration capped: ${uncappedAudioDuration}s → ${MAX_AUDIO_SECONDS}s (YouTube Shorts max ${MAX_SHORT_SECONDS}s)`);
+    }
+
+    // Prompt 19.7: Preparar audioSync con duración corregida
     const audioSync = request.phraseTimestamps && request.phraseTimestamps.length > 0
       ? {
           phraseTimestamps: request.phraseTimestamps,
-          audioDuration: request.audioDuration,
+          audioDuration: effectiveAudioDuration,
         }
       : undefined;
 
     if (audioSync) {
-      console.log(`   ✅ Audio sync enabled: ${request.phraseTimestamps!.length} phrase timestamps`);
+      console.log(`   ✅ Audio sync enabled: ${request.phraseTimestamps!.length} phrase timestamps, duration: ${effectiveAudioDuration}s`);
+    }
+
+    // Prompt 37: Recalcular dynamicScenes si audioDuration cambió
+    let adjustedDynamicScenes = request.dynamicScenes || [];
+    if (adjustedDynamicScenes.length > 0 && effectiveAudioDuration !== request.audioDuration) {
+      const segmentDuration = effectiveAudioDuration / adjustedDynamicScenes.length;
+      adjustedDynamicScenes = adjustedDynamicScenes.map((scene, i) => ({
+        ...scene,
+        startSecond: Math.round(i * segmentDuration),
+        endSecond: Math.round((i + 1) * segmentDuration),
+      }));
+      console.log(`   🔄 DynamicScenes recalculados: ${adjustedDynamicScenes.map(s => `${s.startSecond}-${s.endSecond}s`).join(', ')}`);
     }
 
     // Prompt 25: Log de validación de consistencia texto-audio
@@ -659,8 +697,8 @@ class VideoRenderingService {
       images: {
         hero: heroValue,
         context: contextValue,
-        // Prompt 19.1.7: Imágenes dinámicas por segmento
-        dynamicScenes: request.dynamicScenes || [],
+        // Prompt 19.1.7: Imágenes dinámicas por segmento (Prompt 37: ajustadas si audioDuration cambió)
+        dynamicScenes: adjustedDynamicScenes,
       },
       topics: request.topic ? [request.topic, request.company || ''].filter(Boolean) : [],
       hashtags: ['#IA', '#AI', '#Tech'],
@@ -680,9 +718,9 @@ class VideoRenderingService {
       // Prompt 19.7: Timestamps de sincronización (opcional)
       audioSync,
       config: {
-        // Prompt 30: Duración dinámica basada en audio real + breathing room
+        // Prompt 30/37: Duración dinámica basada en audio real + breathing room
         // Hero 8s + max(37s, audioDuration + 1s fade) + breathing 1s + Outro 5s
-        duration: Math.ceil(8 + Math.max(37, request.audioDuration + 1) + 1 + 5),
+        duration: Math.ceil(8 + Math.max(37, effectiveAudioDuration + 1) + 1 + 5),
         fps: VIDEO_CONFIG.specs.fps,
         enhancedEffects: true,
       },

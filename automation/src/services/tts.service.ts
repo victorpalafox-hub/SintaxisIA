@@ -593,9 +593,12 @@ export class TTSService {
       return parseFloat(stdout.trim());
     } catch {
       // Fallback: estimar por tamano de archivo
+      // Prompt 37: Edge-TTS genera audio a ~48kbps (no 128kbps)
+      // Usar estimación conservadora para evitar cortar audio
       const stats = fs.statSync(audioPath);
-      // MP3 128kbps ≈ 16KB/segundo
-      return stats.size / (16 * 1024);
+      const estimatedAt48kbps = stats.size / (6 * 1024);
+      console.log(`   ⚠️  ffprobe falló, estimando duración por tamaño: ~${estimatedAt48kbps.toFixed(1)}s (48kbps)`);
+      return estimatedAt48kbps;
     }
   }
 

@@ -160,8 +160,9 @@ test.describe('Prompt 30 - video-rendering.service Duration', () => {
     logger.info('Verificando breathing room en duration');
 
     // La fórmula debe incluir + 1 para breathing room
-    // Math.ceil(8 + Math.max(37, request.audioDuration + 1) + 1 + 5)
-    expect(content).toContain('request.audioDuration + 1) + 1 + 5');
+    // Prompt 37: Ahora usa effectiveAudioDuration (Whisper como source of truth)
+    // Math.ceil(8 + Math.max(37, effectiveAudioDuration + 1) + 1 + 5)
+    expect(content).toContain('effectiveAudioDuration + 1) + 1 + 5');
   });
 
   test('Comentario menciona breathing room', async () => {

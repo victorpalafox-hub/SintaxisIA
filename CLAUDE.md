@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 1386 tests (1384 passing, 2 skipped)
+**Test Status**: 1407 tests (1405 passing, 2 skipped)
 
-**Last Updated**: 2026-02-09 (Prompt 36 - Polish editorial premium: colores, sombras sutiles, glows eliminados, accent unificado #4DA3FF)
+**Last Updated**: 2026-02-09 (Prompt 37 - Fix audioDuration incorrecto: Whisper override, fallback 48kbps, dynamicScenes recalc, cap 60s YouTube Shorts)
 
 ## Prerequisites
 
@@ -67,7 +67,7 @@ npm run check
 | CI validation | `npm run ci:validate` |
 | News Manager | `npm run news:history / news:stats / news:help` |
 
-**Test suites**: 1386 tests en 53 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
+**Test suites**: 1407 tests en 54 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
 
 **Playwright config**: 4 workers local / 1 en CI, timeout 2min por test, retries solo en CI (2), reporters: HTML + JSON + JUnit.
 
@@ -457,7 +457,7 @@ output/
 | Gemini | `generateScript()` + Alex Torres Persona | 4/6 marcadores compliance |
 | ElevenLabs | `generateAudio()` + fallback Edge-TTS | 10k chars/mes |
 | YouTube | `uploadVideo()` + OAuth2 | 6 videos/día (quota 10k units) |
-| Video | Dinámico: Hero 8s + Content max(37s,audio+1s) + Breathing 1s + Outro 5s | 1080x1920, 30fps |
+| Video | Dinámico: Hero 8s + Content max(37s,audio+1s) + Breathing 1s + Outro 5s, cap 60s (YouTube Shorts) | 1080x1920, 30fps |
 | Output Manager | `saveAllOutputs()` + TikTok copy | slug max 50 chars |
 | Sequential Text | `splitIntoReadablePhrases()` + `getPhraseTiming()` | 60 chars/frase, fade 15 frames |
 | Whisper | `whisperService.transcribe()` + `groupIntoPhrases()` | Opcional (OPENAI_API_KEY), ~$0.006/min |
@@ -544,6 +544,7 @@ output/
 | 34 | Sistema de Énfasis Visual | 48 | `visual-emphasis.ts`, `visualEmphasis` config, detectEmphasis, scale/dimming/letterSpacing en momentos de impacto |
 | 35 | Fix Imágenes Genéricas | 53 | Gate textRelevance en `scoreCandidate()`, `GENERIC_PENALTY_PATTERNS`, pesos rebalanceados, null fallback (sin UI Avatars), `imageUrl: string \| null` |
 | 36 | Polish Editorial Premium | 30 | Colores premium (#F5F7FA/#C9CED6/#0B0D10), accent unificado #4DA3FF, glows=0, sombras sutiles, overlay editorial imágenes, shadow condicional |
+| 37 | Fix audioDuration incorrecto | 21 | Whisper override en `video-rendering.service.ts`, fallback 48kbps en `tts.service.ts`, dynamicScenes recalc, cap 60s YouTube Shorts |
 
 ## Pendientes
 
