@@ -344,7 +344,8 @@ test.describe('Prompt 34 - Regresión', () => {
     logger.info('Verificando editorialText');
     const content = fs.readFileSync(THEMES_PATH, 'utf-8');
     expect(content).toContain('export const editorialText');
-    expect(content).toMatch(/headline:[\s\S]*?fontSize:\s*78/);
+    // Prompt 39-Fix3: headline fontSize 78→72
+    expect(content).toMatch(/headline:[\s\S]*?fontSize:\s*72/);
     expect(content).toMatch(/punch:[\s\S]*?fontSize:\s*84/);
     expect(content).toMatch(/pauseFramesBeforePunch:\s*6/);
   });

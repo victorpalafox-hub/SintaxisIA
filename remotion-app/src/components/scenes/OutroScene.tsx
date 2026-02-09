@@ -32,7 +32,7 @@ import {
   useVideoConfig,
   Easing,
 } from 'remotion';
-import { colors, spacing, outroAnimation, sceneTransition, editorialShadow } from '../../styles/themes';
+import { colors, spacing, outroAnimation, sceneTransition, editorialShadow, editorialText } from '../../styles/themes';
 import type { OutroSceneProps } from '../../types/video.types';
 
 /**
@@ -151,7 +151,8 @@ export const OutroScene: React.FC<OutroSceneProps> = ({
             justifyContent: 'center',
             fontFamily: 'Inter, Arial Black, sans-serif',
             fontWeight: 900,
-            fontSize: 64,
+            // Prompt 39-Fix3: Usar nivel headline de editorialText
+            fontSize: editorialText.headline.fontSize,
             color: colors.background.darker,
             // Sombra editorial con tinte de marca (Prompt 20)
             boxShadow: editorialShadow.logoBrandTint(colors.primary),
@@ -167,7 +168,8 @@ export const OutroScene: React.FC<OutroSceneProps> = ({
             opacity: ctaOpacity,
             fontFamily: 'Inter, Arial Black, sans-serif',
             fontWeight: 800,
-            fontSize: 48,
+            // Prompt 39-Fix3: Usar nivel support de editorialText
+            fontSize: editorialText.support.fontSize,
             color: colors.text.primary,
             textAlign: 'center',
             letterSpacing: 1,

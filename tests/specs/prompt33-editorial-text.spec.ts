@@ -167,17 +167,17 @@ test.describe('Prompt 33 - editorialText Config', () => {
     expect(content).toContain('export const editorialText');
   });
 
-  test('headline config (fontSize 78, fontWeight 700)', async () => {
+  test('headline config (fontSize 72, fontWeight 700) (Prompt 39-Fix3: 78→72)', async () => {
     logger.info('Verificando headline');
 
-    expect(content).toMatch(/headline:[\s\S]*?fontSize:\s*78/);
+    expect(content).toMatch(/headline:[\s\S]*?fontSize:\s*72/);
     expect(content).toMatch(/headline:[\s\S]*?fontWeight:\s*700/);
   });
 
-  test('support config (fontSize 66, fontWeight 500)', async () => {
+  test('support config (fontSize 54, fontWeight 500) (Prompt 39-Fix3: 66→54)', async () => {
     logger.info('Verificando support');
 
-    expect(content).toMatch(/support:[\s\S]*?fontSize:\s*66/);
+    expect(content).toMatch(/support:[\s\S]*?fontSize:\s*54/);
     expect(content).toMatch(/support:[\s\S]*?fontWeight:\s*500/);
   });
 

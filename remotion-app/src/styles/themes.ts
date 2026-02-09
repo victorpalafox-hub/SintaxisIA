@@ -7,6 +7,7 @@
  *
  * Permite cambiar fácilmente entre estilos visuales.
  * Actualmente activo: Tech Editorial (Prompt 20)
+ * @updated Prompt 39-Fix3 - Jerarquía tipográfica fija (headline 72, support 54, punch 84)
  *
  * Para cambiar de tema:
  * 1. Cambiar la línea: export const activeTheme = themes.techEditorial;
@@ -475,16 +476,16 @@ export const contentTextStyle = {
  * @since Prompt 33
  */
 export const editorialText = {
-  /** Apertura y frases con peso informativo */
+  /** Apertura y frases con peso informativo (Prompt 39-Fix3: 78→72, alineado con HeroScene) */
   headline: {
-    fontSize: 78,
+    fontSize: 72,
     fontWeight: 700 as const,
     color: '#F5F7FA',
     letterSpacing: -0.5,
   },
-  /** Contexto y explicación */
+  /** Contexto y explicación (Prompt 39-Fix3: 66→54, mayor separación visual) */
   support: {
-    fontSize: 66,
+    fontSize: 54,
     fontWeight: 500 as const,
     color: '#C9CED6',
     letterSpacing: 0,

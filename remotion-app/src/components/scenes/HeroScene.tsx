@@ -30,7 +30,7 @@ import {
   useVideoConfig,
   Easing,
 } from 'remotion';
-import { colors, spacing, heroAnimation, sceneTransition, editorialShadow } from '../../styles/themes';
+import { colors, spacing, heroAnimation, sceneTransition, editorialShadow, editorialText } from '../../styles/themes';
 import { SafeImage } from '../elements/SafeImage';
 import type { HeroSceneProps } from '../../types/video.types';
 
@@ -214,8 +214,9 @@ export const HeroScene: React.FC<HeroSceneProps> = ({
             transform: `translateY(${titleY}px)`,
             opacity: titleOpacity,
             fontFamily: 'Inter, Roboto, Arial, sans-serif',
-            fontWeight: 800,
-            fontSize: 72,
+            // Prompt 39-Fix3: Usar nivel headline de editorialText (fuente única de verdad)
+            fontWeight: editorialText.headline.fontWeight,
+            fontSize: editorialText.headline.fontSize,
             color: colors.text.primary,
             textAlign: 'center',
             // Sombra editorial de profundidad (Prompt 20)
