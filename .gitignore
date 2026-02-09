@@ -84,6 +84,12 @@ remotion-app/public/data.json
 remotion-app/public/hero_*.jpg
 
 # ===================================
+# WINDOWS ARTIFACTS
+# ===================================
+nul
+automation/automation/
+
+# ===================================
 # CLAUDE CODE
 # ===================================
 .claude/*
