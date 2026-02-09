@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 1407 tests (1405 passing, 2 skipped)
+**Test Status**: 1413 tests (1411 passing, 2 skipped)
 
-**Last Updated**: 2026-02-09 (Prompt 37 - Fix audioDuration incorrecto: Whisper override, fallback 48kbps, dynamicScenes recalc, cap 60s YouTube Shorts)
+**Last Updated**: 2026-02-09 (Prompt 37-Fix1 - Voz desde frame 0: anti-silencio, hook inmediato, music ducked, sceneStartSecond offset)
 
 ## Prerequisites
 
@@ -67,7 +67,7 @@ npm run check
 | CI validation | `npm run ci:validate` |
 | News Manager | `npm run news:history / news:stats / news:help` |
 
-**Test suites**: 1407 tests en 54 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
+**Test suites**: 1413 tests en 54 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
 
 **Playwright config**: 4 workers local / 1 en CI, timeout 2min por test, retries solo en CI (2), reporters: HTML + JSON + JUnit.
 
@@ -471,7 +471,7 @@ output/
 | ImageScoring | `searchPexelsWithScoring()`, `scoreCandidate()` | 5 candidatos, gate textRelevance≥8, penalty genérico -20, umbral 35, null si no relevante |
 | News Manager CLI | `news-manager-cli.ts` (10 comandos: history/active/expired/search/view/unlock/cleanup/clear/stats/help) | Peer de cli.ts, ts-node directo para args |
 | NewsEnricher | `enrichAll()`, `detectCompany()`, `detectType()` | 81 aliases, 8 type patterns, PASO 2 real |
-| AudioSync | `Sequence(contentStart)`, `phraseTimestamps` pipeline | Audio retrasado a ContentScene, offset 0, lead 200ms, lag 150ms, max 3 img |
+| AudioSync | `Sequence(0)`, `phraseTimestamps` pipeline | Voz desde frame 0 (Prompt 37-Fix1), ContentScene offset contentStart/fps, lead 200ms, lag 150ms, max 3 img |
 | HeroFlash | `flashMaxOpacity`, `flashDurationFrames` | 0.15 opacity, 10 frames (~0.3s) |
 | MusicBed | `musicBed` config + `<Audio>` loop desde frame 0 | hero 22%, content 8%, fadeOut 60 frames |
 | ImageEditorial | `imageAnimation` width/height/borderRadius | 920x520, borderRadius 24, crossfade real |
@@ -545,6 +545,7 @@ output/
 | 35 | Fix Imágenes Genéricas | 53 | Gate textRelevance en `scoreCandidate()`, `GENERIC_PENALTY_PATTERNS`, pesos rebalanceados, null fallback (sin UI Avatars), `imageUrl: string \| null` |
 | 36 | Polish Editorial Premium | 30 | Colores premium (#F5F7FA/#C9CED6/#0B0D10), accent unificado #4DA3FF, glows=0, sombras sutiles, overlay editorial imágenes, shadow condicional |
 | 37 | Fix audioDuration incorrecto | 21 | Whisper override en `video-rendering.service.ts`, fallback 48kbps en `tts.service.ts`, dynamicScenes recalc, cap 60s YouTube Shorts |
+| 37-Fix1 | Voz desde frame 0 (anti-silencio) | 6 | Narration from=0, music ducked siempre, sceneStartSecond=contentStart/fps |
 
 ## Pendientes
 
