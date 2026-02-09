@@ -308,11 +308,12 @@ test.describe('Prompt 20 - Migración Escenas', () => {
 test.describe('Prompt 20 - Migración de Colores', () => {
   const logger = new TestLogger({ testName: 'Prompt20-Colors' });
 
-  test('SafeImage placeholder debe usar 4DA3FF (Prompt 36)', () => {
+  test('SafeImage sin placeholder generico (Prompt 38-Fix2)', () => {
     const content = readFile(SAFE_IMAGE_PATH);
-    expect(content).toContain('background=4DA3FF');
-    expect(content).not.toContain('background=00F0FF');
-    logger.info('[PASS] SafeImage placeholder actualizado (Prompt 36)');
+    // Prompt 38-Fix2: Placeholder eliminado, ahora retorna null en error
+    expect(content).not.toContain('ui-avatars.com');
+    expect(content).toContain('hasError');
+    logger.info('[PASS] SafeImage sin placeholder (Prompt 38-Fix2)');
   });
 
   test('AINewsShort default hero URL debe usar 4A9EFF', () => {

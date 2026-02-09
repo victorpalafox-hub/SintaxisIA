@@ -266,14 +266,16 @@ test.describe('Prompt 36 - SafeImage placeholder actualizado', () => {
     content = fs.readFileSync(SAFE_IMAGE_PATH, 'utf-8');
   });
 
-  test('placeholder usa #4DA3FF (nuevo accent)', async () => {
-    logger.info('Verificando placeholder color');
-    expect(content).toContain('background=4DA3FF');
+  test('Sin placeholder generico (Prompt 38-Fix2)', async () => {
+    logger.info('Verificando placeholder eliminado');
+    // Prompt 38-Fix2: Placeholder eliminado completamente
+    expect(content).not.toContain('ui-avatars.com');
+    expect(content).not.toContain('generatePlaceholder');
   });
 
-  test('placeholder NO usa #4A9EFF (viejo accent)', async () => {
-    logger.info('Verificando viejo accent eliminado');
-    expect(content).not.toContain('background=4A9EFF');
+  test('Error handling con hasError y return null', async () => {
+    logger.info('Verificando error handling');
+    expect(content).toContain('hasError');
   });
 });
 

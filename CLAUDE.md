@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 1413 tests (1411 passing, 2 skipped)
+**Test Status**: 1435 tests (1433 passing, 2 skipped)
 
-**Last Updated**: 2026-02-09 (Prompt 37-Fix1 - Voz desde frame 0: anti-silencio, hook inmediato, music ducked, sceneStartSecond offset)
+**Last Updated**: 2026-02-09 (Prompt 38-Fix2 - Regla dura imagenes render: no placeholder, no reuse, null=no imagen)
 
 ## Prerequisites
 
@@ -164,7 +164,7 @@ if (isShortTimeout(timeout)) { /* manejar error */ }
 
 ```bash
 npm run check          # TypeScript sin errores
-npm test              # Tests pasando (1386 tests, 2 skipped)
+npm test              # Tests pasando (1435 tests, 2 skipped)
 npm run security:check # Sin vulnerabilidades críticas
 ```
 
@@ -469,6 +469,7 @@ output/
 | Anti-Duplicación | `PublishedNewsTracker` + `selectTopNewsExcluding()` | 3 capas: ID, titulo 80%, empresa+producto 7d |
 | SmartQuery | `translateKeywords()`, `generateQueries()` | 170+ ES→EN, max 3 kw/query, 2 alternativas |
 | ImageScoring | `searchPexelsWithScoring()`, `scoreCandidate()` | 5 candidatos, gate textRelevance≥8, penalty genérico -20, umbral 35, null si no relevante |
+| SafeImage | `SafeImage.tsx`, `hasError`, `return null` | Sin placeholder (Prompt 38-Fix2), error=null, no UI Avatars, fallbackSrc opcional |
 | News Manager CLI | `news-manager-cli.ts` (10 comandos: history/active/expired/search/view/unlock/cleanup/clear/stats/help) | Peer de cli.ts, ts-node directo para args |
 | NewsEnricher | `enrichAll()`, `detectCompany()`, `detectType()` | 81 aliases, 8 type patterns, PASO 2 real |
 | AudioSync | `Sequence(0)`, `phraseTimestamps` pipeline | Voz desde frame 0 (Prompt 37-Fix1), ContentScene offset contentStart/fps, lead 200ms, lag 150ms, max 3 img |
@@ -546,6 +547,7 @@ output/
 | 36 | Polish Editorial Premium | 30 | Colores premium (#F5F7FA/#C9CED6/#0B0D10), accent unificado #4DA3FF, glows=0, sombras sutiles, overlay editorial imágenes, shadow condicional |
 | 37 | Fix audioDuration incorrecto | 21 | Whisper override en `video-rendering.service.ts`, fallback 48kbps en `tts.service.ts`, dynamicScenes recalc, cap 60s YouTube Shorts |
 | 37-Fix1 | Voz desde frame 0 (anti-silencio) | 6 | Narration from=0, music ducked siempre, sceneStartSecond=contentStart/fps |
+| 38-Fix2 | Regla dura imagenes (render) | 22 | SafeImage sin placeholder (hasError+null), ContentScene no reuse imagen previa |
 
 ## Pendientes
 

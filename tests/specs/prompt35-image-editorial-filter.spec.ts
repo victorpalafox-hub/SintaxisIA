@@ -399,9 +399,11 @@ test.describe('Prompt 35 - ContentScene Null Handling', () => {
     expect(content).toContain('previousScene?.imageUrl ?? undefined');
   });
 
-  test('contextImage sigue siendo condicional (ya manejaba undefined)', async () => {
-    logger.info('Verificando rendering condicional intacto');
-    expect(content).toContain('contextImage || previousImage');
+  test('contextImage es unica condicion de render (Prompt 38-Fix2: no reuse)', async () => {
+    logger.info('Verificando rendering condicional sin reuse');
+    // Prompt 38-Fix2: No reutilizar imagen previa — solo contextImage
+    expect(content).toContain('{contextImage && (');
+    expect(content).not.toMatch(/\(contextImage\s*\|\|\s*previousImage\)/);
   });
 
   test('@updated Prompt 35 documentado', async () => {

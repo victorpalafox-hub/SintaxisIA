@@ -27,6 +27,7 @@
  * @updated Prompt 33 - Texto editorial con jerarquía (headline/support/punch), bloques agrupados
  * @updated Prompt 34 - Énfasis visual: scale, dimming, letterSpacing en momentos de impacto
  * @updated Prompt 35 - Handle imageUrl null (sin imagen genérica, null → undefined)
+ * @updated Prompt 38-Fix2 - Regla dura: no reutilizar imagen previa, null = no imagen
  */
 
 import React, { useMemo } from 'react';
@@ -378,7 +379,9 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
         }}
       >
         {/* IMAGEN CONTEXT - Prompt 28: Editorial grande (920x520) + crossfade real */}
-        {(contextImage || previousImage) && (
+        {/* Prompt 38-Fix2: Solo renderizar si hay imagen actual.
+            Nunca reutilizar imagen previa como fallback — null = no imagen. */}
+        {contextImage && (
           <div
             style={{
               position: 'relative',

@@ -109,8 +109,8 @@ test.describe('PROMPT 13.1: SafeImage Component', () => {
       });
     });
 
-    test('should have generatePlaceholder function', async () => {
-      await logger.info('Validando funcion generatePlaceholder');
+    test('should have error handling without placeholder (Prompt 38-Fix2)', async () => {
+      await logger.info('Validando error handling sin placeholder');
 
       const safeImagePath = path.join(
         REMOTION_SRC,
@@ -121,16 +121,17 @@ test.describe('PROMPT 13.1: SafeImage Component', () => {
 
       const content = fs.readFileSync(safeImagePath, 'utf-8');
 
-      const hasGeneratePlaceholder = content.includes('generatePlaceholder');
-      const hasUiAvatars = content.includes('ui-avatars.com');
+      // Prompt 38-Fix2: generatePlaceholder eliminado, ahora usa hasError + return null
+      const hasErrorHandling = content.includes('hasError');
+      const hasNoUiAvatars = !content.includes('ui-avatars.com');
 
-      expect(hasGeneratePlaceholder).toBeTruthy();
-      expect(hasUiAvatars).toBeTruthy();
+      expect(hasErrorHandling).toBeTruthy();
+      expect(hasNoUiAvatars).toBeTruthy();
 
       await logger.logValidationResults({
-        validator: 'PlaceholderGeneration',
-        passed: hasGeneratePlaceholder && hasUiAvatars,
-        details: { hasGeneratePlaceholder, hasUiAvatars },
+        validator: 'ErrorHandlingNoPlaceholder',
+        passed: hasErrorHandling && hasNoUiAvatars,
+        details: { hasErrorHandling, hasNoUiAvatars },
       });
     });
   });

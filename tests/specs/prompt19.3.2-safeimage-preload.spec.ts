@@ -222,21 +222,20 @@ test.describe('Prompt 19.3.2 - Timeout de Seguridad', () => {
 
 test.describe('Prompt 19.3.2 - Regresión', () => {
 
-  test('generatePlaceholder debe existir sin cambios', async () => {
-    logger.logTestStart('generatePlaceholder sin cambios');
+  test('SafeImage error handling sin placeholder (Prompt 38-Fix2)', async () => {
+    logger.logTestStart('SafeImage error handling');
     const content = fs.readFileSync(SAFE_IMAGE_PATH, 'utf-8');
 
-    // Debe mantener la función generatePlaceholder
-    const hasGeneratePlaceholder = content.includes('function generatePlaceholder');
-    const hasUiAvatars = content.includes('ui-avatars.com');
-    const hasClearbit = content.includes('clearbit.com');
-    const hasLogoDev = content.includes('logo.dev');
+    // Prompt 38-Fix2: generatePlaceholder eliminado
+    // Ahora usa hasError + return null en lugar de UI Avatars
+    const hasErrorState = content.includes('hasError');
+    const hasReturnNull = content.includes('return null');
+    const hasContinueRender = content.includes('continueRender');
 
-    expect(hasGeneratePlaceholder).toBeTruthy();
-    expect(hasUiAvatars).toBeTruthy();
-    expect(hasClearbit).toBeTruthy();
-    expect(hasLogoDev).toBeTruthy();
-    logger.logTestEnd('generatePlaceholder sin cambios', 'passed', 0);
+    expect(hasErrorState).toBeTruthy();
+    expect(hasReturnNull).toBeTruthy();
+    expect(hasContinueRender).toBeTruthy();
+    logger.logTestEnd('SafeImage error handling', 'passed', 0);
   });
 
   test('Props interface debe mantenerse', async () => {

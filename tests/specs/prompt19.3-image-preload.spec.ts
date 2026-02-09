@@ -159,11 +159,12 @@ test.describe('Prompt 19.3 - SafeImage Preload', () => {
     expect(content).toMatch(/import\s*{[^}]*Img[^}]*}\s*from\s*['"]remotion['"]/);
   });
 
-  test('SafeImage tiene fallback a UI Avatars', async () => {
+  test('SafeImage retorna null en error sin fallback (Prompt 38-Fix2)', async () => {
     const filePath = path.join(ELEMENTS_PATH, 'SafeImage.tsx');
     const content = fs.readFileSync(filePath, 'utf-8');
 
-    expect(content).toContain('ui-avatars.com');
+    // Prompt 38-Fix2: UI Avatars eliminado, ahora retorna null en error
+    expect(content).toContain('hasError && !fallbackSrc');
   });
 
   test('SafeImage tiene error handling', async () => {
@@ -174,11 +175,12 @@ test.describe('Prompt 19.3 - SafeImage Preload', () => {
     expect(content).toContain('.onerror');
   });
 
-  test('SafeImage genera placeholder dinámico', async () => {
+  test('SafeImage tiene estado hasError (Prompt 38-Fix2)', async () => {
     const filePath = path.join(ELEMENTS_PATH, 'SafeImage.tsx');
     const content = fs.readFileSync(filePath, 'utf-8');
 
-    expect(content).toContain('generatePlaceholder');
+    // Prompt 38-Fix2: generatePlaceholder eliminado, usa hasError
+    expect(content).toContain('setHasError');
   });
 
 });
