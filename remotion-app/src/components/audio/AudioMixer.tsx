@@ -58,8 +58,10 @@ export const AudioMixer: React.FC<AudioMixerProps> = ({
   // Volumen base de voz (protagonista)
   const voiceVolume = voice.volume ?? audioConfig.voiceVolume;
 
-  // Prompt 32.1: Fade-out de voz en últimos 30 frames (1s) para transición suave a outro
-  const VOICE_FADEOUT_FRAMES = 30;
+  // Prompt 41: 30→45 frames (1.5s) para decay natural de la voz
+  // La Narration Sequence ahora termina en outroStart, así que este fade
+  // ocurre durante los últimos 1.5s de contenido (antes del branding)
+  const VOICE_FADEOUT_FRAMES = 45;
 
   /**
    * Calcula el volumen de la música con ducking y fades

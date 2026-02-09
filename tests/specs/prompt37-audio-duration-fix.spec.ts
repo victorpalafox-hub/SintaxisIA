@@ -230,11 +230,14 @@ test.describe('Prompt 37 - Regresión', () => {
     expect(content).toMatch(/crossfadeFrames:\s*30/);
   });
 
-  test('Breathing room 30 frames sin cambio', async () => {
+  // Prompt 41: BREATHING_ROOM_FRAMES 30→45
+  test('Breathing room >= 30 frames sin regresión', async () => {
     logger.info('Verificando breathing room');
 
     const content = fs.readFileSync(AINEWS_PATH, 'utf-8');
-    expect(content).toContain('BREATHING_ROOM_FRAMES = 30');
+    const match = content.match(/BREATHING_ROOM_FRAMES\s*=\s*(\d+)/);
+    expect(match).not.toBeNull();
+    expect(Number(match![1])).toBeGreaterThanOrEqual(30);
   });
 
   test('AudioMixer sin cambio', async () => {
@@ -269,13 +272,15 @@ test.describe('Prompt 37-Fix1 - Voz desde frame 0 (anti-silencio)', () => {
     logger.info('Verificando Narration from={0}');
 
     // Debe usar from={0} para voz inmediata
-    expect(content).toMatch(/Sequence\s+from=\{0\}\s+durationInFrames=\{durationInFrames\}\s+name="Narration"/);
+    // Prompt 41: duration cambió de durationInFrames a outroStart
+    expect(content).toMatch(/Sequence\s+from=\{0\}\s+durationInFrames=\{outroStart\}\s+name="Narration"/);
   });
 
-  test('Narration Sequence cubre todo el video (durationInFrames)', async () => {
-    logger.info('Verificando Narration durationInFrames');
+  // Prompt 41: Narration ahora termina en outroStart (no durationInFrames)
+  test('Narration Sequence termina en outroStart (Prompt 41)', async () => {
+    logger.info('Verificando Narration outroStart');
 
-    expect(content).toMatch(/durationInFrames=\{durationInFrames\}[\s\S]*?name="Narration"/);
+    expect(content).toMatch(/durationInFrames=\{outroStart\}[\s\S]*?name="Narration"/);
   });
 
   test('Music bed NO usa heroVolume en callback (siempre ducked)', async () => {

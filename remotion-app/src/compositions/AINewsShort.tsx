@@ -23,6 +23,7 @@
  * @updated Prompt 27 - Audio bed desde frame 0, music separado de AudioMixer
  * @updated Prompt 30 - Breathing room (1s) entre narración y outro, duración dinámica via calculateMetadata
  * @updated Prompt 32 - Title Card overlay (0.5s) como thumbnail topic-aware
+ * @updated Prompt 41 - Cierre editorial: breathing room 1.5s, narración termina antes de outro
  */
 
 import React from 'react';
@@ -151,7 +152,8 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
 
   // Prompt 30: Buffer de respiración entre narración y outro
   // Pausa natural de 1s para que el CTA no atropelle la voz
-  const BREATHING_ROOM_FRAMES = 30; // 1s @ 30fps
+  // Prompt 41: 30→45 frames (1.5s) para que la última palabra "respire" antes del branding
+  const BREATHING_ROOM_FRAMES = 45; // 1.5s @ 30fps
 
   // Puntos de inicio con overlap de crossfade (Prompt 19.11)
   // Cada escena downstream empieza crossfadeFrames antes que la anterior termine
@@ -290,13 +292,15 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
       )}
 
       {/* ==========================================
-          VOICE NARRATION - Voz TTS (Prompt 37-Fix1)
+          VOICE NARRATION - Voz TTS (Prompt 37-Fix1, Prompt 41)
           ==========================================
           Voz desde frame 0 para hook inmediato (anti-silencio).
-          El espectador oye el narrador desde el primer segundo.
-          ContentScene usa sceneStartSecond para sincronizar texto.
+          Prompt 41: Termina en outroStart para que la voz no se solape con el branding.
+          AudioMixer aplica fade-out de 1.5s al final de esta Sequence.
       */}
-      <Sequence from={0} durationInFrames={durationInFrames} name="Narration">
+      {/* Prompt 41: Narration termina en outroStart (NO en durationInFrames)
+          Así el fade-out de AudioMixer ocurre ANTES del outro, no durante */}
+      <Sequence from={0} durationInFrames={outroStart} name="Narration">
         <AudioMixer
           voice={audio.voice}
         />

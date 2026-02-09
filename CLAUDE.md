@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 1477 tests (1475 passing, 2 skipped)
+**Test Status**: 1498 tests (1496 passing, 2 skipped)
 
-**Last Updated**: 2026-02-09 (Prompt 40-Fix4 - Ritmo humano: slide/easing por peso, pausas dramáticas, fix ElevenLabs fallback silencioso)
+**Last Updated**: 2026-02-09 (Prompt 41 - Cierre editorial real: voz termina antes de outro, breathing room 1.5s, CTA delay 1.5s)
 
 ## Prerequisites
 
@@ -67,7 +67,7 @@ npm run check
 | CI validation | `npm run ci:validate` |
 | News Manager | `npm run news:history / news:stats / news:help` |
 
-**Test suites**: 1477 tests en 57 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
+**Test suites**: 1498 tests en 58 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
 
 **Playwright config**: 4 workers local / 1 en CI, timeout 2min por test, retries solo en CI (2), reporters: HTML + JSON + JUnit.
 
@@ -164,7 +164,7 @@ if (isShortTimeout(timeout)) { /* manejar error */ }
 
 ```bash
 npm run check          # TypeScript sin errores
-npm test              # Tests pasando (1477 tests, 2 skipped)
+npm test              # Tests pasando (1498 tests, 2 skipped)
 npm run security:check # Sin vulnerabilidades críticas
 ```
 
@@ -481,6 +481,7 @@ output/
 | TitleCard | `TitleCardScene.tsx`, `title-derivation.ts`, `deriveTitleCardText()`, `deriveBadge()` | Overlay 3s (90 frames), fade-out 15f, badge contextual, hero image background, max 7 palabras |
 | EditorialText | `text-editorial.ts`, `editorialText` config, `getBlockTiming()` | Bloques 1-2 líneas, headline 72px/support 54px/punch 84px, slide por peso (20/12/30px), easing diferenciado, pause 10f antes + 8f después punch |
 | VisualEmphasis | `visual-emphasis.ts`, `visualEmphasis` config, `detectEmphasis()` | Max 3 momentos (1 hard + 2 soft), scale 1.08/1.03, dimming overlay, ramp 10f, min 4 bloques |
+| EditorialClosing | `AINewsShort.tsx` Narration→outroStart, `AudioMixer.tsx` fade 45f, `themes.ts` ctaDelay 45f | Voz termina antes de outro, breathing 1.5s, CTA delay 1.5s, voice fade 1.5s |
 
 ## Prompt History (Resumen)
 
@@ -550,6 +551,7 @@ output/
 | 38-Fix2 | Regla dura imagenes (render) | 22 | SafeImage sin placeholder (hasError+null), ContentScene no reuse imagen previa |
 | 39-Fix3 | Jerarquía tipográfica fija | 18 | headline 78→72, support 66→54, punch 84, HeroScene/OutroScene via editorialText |
 | 40-Fix4 | Ritmo humano + Fix ElevenLabs | 24 | Slide/easing por peso (punch rápido, support suave), pausas dramáticas 10f/8f, validateElevenLabsKey, logging detallado axios |
+| 41 | Cierre editorial real | 21 | Narración termina en outroStart (no durationInFrames), breathing room 30→45f, CTA delay 20→45f, voice fade 30→45f |
 
 ## Pendientes
 

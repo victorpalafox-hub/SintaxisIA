@@ -109,10 +109,13 @@ test.describe('Prompt 30 - AINewsShort Breathing Room', () => {
     content = fs.readFileSync(AINEWS_PATH, 'utf-8');
   });
 
-  test('BREATHING_ROOM_FRAMES = 30 (1s @ 30fps)', async () => {
+  // Prompt 41: BREATHING_ROOM_FRAMES 30→45
+  test('BREATHING_ROOM_FRAMES >= 30 (mínimo 1s @ 30fps)', async () => {
     logger.info('Verificando constante BREATHING_ROOM_FRAMES');
 
-    expect(content).toMatch(/BREATHING_ROOM_FRAMES\s*=\s*30/);
+    const match = content.match(/BREATHING_ROOM_FRAMES\s*=\s*(\d+)/);
+    expect(match).not.toBeNull();
+    expect(Number(match![1])).toBeGreaterThanOrEqual(30);
   });
 
   test('outroStart incluye BREATHING_ROOM_FRAMES', async () => {

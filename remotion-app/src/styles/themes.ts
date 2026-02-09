@@ -345,8 +345,8 @@ export const outroAnimation = {
   glowCycle: 90,
   /** Frames para fade-out al final de la escena */
   fadeOutFrames: 30,
-  /** Frame donde empieza el CTA */
-  ctaDelayFrames: 20,
+  /** Frame donde empieza el CTA (Prompt 41: 20→45 = 1.5s, logo se establece antes del CTA) */
+  ctaDelayFrames: 45,
   /** Duración del fade-in del CTA (frames) */
   ctaFadeDuration: 30,
 };

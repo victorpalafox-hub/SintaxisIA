@@ -196,11 +196,12 @@ test.describe('Prompt 38-Fix2 - Regresion', () => {
     expect(content).toContain('voice={audio.voice}');
   });
 
-  test('Narration desde frame 0 sin cambio (Prompt 37-Fix1)', async () => {
+  // Prompt 41: Narration duration cambió de durationInFrames a outroStart
+  test('Narration desde frame 0, termina en outroStart (Prompt 37-Fix1 + Prompt 41)', async () => {
     logger.info('Verificando Narration');
 
     const content = fs.readFileSync(AINEWS_PATH, 'utf-8');
-    expect(content).toMatch(/Sequence\s+from=\{0\}\s+durationInFrames=\{durationInFrames\}\s+name="Narration"/);
+    expect(content).toMatch(/Sequence\s+from=\{0\}\s+durationInFrames=\{outroStart\}\s+name="Narration"/);
   });
 
   test('imageAnimation config sin cambio', async () => {
