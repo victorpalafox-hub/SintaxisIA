@@ -226,11 +226,14 @@ test.describe('Prompt 19.2.7 - Regresión Texto Secuencial', () => {
     logger.logTestEnd('Mantiene currentOpacity', 'passed', 0);
   });
 
-  test('Mantiene fallback a description', async () => {
-    logger.logTestStart('Mantiene fallback a description');
+  // Prompt 42: Fallback `|| description` eliminado — fuente única de texto
+  test('NO tiene fallback a description cruda (Prompt 42)', async () => {
+    logger.logTestStart('NO tiene fallback a description');
     const content = fs.readFileSync(CONTENT_SCENE_PATH, 'utf-8');
-    expect(content).toContain('|| description');
-    logger.logTestEnd('Mantiene fallback a description', 'passed', 0);
+    // Prompt 42: Solo bloques editoriales renderizan texto
+    expect(content).not.toMatch(/\)\)\s*\|\|\s*description/);
+    expect(content).toContain('currentBlock?.lines.map');
+    logger.logTestEnd('NO tiene fallback a description', 'passed', 0);
   });
 
 });

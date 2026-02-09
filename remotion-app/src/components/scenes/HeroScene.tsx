@@ -19,6 +19,7 @@
  * @updated Prompt 20 - Migración a Tech Editorial: sombras sutiles, fondo transparente
  * @updated Prompt 25 - Flash de impacto inicial para retención
  * @updated Prompt 27 - Micro zoom-in escena (0.96→1.0) para retención
+ * @updated Prompt 42 - Exclusividad de texto: título invisible durante TitleCard, fade-out antes de crossfade
  */
 
 import React from 'react';
@@ -30,7 +31,7 @@ import {
   useVideoConfig,
   Easing,
 } from 'remotion';
-import { colors, spacing, heroAnimation, sceneTransition, editorialShadow, editorialText } from '../../styles/themes';
+import { colors, spacing, heroAnimation, sceneTransition, editorialShadow, editorialText, titleCard } from '../../styles/themes';
 import { SafeImage } from '../elements/SafeImage';
 import type { HeroSceneProps } from '../../types/video.types';
 
@@ -121,6 +122,34 @@ export const HeroScene: React.FC<HeroSceneProps> = ({
   const titleOpacity = interpolate(animation, [0, 1], [0, 1]);
 
   // ==========================================
+  // EXCLUSIVIDAD DE TEXTO POR FRAME (Prompt 42)
+  // ==========================================
+
+  // Prompt 42: El título de HeroScene NO se muestra mientras TitleCard es visible.
+  // TitleCard tiene su propio título (truncado + badge), mostrar ambos es redundante.
+  // El título de Hero aparece gradualmente después de que TitleCard hace fade-out.
+  const titleCardEnd = titleCard.durationFrames; // 90
+  const titleCardFadeStart = titleCardEnd - titleCard.fadeOutFrames; // 75
+  const titleDelayedIn = interpolate(
+    frame,
+    [titleCardFadeStart, titleCardEnd + 15], // Fade in suave de frame 75 a 105
+    [0, 1],
+    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+  );
+
+  // Prompt 42: Título sale antes de que ContentScene entre.
+  // Evita empalme visual entre título Hero y primer bloque editorial.
+  // 15 frames de anticipación aseguran que el título ya es invisible
+  // cuando ContentScene empieza su crossfade-in.
+  const titleEarlyOut = interpolate(
+    frame,
+    [durationInFrames - sceneTransition.crossfadeFrames - 15,
+     durationInFrames - sceneTransition.crossfadeFrames], // [195, 210]
+    [1, 0],
+    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+  );
+
+  // ==========================================
   // FLASH DE IMPACTO INICIAL (Prompt 25)
   // ==========================================
 
@@ -208,11 +237,13 @@ export const HeroScene: React.FC<HeroSceneProps> = ({
           />
         </div>
 
-        {/* TITULO PRINCIPAL */}
+        {/* TITULO PRINCIPAL — Prompt 42: exclusividad de texto por frame */}
         <div
           style={{
             transform: `translateY(${titleY}px)`,
-            opacity: titleOpacity,
+            // Prompt 42: Opacidad compuesta = spring × delayed-in × early-out
+            // Invisible durante TitleCard (0-75), fade-in (75-105), fade-out antes de crossfade (195-210)
+            opacity: titleOpacity * titleDelayedIn * titleEarlyOut,
             fontFamily: 'Inter, Roboto, Arial, sans-serif',
             // Prompt 39-Fix3: Usar nivel headline de editorialText (fuente única de verdad)
             fontWeight: editorialText.headline.fontWeight,

@@ -311,12 +311,14 @@ test.describe('Prompt 19.2 - ContentScene Integration', () => {
     expect(content).toMatch(/baseOpacity\s*\*\s*currentOpacity/);
   });
 
-  test('ContentScene tiene fallback a description completa', async () => {
+  // Prompt 42: Fallback `|| description` eliminado — fuente única de texto
+  test('ContentScene NO tiene fallback a description cruda (Prompt 42)', async () => {
     const filePath = path.join(COMPONENTS_PATH, 'ContentScene.tsx');
     const content = fs.readFileSync(filePath, 'utf-8');
 
-    // Fallback: lines render || description (Prompt 33: editorial blocks with fallback)
-    expect(content).toContain('|| description');
+    // Prompt 42: Solo bloques editoriales renderizan texto, sin fallback crudo
+    expect(content).not.toMatch(/\)\)\s*\|\|\s*description/);
+    expect(content).toContain('currentBlock?.lines.map');
   });
 
 });

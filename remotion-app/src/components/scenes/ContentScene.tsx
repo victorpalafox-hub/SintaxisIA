@@ -28,6 +28,7 @@
  * @updated Prompt 34 - Énfasis visual: scale, dimming, letterSpacing en momentos de impacto
  * @updated Prompt 35 - Handle imageUrl null (sin imagen genérica, null → undefined)
  * @updated Prompt 38-Fix2 - Regla dura: no reutilizar imagen previa, null = no imagen
+ * @updated Prompt 42 - Fuente única de texto: sin fallback a description cruda, exclusividad por frame
  */
 
 import React, { useMemo } from 'react';
@@ -507,6 +508,8 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
           }}
         >
           {/* Prompt 33: Renderizar líneas del bloque editorial con estilo por peso */}
+          {/* Prompt 42: Sin texto fallback — solo bloques editoriales (fuente única de verdad)
+              Si no hay bloque activo, no se renderiza texto (nunca texto crudo) */}
           {currentBlock?.lines.map((line, i) => (
             <div
               key={`${currentBlockIndex}-${i}`}
@@ -521,7 +524,7 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
             >
               {line}
             </div>
-          )) || description}
+          ))}
         </div>
 
         {/* BULLET POINTS eliminados en Prompt 19.2.6
