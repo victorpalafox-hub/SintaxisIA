@@ -229,7 +229,7 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
             context: images.context,
           }}
           dynamicScenes={images.dynamicScenes}
-          sceneStartSecond={0}
+          sceneStartSecond={contentStart / fps}
           totalDuration={durationInFrames}
           fps={fps}
           dynamicEffects={enhancedEffects}
@@ -272,9 +272,7 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
           <Audio
             src={staticFile(audio.music.src)}
             volume={(f: number) => {
-              // Hero (0 a contentStart): volumen alto, sin voz
-              if (f < contentStart) return musicBed.heroVolume;
-              // Fade-out final (últimos 2s)
+              // Prompt 37-Fix1: voz desde frame 0, music siempre ducked
               const fadeOutStart = durationInFrames - musicBed.fadeOutFrames;
               if (f > fadeOutStart) {
                 return interpolate(
@@ -284,7 +282,6 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
                   { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
                 );
               }
-              // Content + Outro: volumen bajo (ducked)
               return musicBed.contentVolume;
             }}
             loop
@@ -293,13 +290,13 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
       )}
 
       {/* ==========================================
-          VOICE NARRATION - Voz TTS (Prompt 26)
+          VOICE NARRATION - Voz TTS (Prompt 37-Fix1)
           ==========================================
-          Retrasado al inicio de ContentScene para que:
-          - HeroScene solo tenga music bed (Prompt 27)
-          - Narración arranque sincronizada con el texto
+          Voz desde frame 0 para hook inmediato (anti-silencio).
+          El espectador oye el narrador desde el primer segundo.
+          ContentScene usa sceneStartSecond para sincronizar texto.
       */}
-      <Sequence from={contentStart} durationInFrames={contentDuration} name="Narration">
+      <Sequence from={0} durationInFrames={durationInFrames} name="Narration">
         <AudioMixer
           voice={audio.voice}
         />

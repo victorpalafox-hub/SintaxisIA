@@ -245,10 +245,65 @@ test.describe('Prompt 37 - Regresión', () => {
     expect(content).toContain('voice={audio.voice}');
   });
 
-  test('sceneStartSecond={0} intacto en ContentScene', async () => {
+  test('sceneStartSecond usa contentStart / fps (Prompt 37-Fix1)', async () => {
     logger.info('Verificando sceneStartSecond');
 
     const content = fs.readFileSync(AINEWS_PATH, 'utf-8');
-    expect(content).toContain('sceneStartSecond={0}');
+    expect(content).toContain('sceneStartSecond={contentStart / fps}');
+  });
+});
+
+// =============================================================================
+// TESTS: PROMPT 37-FIX1 — ANTI-SILENCIO (VOZ DESDE FRAME 0)
+// =============================================================================
+
+test.describe('Prompt 37-Fix1 - Voz desde frame 0 (anti-silencio)', () => {
+  const logger = new TestLogger({ testName: 'Prompt37Fix1-AntiSilencio' });
+  let content: string;
+
+  test.beforeAll(async () => {
+    content = fs.readFileSync(AINEWS_PATH, 'utf-8');
+  });
+
+  test('Narration Sequence arranca en frame 0 (no contentStart)', async () => {
+    logger.info('Verificando Narration from={0}');
+
+    // Debe usar from={0} para voz inmediata
+    expect(content).toMatch(/Sequence\s+from=\{0\}\s+durationInFrames=\{durationInFrames\}\s+name="Narration"/);
+  });
+
+  test('Narration Sequence cubre todo el video (durationInFrames)', async () => {
+    logger.info('Verificando Narration durationInFrames');
+
+    expect(content).toMatch(/durationInFrames=\{durationInFrames\}[\s\S]*?name="Narration"/);
+  });
+
+  test('Music bed NO usa heroVolume en callback (siempre ducked)', async () => {
+    logger.info('Verificando music bed sin heroVolume');
+
+    // El volume callback no debe referenciar heroVolume
+    const musicSection = content.match(/BackgroundMusic[\s\S]*?<\/Sequence>/);
+    expect(musicSection).toBeTruthy();
+    expect(musicSection![0]).not.toContain('heroVolume');
+  });
+
+  test('Music bed usa contentVolume como base (8%)', async () => {
+    logger.info('Verificando music bed contentVolume');
+
+    const musicSection = content.match(/BackgroundMusic[\s\S]*?<\/Sequence>/);
+    expect(musicSection).toBeTruthy();
+    expect(musicSection![0]).toContain('musicBed.contentVolume');
+  });
+
+  test('ContentScene recibe sceneStartSecond dinámico (contentStart / fps)', async () => {
+    logger.info('Verificando offset de audio en ContentScene');
+
+    expect(content).toContain('sceneStartSecond={contentStart / fps}');
+  });
+
+  test('Documentación menciona Prompt 37-Fix1', async () => {
+    logger.info('Verificando documentación');
+
+    expect(content).toContain('Prompt 37-Fix1');
   });
 });

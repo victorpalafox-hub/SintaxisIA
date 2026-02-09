@@ -158,9 +158,9 @@ test.describe('Prompt 27 - AINewsShort BackgroundMusic', () => {
 
     const content = fs.readFileSync(AI_NEWS_SHORT_PATH, 'utf-8');
 
-    // Volume callback usa musicBed.heroVolume y musicBed.contentVolume
-    expect(content).toContain('musicBed.heroVolume');
+    // Prompt 37-Fix1: voz desde frame 0, music siempre ducked (no heroVolume en callback)
     expect(content).toContain('musicBed.contentVolume');
+    expect(content).toContain('musicBed.fadeOutFrames');
     expect(content).toContain('musicBed.fadeOutFrames');
 
     await logger.info('Volume callback usa musicBed config');
