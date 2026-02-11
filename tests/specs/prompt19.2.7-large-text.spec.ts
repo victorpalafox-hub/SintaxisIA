@@ -86,13 +86,13 @@ test.describe('Prompt 19.2.7 - Centralización en themes.ts', () => {
     logger.logTestEnd('contentTextStyle tiene paddingHorizontal = 60', 'passed', 0);
   });
 
-  test('textAnimation.maxCharsPerPhrase = 60 (actualizado)', async () => {
-    logger.logTestStart('textAnimation.maxCharsPerPhrase = 60');
+  test('textAnimation.maxCharsPerPhrase = 48 (actualizado Prompt 44)', async () => {
+    logger.logTestStart('textAnimation.maxCharsPerPhrase = 48');
     const content = fs.readFileSync(THEMES_PATH, 'utf-8');
     const textAnimationMatch = content.match(/textAnimation\s*=\s*\{[\s\S]*?\n\};/);
     expect(textAnimationMatch).toBeTruthy();
-    expect(textAnimationMatch![0]).toMatch(/maxCharsPerPhrase:\s*60/);
-    logger.logTestEnd('textAnimation.maxCharsPerPhrase = 60', 'passed', 0);
+    expect(textAnimationMatch![0]).toMatch(/maxCharsPerPhrase:\s*48/);
+    logger.logTestEnd('textAnimation.maxCharsPerPhrase = 48', 'passed', 0);
   });
 
 });
@@ -169,11 +169,11 @@ test.describe('Prompt 19.2.7 - ContentScene Centralización', () => {
 
 test.describe('Prompt 19.2.7 - text-splitter.ts Sincronizado', () => {
 
-  test('DEFAULT_MAX_CHARS = 60', async () => {
-    logger.logTestStart('DEFAULT_MAX_CHARS = 60');
+  test('DEFAULT_MAX_CHARS = 48 (Prompt 44)', async () => {
+    logger.logTestStart('DEFAULT_MAX_CHARS = 48');
     const content = fs.readFileSync(TEXT_SPLITTER_PATH, 'utf-8');
-    expect(content).toMatch(/DEFAULT_MAX_CHARS\s*=\s*60/);
-    logger.logTestEnd('DEFAULT_MAX_CHARS = 60', 'passed', 0);
+    expect(content).toMatch(/DEFAULT_MAX_CHARS\s*=\s*48/);
+    logger.logTestEnd('DEFAULT_MAX_CHARS = 48', 'passed', 0);
   });
 
   test('DEFAULT_MIN_WORDS = 3 (sin cambio)', async () => {

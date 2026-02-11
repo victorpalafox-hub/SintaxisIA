@@ -344,11 +344,11 @@ test.describe('Prompt 42 - Regresión', () => {
     expect(content).toContain('voice={audio.voice}');
   });
 
-  test('Narration desde frame 0, termina en outroStart (Prompt 37-Fix1 + Prompt 41)', async () => {
+  test('Narration desde contentStart, termina en outroStart (Prompt 44)', async () => {
     logger.info('Verificando Narration');
 
     const content = fs.readFileSync(AINEWS_PATH, 'utf-8');
-    expect(content).toMatch(/Sequence\s+from=\{0\}\s+durationInFrames=\{outroStart\}\s+name="Narration"/);
+    expect(content).toMatch(/Sequence\s+from=\{contentStart\}\s+durationInFrames=\{outroStart\s*-\s*contentStart\}\s+name="Narration"/);
   });
 
   test('BREATHING_ROOM_FRAMES >= 45 (Prompt 41)', async () => {

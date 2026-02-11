@@ -24,6 +24,7 @@
  * @updated Prompt 30 - Breathing room (1s) entre narración y outro, duración dinámica via calculateMetadata
  * @updated Prompt 32 - Title Card overlay (0.5s) como thumbnail topic-aware
  * @updated Prompt 41 - Cierre editorial: breathing room 1.5s, narración termina antes de outro
+ * @updated Prompt 44 - Corrección editorial integral: narración alineada con contentStart, music bed hero 22%
  */
 
 import React from 'react';
@@ -231,7 +232,7 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
             context: images.context,
           }}
           dynamicScenes={images.dynamicScenes}
-          sceneStartSecond={contentStart / fps}
+          sceneStartSecond={0}
           totalDuration={durationInFrames}
           fps={fps}
           dynamicEffects={enhancedEffects}
@@ -274,13 +275,28 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
           <Audio
             src={staticFile(audio.music.src)}
             volume={(f: number) => {
-              // Prompt 37-Fix1: voz desde frame 0, music siempre ducked
+              // Prompt 44: Restaurar transición hero→content (revierte Prompt 37-Fix1)
+              // Hero (0 a contentStart): 22% - hook musical enérgico, sin voz
+              // Crossfade: transición suave 22% → 8%
+              // Content (contentStart+): 8% - ducked detrás de narración
+              // Final: fade a 0
               const fadeOutStart = durationInFrames - musicBed.fadeOutFrames;
               if (f > fadeOutStart) {
                 return interpolate(
                   f,
                   [fadeOutStart, durationInFrames],
                   [musicBed.contentVolume, 0],
+                  { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+                );
+              }
+              if (f < contentStart) {
+                return musicBed.heroVolume;
+              }
+              if (f < contentStart + crossfadeFrames) {
+                return interpolate(
+                  f,
+                  [contentStart, contentStart + crossfadeFrames],
+                  [musicBed.heroVolume, musicBed.contentVolume],
                   { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
                 );
               }
@@ -294,13 +310,15 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
       {/* ==========================================
           VOICE NARRATION - Voz TTS (Prompt 37-Fix1, Prompt 41)
           ==========================================
-          Voz desde frame 0 para hook inmediato (anti-silencio).
+          Prompt 44: Voz desde contentStart (alineada con texto editorial).
+          Revierte Prompt 37-Fix1: elimina desfase audio-texto durante HeroScene.
           Prompt 41: Termina en outroStart para que la voz no se solape con el branding.
           AudioMixer aplica fade-out de 1.5s al final de esta Sequence.
       */}
-      {/* Prompt 41: Narration termina en outroStart (NO en durationInFrames)
+      {/* Prompt 44: Narration empieza en contentStart (alineada con texto editorial)
+          Prompt 41: Narration termina en outroStart (NO en durationInFrames)
           Así el fade-out de AudioMixer ocurre ANTES del outro, no durante */}
-      <Sequence from={0} durationInFrames={outroStart} name="Narration">
+      <Sequence from={contentStart} durationInFrames={outroStart - contentStart} name="Narration">
         <AudioMixer
           voice={audio.voice}
         />

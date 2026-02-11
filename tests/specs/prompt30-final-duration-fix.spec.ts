@@ -227,12 +227,12 @@ test.describe('Prompt 30 - Regresión', () => {
     expect(content).toContain('<AudioMixer');
   });
 
-  test('ContentScene sceneStartSecond = contentStart / fps (Prompt 37-Fix1)', async () => {
+  test('ContentScene sceneStartSecond = 0 (Prompt 44)', async () => {
     logger.info('Verificando sceneStartSecond');
 
     const content = fs.readFileSync(AINEWS_PATH, 'utf-8');
-    // Prompt 37-Fix1: offset para sincronizar texto con audio que empieza en frame 0
-    expect(content).toContain('sceneStartSecond={contentStart / fps}');
+    // Prompt 44: con narración en contentStart, offset ya no necesario
+    expect(content).toContain('sceneStartSecond={0}');
   });
 
   test('Prompt 29 topic-segmentation sin cambio', async () => {

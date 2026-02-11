@@ -192,7 +192,9 @@
     "test:editorial-color": "playwright test tests/specs/prompt36-editorial-premium-color.spec.ts",
     "test:prompt36": "playwright test tests/specs/prompt36-editorial-premium-color.spec.ts",
     "test:audio-duration": "playwright test tests/specs/prompt37-audio-duration-fix.spec.ts",
-    "test:prompt37": "playwright test tests/specs/prompt37-audio-duration-fix.spec.ts"
+    "test:prompt37": "playwright test tests/specs/prompt37-audio-duration-fix.spec.ts",
+    "test:editorial-integral": "playwright test tests/specs/prompt44-editorial-integral.spec.ts",
+    "test:prompt44": "playwright test tests/specs/prompt44-editorial-integral.spec.ts"
   },
   "keywords": [
     "youtube",

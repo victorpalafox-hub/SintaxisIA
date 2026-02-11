@@ -201,7 +201,7 @@ npm test
 
 | Script | Description |
 |--------|-------------|
-| `npm test` | Run all Playwright tests (430 tests) |
+| `npm test` | Run all Playwright tests (1557 tests) |
 | `npm run test:ui` | Open Playwright UI mode (interactive) |
 | `npm run test:logger` | Run TestLogger validation tests (Prompt #5) |
 | `npm run test:demo` | Run Service Objects demo tests (Prompt #6) |
@@ -219,6 +219,28 @@ npm test
 | `npm run test:tts` | Run TTS tests (Prompt #16) |
 | `npm run test:video-rendering` | Run Video Rendering tests (Prompt #17) |
 | `npm run test:youtube` | Run YouTube Upload tests (Prompt #18) |
+| `npm run test:output-manager` | Run Output Manager tests (Prompt #19) |
+| `npm run test:dynamic-images` | Run Dynamic Images tests (Prompt #19.1) |
+| `npm run test:sequential-text` | Run Sequential Text tests (Prompt #19.2) |
+| `npm run test:image-preload` | Run Image Preload tests (Prompt #19.3) |
+| `npm run test:tech-editorial` | Run Tech Editorial tests (Prompt #20) |
+| `npm run test:anti-duplication` | Run Anti-Duplication tests (Prompt #21) |
+| `npm run test:news-manager` | Run News Manager CLI tests (Prompt #22) |
+| `npm run test:smart-image` | Run Smart Image Selector tests (Prompt #23) |
+| `npm run test:newsdata` | Run NewsData.io Integration tests (Prompt #24) |
+| `npm run test:audio-sync-fix` | Run Audio Sync Fix tests (Prompt #25) |
+| `npm run test:hero-audio-bed` | Run Hero Audio Bed tests (Prompt #27) |
+| `npm run test:images-editorial` | Run Images Editorial tests (Prompt #28) |
+| `npm run test:topic-segmentation` | Run Topic Segmentation tests (Prompt #29) |
+| `npm run test:final-duration` | Run Dynamic Duration tests (Prompt #30) |
+| `npm run test:premium-background` | Run Premium Background tests (Prompt #31) |
+| `npm run test:titlecard` | Run Title Card tests (Prompt #32) |
+| `npm run test:editorial` | Run Editorial Text tests (Prompt #33) |
+| `npm run test:emphasis` | Run Visual Emphasis tests (Prompt #34) |
+| `npm run test:image-filter` | Run Image Editorial Filter tests (Prompt #35) |
+| `npm run test:editorial-color` | Run Editorial Premium Color tests (Prompt #36) |
+| `npm run test:audio-duration` | Run Audio Duration Fix tests (Prompt #37) |
+| `npm run test:editorial-integral` | Run Editorial Integral tests (Prompt #44) |
 | `npm run test:headed` | Run tests with visible browser |
 | `npm run test:debug` | Run tests in debug mode |
 | `npm run test:report` | Open HTML test report |
@@ -435,6 +457,8 @@ npm run test:report
 
 | Test Suite | Tests | Status |
 |------------|-------|--------|
+| Smoke Paths | 18 | ✅ Passing |
+| Config Sync | 5 | ✅ Passing |
 | TestLogger Validation (Prompt #5) | 4 | ✅ Passing |
 | Service Objects Demo (Prompt #6) | 4 | ✅ Passing |
 | Video Generation (Prompt #7) | 19 | ✅ Passing |
@@ -454,9 +478,46 @@ npm run test:report
 | Video Rendering (Prompt #17) | 27 | ✅ Passing |
 | YouTube Upload (Prompt #18) | 53 | ✅ Passing |
 | Output Manager (Prompt #19) | 43 | ✅ Passing |
-| Smoke Paths | 18 | ✅ Passing |
-| Config Sync | 5 | ✅ Passing |
-| **Total** | **430** | **✅ All Passing (4 skipped)** |
+| Dynamic Images (Prompt #19.1) | 36 | ✅ Passing |
+| Specific Queries (Prompt #19.1.6) | 17 | ✅ Passing |
+| Sequential Text (Prompt #19.2) | 41 | ✅ Passing |
+| No Bullet Points (Prompt #19.2.6) | 21 | ✅ Passing |
+| Large Text (Prompt #19.2.7) | 25 | ✅ Passing |
+| Image Preload (Prompt #19.3) | 26 | ✅ Passing |
+| SafeImage Preload (Prompt #19.3.2) | 17 | ✅ Passing |
+| Outro Duration (Prompt #19.4) | 16 | ✅ Passing |
+| Visual Queries (Prompt #19.5) | 24 | ✅ Passing |
+| Hero Image Fallback (Prompt #19.6) | 10 | ✅ Passing |
+| Audio Sync (Prompt #19.7) | 29 | ✅ Passing |
+| Dynamic Animations (Prompt #19.8) | 16 | ✅ Passing |
+| Outro Scene (Prompt #19.9) | 13 | ✅ Passing |
+| Glow Intense (Prompt #19.10) | 13 | ✅ Passing |
+| Smooth Transitions (Prompt #19.11) | 37 | ✅ Passing |
+| Duration Fix (Prompt #19.12) | 12 | ✅ Passing |
+| Tech Editorial (Prompt #20) | 45 | ✅ Passing |
+| Anti-Duplication (Prompt #21) | 35 | ✅ Passing |
+| News Manager CLI (Prompt #22) | 42 | ✅ Passing |
+| Smart Image Selector (Prompt #23) | 49 | ✅ Passing |
+| NewsData.io Integration (Prompt #24) | 44 | ✅ Passing |
+| Audio Sync Fix (Prompt #25) | 34 | ✅ Passing |
+| Hero Audio Bed (Prompt #27) | 23 | ✅ Passing |
+| Images Editorial (Prompt #28) | 25 | ✅ Passing |
+| Topic Segmentation (Prompt #29) | 35 | ✅ Passing |
+| Dynamic Duration (Prompt #30) | 23 | ✅ Passing |
+| Premium Background (Prompt #31) | 25 | ✅ Passing |
+| Title Card (Prompt #32) | 31 | ✅ Passing |
+| Editorial Text (Prompt #33) | 46 | ✅ Passing |
+| Visual Emphasis (Prompt #34) | 48 | ✅ Passing |
+| Image Editorial Filter (Prompt #35) | 53 | ✅ Passing |
+| Editorial Premium Color (Prompt #36) | 30 | ✅ Passing |
+| Audio Duration Fix (Prompt #37) | 21 | ✅ Passing |
+| Image Render Rules (Prompt #38-Fix2) | 22 | ✅ Passing |
+| Typography Hierarchy (Prompt #39-Fix3) | 18 | ✅ Passing |
+| Human Rhythm (Prompt #40-Fix4) | 24 | ✅ Passing |
+| Editorial Closing (Prompt #41) | 21 | ✅ Passing |
+| Text Single Source (Prompt #42) | 37 | ✅ Passing |
+| Editorial Integral (Prompt #44) | 22 | ✅ Passing |
+| **Total** | **1557** | **✅ All Passing (2 skipped)** |
 
 ### Completed (Prompts #4-10)
 
@@ -508,14 +569,14 @@ npm run test:report
 | News Scoring System | ✅ Done | Rank news by importance (0-37 points) (Prompt #11) |
 | Image Search System | ✅ Done | Multi-provider fallback (Clearbit → Logo.dev → Google → Unsplash) (Prompt #12) |
 | Video Optimized | ✅ Done | 1 news per video, dynamic effects (zoom, blur, parallax) (Prompt #13) |
-| SafeImage Component | ✅ Done | CORS fallback with UI Avatars placeholders (Prompt #13.1) |
+| SafeImage Component | ✅ Done | CORS fallback, returns null on error (Prompt #13.1, #38-Fix2) |
 | Compositions Cleanup | ✅ Done | Removed obsolete compositions (Prompt #13.2) |
 | Orchestrator Pipeline | ✅ Done | 9-step pipeline with publication calendar (Prompt #14) |
 | Notification System | ✅ Done | Email (Resend) + Telegram with approval buttons (Prompt #14.1) |
 | Notification Fix | ✅ Done | Callback handlers for local development (Prompt #14.2) |
 | Storage Fix | ✅ Done | Auto-create temp directories (Prompt #14.2.1) |
 
-### Completed (Prompts #15-18)
+### Completed (Prompts #15-19)
 
 | Feature | Status | Description |
 |---------|--------|-------------|
@@ -524,14 +585,46 @@ npm run test:report
 | Video Rendering Service | ✅ Done | Remotion CLI integration + subtitles (Prompt #17) |
 | YouTube Upload | ✅ Done | OAuth2 + resumable upload + quota management (Prompt #18) |
 | Output Manager | ✅ Done | Save outputs + TikTok copy + Dry-Run Real (Prompt #19) |
+| Dynamic Images | ✅ Done | Per-segment image orchestration + visual queries (Prompt #19.1-19.6) |
+| Sequential Text | ✅ Done | Phrase-based timing, large text, no bullet points (Prompt #19.2) |
+| Audio Sync (Whisper) | ✅ Done | Real timestamps text-to-speech sync (Prompt #19.7) |
+| Dynamic Animations | ✅ Done | Parallax, zoom, glow, slide effects (Prompt #19.8-19.12) |
 
-### Pending (Prompt #20+)
+### Completed (Prompts #20-44)
 
 | Feature | Status | Description |
 |---------|--------|-------------|
-| Visual Identity | ⏳ Pending | Humanized branding (Prompt #20) |
-| E2E Pipeline | ⏳ Pending | Full integration of YouTubeService (Prompt #21) |
-| OCR + Thumbnails | ⏳ Pending | Text extraction from images (Prompt #22) |
+| Tech Editorial + Background | ✅ Done | BackgroundDirector, GrainOverlay, LightSweep, editorial theme (Prompt #20) |
+| Anti-Duplication | ✅ Done | PublishedNewsTracker, 3-layer dedup (ID, title 80%, company 7d) (Prompt #21) |
+| News Manager CLI | ✅ Done | 10 commands: history/active/expired/search/view/unlock/cleanup/clear/stats/help (Prompt #22) |
+| Smart Image Selector | ✅ Done | Smart query generator, scoring system, retry alternatives (Prompt #23) |
+| NewsData.io Integration | ✅ Done | Real API, NewsEnricher, 81 company aliases (Prompt #24) |
+| Audio Sync Fix | ✅ Done | Frame offset, phraseTimestamps pipeline, flash overlay (Prompt #25) |
+| Audio Delayed + Dynamic Duration | ✅ Done | Narration starts with ContentScene, duration based on audio (Prompt #26) |
+| Hero Audio Bed | ✅ Done | Music bed, scene zoom, background music sequence (Prompt #27) |
+| Images Editorial | ✅ Done | 920x520 editorial images, real crossfade, newsTitle queries (Prompt #28) |
+| Topic Segmentation | ✅ Done | Topic-aware boundaries, 18 Spanish transition markers (Prompt #29) |
+| Dynamic Duration Fix | ✅ Done | calculateMetadata in Root.tsx, breathing room frames (Prompt #30) |
+| Premium Background | ✅ Done | Color pulse, accent glow, dual LightSweep, variable grain (Prompt #31) |
+| Title Card | ✅ Done | Topic-aware badge, hero image background, 3s overlay (Prompt #32) |
+| Editorial Text | ✅ Done | Headline/support/punch blocks, slide by weight, easing (Prompt #33) |
+| Visual Emphasis | ✅ Done | Max 3 emphasis moments, scale/dimming/letterSpacing (Prompt #34) |
+| Image Editorial Filter | ✅ Done | textRelevance gate, generic penalty, null fallback (Prompt #35) |
+| Editorial Premium Color | ✅ Done | Premium colors (#F5F7FA/#C9CED6/#0B0D10), accent #4DA3FF (Prompt #36) |
+| Audio Duration Fix | ✅ Done | Whisper override, fallback 48kbps, cap 60s YouTube Shorts (Prompt #37) |
+| Image Render Rules | ✅ Done | SafeImage null on error, no image reuse in ContentScene (Prompt #38-Fix2) |
+| Typography Hierarchy | ✅ Done | headline 72px, support 54px, punch 84px fixed (Prompt #39-Fix3) |
+| Human Rhythm | ✅ Done | Slide/easing by weight, dramatic pauses, ElevenLabs validation (Prompt #40-Fix4) |
+| Editorial Closing | ✅ Done | Voice ends before outro, breathing 1.5s, CTA delay 1.5s (Prompt #41) |
+| Text Single Source | ✅ Done | Max 1 text per frame, TitleCard→Hero→Content→Outro exclusivity (Prompt #42) |
+| Editorial Integral | ✅ Done | Narration from={contentStart}, music bed hero 22%→8%, maxChars 48 (Prompt #44) |
+
+### Pending
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| E2E Pipeline | ⏳ Pending | Full integration of YouTubeService in orchestrator step 11 |
+| OCR + Thumbnails | ⏳ Pending | Text extraction from images |
 
 ---
 
@@ -541,20 +634,24 @@ npm run test:report
 |----------|-------|
 | Resolution | 1080x1920 (9:16 vertical) |
 | Frame Rate | 30 FPS |
-| Duration | 60 seconds |
+| Duration | Dynamic, cap 60s (YouTube Shorts) |
 | Video Codec | H.264 |
 | Audio Codec | AAC |
-| Watermark | Bottom-right, 30% opacity |
+| Theme | Tech Editorial (premium colors) |
 
 ### Video Structure
 
-| Segment | Time | Content |
-|---------|------|---------|
-| Hook | 0-3s | Explosive intro with logo |
-| Headline | 3-8s | News title |
-| Content | 8-50s | Main points with subtitles |
-| Impact | 50-55s | Key data highlight |
-| Outro | 55-60s | CTA and branding |
+| Segment | Duration | Content |
+|---------|----------|---------|
+| HeroScene | 8s (silent) | Title card overlay (3s), logo, badge contextual |
+| ContentScene | max(37s, audioDuration+1s) | Sequential text (headline/support/punch), editorial images, narration |
+| Breathing | 1.5s | Pause before outro |
+| OutroScene | 5s | CTA with delay 1.5s, fade-out, branding |
+
+- **Crossfade**: 1s (30 frames) between scenes
+- **Audio**: Narration starts with ContentScene, music bed ducked (hero 22%, content 8%)
+- **Background**: BackgroundDirector (gradient drift + parallax blobs + grain + light sweep + vignette)
+- **Images**: 3 max (hero logo, context screenshot, outro hardcoded), 920x520 editorial style
 
 ---
 
@@ -562,36 +659,19 @@ npm run test:report
 
 ### Theme Customization
 
-Edit `remotion-app/src/theme.ts` to customize colors:
+Active theme: **Tech Editorial** (Prompt #36). Edit `remotion-app/src/styles/themes.ts` to customize:
 
 ```typescript
-export const theme = {
-  colors: {
-    primary: '#00f0ff',      // Cyan - main color
-    secondary: '#ff0099',    // Magenta - secondary
-    accent: '#cc00ff',       // Purple - accent
-    gold: '#ffd700',         // Gold - impact
-    red: '#ff3366',          // Red - alerts
-    darkBg: '#0a0a0f',       // Main background
-  },
-  fonts: {
-    main: 'Arial, sans-serif',
-    title: 'Arial Black, sans-serif',
-  },
-};
+// Premium editorial palette (Prompt #36)
+colors: {
+  primary: '#F5F7FA',      // Light text
+  secondary: '#C9CED6',    // Muted text
+  accent: '#4DA3FF',       // Unified accent blue
+  darkBg: '#0B0D10',       // Deep background
+}
 ```
 
-### Highlight Keywords
-
-Keywords highlighted in subtitles (defined in `theme.ts`):
-
-```typescript
-export const HIGHLIGHT_KEYWORDS = [
-  'OpenAI', 'Claude', 'GPT', 'Gemini', 'IA', 'AI',
-  'ChatGPT', 'Anthropic', 'Google', 'Microsoft',
-  // Add more keywords here
-];
-```
+Key theme configs: `editorialText`, `visualEmphasis`, `imageAnimation`, `musicBed`, `sceneTransition`, `premiumBackground`, `editorialClosing`.
 
 ### Entity Mapping
 
@@ -674,16 +754,15 @@ Types: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`
 
 ---
 
-## Color Reference
+## Color Reference (Tech Editorial - Prompt #36)
 
 | Color | Hex | Usage |
 |-------|-----|-------|
-| Cyan Primary | `#00f0ff` | Main color |
-| Magenta Secondary | `#ff0099` | Accents |
-| Purple Accent | `#cc00ff` | Gradients |
-| Dark Background | `#0a0a0f` | Background |
-| Gold | `#ffd700` | Impact highlights |
-| Red | `#ff3366` | Alerts |
+| Light Primary | `#F5F7FA` | Main text |
+| Muted Secondary | `#C9CED6` | Support text |
+| Accent Blue | `#4DA3FF` | Unified accent, highlights |
+| Deep Background | `#0B0D10` | Main background |
+| Editorial shadows | subtle | Replaces neon glows (Prompt #20) |
 
 ---
 

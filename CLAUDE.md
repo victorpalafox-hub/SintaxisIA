@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 1535 tests (1533 passing, 2 skipped)
+**Test Status**: 1557 tests (1555 passing, 2 skipped)
 
-**Last Updated**: 2026-02-09 (Prompt 42 - Unificación fuente de texto: exclusividad por frame, sin fallback description)
+**Last Updated**: 2026-02-10 (Prompt 44 - Corrección editorial integral: narración alineada con contentStart, music bed hero 22%, frases cortas 48 chars)
 
 ## Prerequisites
 
@@ -67,7 +67,7 @@ npm run check
 | CI validation | `npm run ci:validate` |
 | News Manager | `npm run news:history / news:stats / news:help` |
 
-**Test suites**: 1535 tests en 59 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
+**Test suites**: 1557 tests en 60 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
 
 **Playwright config**: 4 workers local / 1 en CI, timeout 2min por test, retries solo en CI (2), reporters: HTML + JSON + JUnit.
 
@@ -143,7 +143,7 @@ if (isShortTimeout(timeout)) { /* manejar error */ }
 | Problema | Solución |
 |----------|----------|
 | Tests timeout en CI | Aumentar timeout en `playwright.config.ts` o agregar `test.slow()` |
-| CORS en imágenes (preview) | `SafeImage` usa fallback UI Avatars automáticamente |
+| CORS en imágenes (preview) | `SafeImage` retorna `null` en error (sin placeholder, Prompt 38-Fix2) |
 | Composición no encontrada | Usar `AINewsShort` (producción) o `AINewsShort-Preview` (dev) |
 | FFmpeg no disponible | Instalar FFmpeg y agregar al PATH |
 | API rate limit (ElevenLabs) | Usa fallback Edge-TTS automáticamente (10k chars/mes) |
@@ -483,6 +483,7 @@ output/
 | VisualEmphasis | `visual-emphasis.ts`, `visualEmphasis` config, `detectEmphasis()` | Max 3 momentos (1 hard + 2 soft), scale 1.08/1.03, dimming overlay, ramp 10f, min 4 bloques |
 | EditorialClosing | `AINewsShort.tsx` Narration→outroStart, `AudioMixer.tsx` fade 45f, `themes.ts` ctaDelay 45f | Voz termina antes de outro, breathing 1.5s, CTA delay 1.5s, voice fade 1.5s |
 | TextExclusivity | `HeroScene.tsx` titleDelayedIn/titleEarlyOut, `ContentScene.tsx` sin fallback | Max 1 texto por frame, TitleCard→Hero→Content→Outro sin overlap |
+| EditorialIntegral | `AINewsShort.tsx` Narration from={contentStart}, music bed hero/content, `text-splitter.ts` 48 chars | Voz alineada con texto, music bed 22%→8%, frases cortas editoriales |
 
 ## Prompt History (Resumen)
 
@@ -554,6 +555,7 @@ output/
 | 40-Fix4 | Ritmo humano + Fix ElevenLabs | 24 | Slide/easing por peso (punch rápido, support suave), pausas dramáticas 10f/8f, validateElevenLabsKey, logging detallado axios |
 | 41 | Cierre editorial real | 21 | Narración termina en outroStart (no durationInFrames), breathing room 30→45f, CTA delay 20→45f, voice fade 30→45f |
 | 42 | Unificación fuente de texto | 37 | `HeroScene.tsx` titleDelayedIn/titleEarlyOut, `ContentScene.tsx` sin `\|\| description`, exclusividad texto por frame |
+| 44 | Corrección editorial integral | 22 | `AINewsShort.tsx` Narration from={contentStart}, music bed hero 22%→8% transición, `text-splitter.ts`/`themes.ts` maxChars 48 |
 
 ## Pendientes
 

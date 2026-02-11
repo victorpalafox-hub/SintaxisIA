@@ -49,9 +49,10 @@ test.describe('Prompt 41 - Breathing Room y Narration Timing', () => {
     expect(Number(match![1])).toBeGreaterThanOrEqual(45);
   });
 
-  test('Narration Sequence usa outroStart (no durationInFrames)', async () => {
+  test('Narration Sequence usa outroStart - contentStart (Prompt 44)', async () => {
     logger.info('Verificando narración termina antes de outro');
-    expect(ainews).toContain('durationInFrames={outroStart}');
+    // Prompt 44: durationInFrames cambió de outroStart a outroStart - contentStart
+    expect(ainews).toContain('durationInFrames={outroStart - contentStart}');
     expect(ainews).toContain('name="Narration"');
   });
 
@@ -194,11 +195,11 @@ test.describe('Prompt 41 - Regresión', () => {
     expect(audioMixer).toContain('voice.src');
   });
 
-  test('Narration Sequence empieza en frame 0 (Prompt 37-Fix1)', async () => {
-    logger.info('Verificando voz desde frame 0');
+  test('Narration Sequence empieza en contentStart (Prompt 44)', async () => {
+    logger.info('Verificando voz desde contentStart');
     const ainews = fs.readFileSync(AINEWS_PATH, 'utf-8');
-    // Narration sequence starts from 0
-    expect(ainews).toMatch(/Sequence\s+from=\{0\}[\s\S]*?name="Narration"/);
+    // Prompt 44: Narration alineada con texto editorial
+    expect(ainews).toMatch(/Sequence\s+from=\{contentStart\}[\s\S]*?name="Narration"/);
   });
 
   test('BackgroundMusic sin cambio', async () => {

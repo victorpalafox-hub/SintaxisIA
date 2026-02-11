@@ -248,11 +248,12 @@ test.describe('Prompt 37 - Regresión', () => {
     expect(content).toContain('voice={audio.voice}');
   });
 
-  test('sceneStartSecond usa contentStart / fps (Prompt 37-Fix1)', async () => {
-    logger.info('Verificando sceneStartSecond');
+  test('sceneStartSecond={0} (Prompt 44: audio alineado)', async () => {
+    logger.info('Verificando sceneStartSecond={0}');
 
     const content = fs.readFileSync(AINEWS_PATH, 'utf-8');
-    expect(content).toContain('sceneStartSecond={contentStart / fps}');
+    // Prompt 44: con narración en contentStart, offset ya no necesario
+    expect(content).toContain('sceneStartSecond={0}');
   });
 });
 
@@ -260,7 +261,7 @@ test.describe('Prompt 37 - Regresión', () => {
 // TESTS: PROMPT 37-FIX1 — ANTI-SILENCIO (VOZ DESDE FRAME 0)
 // =============================================================================
 
-test.describe('Prompt 37-Fix1 - Voz desde frame 0 (anti-silencio)', () => {
+test.describe('Prompt 37-Fix1→44 - Voz desde contentStart (sync editorial)', () => {
   const logger = new TestLogger({ testName: 'Prompt37Fix1-AntiSilencio' });
   let content: string;
 
@@ -268,28 +269,28 @@ test.describe('Prompt 37-Fix1 - Voz desde frame 0 (anti-silencio)', () => {
     content = fs.readFileSync(AINEWS_PATH, 'utf-8');
   });
 
-  test('Narration Sequence arranca en frame 0 (no contentStart)', async () => {
-    logger.info('Verificando Narration from={0}');
+  test('Narration Sequence arranca en contentStart (Prompt 44)', async () => {
+    logger.info('Verificando Narration from={contentStart}');
 
-    // Debe usar from={0} para voz inmediata
-    // Prompt 41: duration cambió de durationInFrames a outroStart
-    expect(content).toMatch(/Sequence\s+from=\{0\}\s+durationInFrames=\{outroStart\}\s+name="Narration"/);
+    // Prompt 44: voz alineada con texto editorial (revierte Prompt 37-Fix1)
+    // Prompt 41: termina en outroStart
+    expect(content).toMatch(/Sequence\s+from=\{contentStart\}\s+durationInFrames=\{outroStart\s*-\s*contentStart\}\s+name="Narration"/);
   });
 
-  // Prompt 41: Narration ahora termina en outroStart (no durationInFrames)
-  test('Narration Sequence termina en outroStart (Prompt 41)', async () => {
-    logger.info('Verificando Narration outroStart');
+  // Prompt 41+44: Narration termina en outroStart, empieza en contentStart
+  test('Narration Sequence termina en outroStart - contentStart (Prompt 41+44)', async () => {
+    logger.info('Verificando Narration outroStart - contentStart');
 
-    expect(content).toMatch(/durationInFrames=\{outroStart\}[\s\S]*?name="Narration"/);
+    expect(content).toMatch(/durationInFrames=\{outroStart\s*-\s*contentStart\}[\s\S]*?name="Narration"/);
   });
 
-  test('Music bed NO usa heroVolume en callback (siempre ducked)', async () => {
-    logger.info('Verificando music bed sin heroVolume');
+  test('Music bed SÍ usa heroVolume en callback (Prompt 44)', async () => {
+    logger.info('Verificando music bed con heroVolume');
 
-    // El volume callback no debe referenciar heroVolume
+    // Prompt 44: restaurar heroVolume para hero scene (22%)
     const musicSection = content.match(/BackgroundMusic[\s\S]*?<\/Sequence>/);
     expect(musicSection).toBeTruthy();
-    expect(musicSection![0]).not.toContain('heroVolume');
+    expect(musicSection![0]).toContain('heroVolume');
   });
 
   test('Music bed usa contentVolume como base (8%)', async () => {
@@ -300,10 +301,11 @@ test.describe('Prompt 37-Fix1 - Voz desde frame 0 (anti-silencio)', () => {
     expect(musicSection![0]).toContain('musicBed.contentVolume');
   });
 
-  test('ContentScene recibe sceneStartSecond dinámico (contentStart / fps)', async () => {
-    logger.info('Verificando offset de audio en ContentScene');
+  test('ContentScene recibe sceneStartSecond={0} (Prompt 44: audio alineado)', async () => {
+    logger.info('Verificando sceneStartSecond={0}');
 
-    expect(content).toContain('sceneStartSecond={contentStart / fps}');
+    // Prompt 44: con narración en contentStart, offset ya no necesario
+    expect(content).toContain('sceneStartSecond={0}');
   });
 
   test('Documentación menciona Prompt 37-Fix1', async () => {

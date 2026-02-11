@@ -306,11 +306,12 @@ test.describe('Prompt 36 - Regresion: estructuras intactas', () => {
     expect(themes).toContain('bgDimOpacity: 0.15');
   });
 
-  test('textAnimation sin cambios (fadeIn/fadeOut 15 frames)', async () => {
-    logger.info('Verificando text animation intacta');
+  test('textAnimation fadeIn/fadeOut 15 frames sin cambios', async () => {
+    logger.info('Verificando text animation fade intacta');
     expect(themes).toContain('fadeInFrames: 15');
     expect(themes).toContain('fadeOutFrames: 15');
-    expect(themes).toContain('maxCharsPerPhrase: 60');
+    // Prompt 44: maxCharsPerPhrase cambió de 60 a 48
+    expect(themes).toContain('maxCharsPerPhrase: 48');
   });
 
   test('contentAnimation.parallaxKeyframes sin cambios', async () => {

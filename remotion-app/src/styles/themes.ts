@@ -260,8 +260,8 @@ export const textAnimation = {
   fadeInFrames: 15,
   /** Frames para fade out de cada frase (0.5s @ 30fps) */
   fadeOutFrames: 15,
-  /** Máximo de caracteres por frase (reducido de 100 en Prompt 19.2.7) */
-  maxCharsPerPhrase: 60,
+  /** Máximo de caracteres por frase (reducido de 60 en Prompt 44) */
+  maxCharsPerPhrase: 48, // Prompt 44: frases más cortas para ritmo editorial
   /** Mínimo de palabras para considerar frase completa */
   minWordsPerPhrase: 3,
 };
