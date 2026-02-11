@@ -20,6 +20,7 @@
  * @updated Prompt 25 - Flash de impacto inicial para retención
  * @updated Prompt 27 - Micro zoom-in escena (0.96→1.0) para retención
  * @updated Prompt 42 - Exclusividad de texto: título invisible durante TitleCard, fade-out antes de crossfade
+ * @updated Prompt 45 - Impact flash 0.85 + micro-zoom 1.03→1.0 + energy ramp frames 30-90
  */
 
 import React from 'react';
@@ -31,7 +32,7 @@ import {
   useVideoConfig,
   Easing,
 } from 'remotion';
-import { colors, spacing, heroAnimation, sceneTransition, editorialShadow, editorialText, titleCard } from '../../styles/themes';
+import { colors, spacing, heroAnimation, heroImpact, sceneTransition, editorialShadow, editorialText, titleCard } from '../../styles/themes';
 import { SafeImage } from '../elements/SafeImage';
 import type { HeroSceneProps } from '../../types/video.types';
 
@@ -176,6 +177,40 @@ export const HeroScene: React.FC<HeroSceneProps> = ({
   );
 
   // ==========================================
+  // IMPACTO EDITORIAL INICIAL (Prompt 45)
+  // ==========================================
+
+  // Flash intenso de 0.85 opacity en los primeros 2 frames, luego decay rápido.
+  // Captura el scroll con un golpe blanco que dice "algo empezó".
+  const impactFlash = frame <= heroImpact.flashHoldFrames
+    ? heroImpact.flashMaxOpacity
+    : interpolate(
+        frame,
+        [heroImpact.flashHoldFrames, heroImpact.flashHoldFrames + heroImpact.flashDecayFrames],
+        [heroImpact.flashMaxOpacity, 0],
+        { extrapolateRight: 'clamp' }
+      );
+
+  // Composición: el más intenso de los dos flashes (impacto vs sutil existente)
+  const combinedFlash = Math.max(impactFlash, flashOpacity);
+
+  // Micro-zoom snap: 1.03 → 1.0 en 10 frames (sensación de "punch" visual)
+  const microZoom = interpolate(
+    frame,
+    [0, heroImpact.microZoomFrames],
+    [heroImpact.microZoomStart, heroImpact.microZoomEnd],
+    { extrapolateRight: 'clamp' }
+  );
+
+  // Energy ramp: +2% zoom sutil entre frames 30-90 (building energy subconsciente)
+  const energyBoost = interpolate(
+    frame,
+    [heroImpact.energyRampStart, heroImpact.energyRampPeak, heroImpact.energyRampEnd],
+    [0, heroImpact.energyScaleBoost, 0],
+    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+  );
+
+  // ==========================================
   // FADE-OUT PARA CROSSFADE (Prompt 19.11)
   // ==========================================
 
@@ -209,7 +244,7 @@ export const HeroScene: React.FC<HeroSceneProps> = ({
           justifyContent: 'center',
           gap: spacing.padding.xl,
           padding: `${spacing.safe.top}px ${spacing.safe.horizontal}px ${spacing.safe.bottom}px`,
-          transform: `scale(${sceneZoom})`,
+          transform: `scale(${sceneZoom * microZoom * (1 + energyBoost)})`,
         }}
       >
         {/* IMAGEN HERO (Logo empresa) */}
@@ -261,11 +296,11 @@ export const HeroScene: React.FC<HeroSceneProps> = ({
         </div>
       </AbsoluteFill>
 
-      {/* Prompt 25: Flash de impacto inicial para capturar scroll */}
-      {flashOpacity > 0 && (
+      {/* Prompt 45: Flash combinado (impacto 0.85 + sutil existente) */}
+      {combinedFlash > 0 && (
         <AbsoluteFill
           style={{
-            backgroundColor: `rgba(255, 255, 255, ${flashOpacity})`,
+            backgroundColor: `rgba(255, 255, 255, ${combinedFlash})`,
             pointerEvents: 'none',
           }}
         />

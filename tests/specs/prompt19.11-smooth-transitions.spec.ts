@@ -479,16 +479,16 @@ test.describe('Prompt 19.11 - Regresion', () => {
     logger.info('AudioMixer presente');
   });
 
-  test('5 Sequences presentes (Hero, Content, Outro, Narration, BackgroundMusic)', async () => {
-    logger.info('Verificando 5 Sequences');
+  test('7 Sequences presentes (Hero, Content, Outro, Narration, BackgroundMusic, TitleCard, ImpactSFX)', async () => {
+    logger.info('Verificando 7 Sequences');
 
     const content = fs.readFileSync(AI_NEWS_SHORT_PATH, 'utf-8');
 
     const matches = content.match(/<Sequence/g);
     expect(matches).toBeTruthy();
-    // Prompt 27: 5 Sequences + Prompt 32: TitleCard = 6 Sequences
-    expect(matches!.length).toBe(6);
+    // Prompt 27: 5 Sequences + Prompt 32: TitleCard + Prompt 45: ImpactSFX = 7 Sequences
+    expect(matches!.length).toBe(7);
 
-    logger.info('6 Sequences presentes');
+    logger.info('7 Sequences presentes');
   });
 });

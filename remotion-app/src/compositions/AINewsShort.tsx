@@ -25,6 +25,7 @@
  * @updated Prompt 32 - Title Card overlay (0.5s) como thumbnail topic-aware
  * @updated Prompt 41 - Cierre editorial: breathing room 1.5s, narración termina antes de outro
  * @updated Prompt 44 - Corrección editorial integral: narración alineada con contentStart, music bed hero 22%
+ * @updated Prompt 45 - Micro-polish: impact SFX, music swell hero, outro volume 5%, cierre gradual
  */
 
 import React from 'react';
@@ -49,7 +50,7 @@ import { TitleCardScene } from '../components/scenes/TitleCardScene';
 import { deriveTitleCardText, deriveBadge } from '../utils/title-derivation';
 
 // Estilos
-import { colors, sceneTransition, musicBed, titleCard } from '../styles/themes';
+import { colors, sceneTransition, musicBed, heroImpact, titleCard } from '../styles/themes';
 
 // =============================================================================
 // PROPS PARCIALES (para compatibilidad con Remotion Composition)
@@ -275,23 +276,43 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
           <Audio
             src={staticFile(audio.music.src)}
             volume={(f: number) => {
-              // Prompt 44: Restaurar transición hero→content (revierte Prompt 37-Fix1)
-              // Hero (0 a contentStart): 22% - hook musical enérgico, sin voz
+              // Prompt 44+45: Transición hero→content→outro con swell y cierre suave
+              // Hero (0 a contentStart): 22% con swell energético frames 30-90
               // Crossfade: transición suave 22% → 8%
-              // Content (contentStart+): 8% - ducked detrás de narración
-              // Final: fade a 0
+              // Content: 8% - ducked detrás de narración
+              // Outro: 8% → 5% transición suave, luego fade a 0
               const fadeOutStart = durationInFrames - musicBed.fadeOutFrames;
-              if (f > fadeOutStart) {
+
+              // Prompt 45: Outro con música más baja para cierre premium
+              if (f >= outroStart) {
+                if (f > fadeOutStart) {
+                  return interpolate(
+                    f,
+                    [fadeOutStart, durationInFrames],
+                    [musicBed.outroVolume, 0],
+                    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+                  );
+                }
+                // Transición suave content → outro volume
                 return interpolate(
                   f,
-                  [fadeOutStart, durationInFrames],
-                  [musicBed.contentVolume, 0],
+                  [outroStart, outroStart + crossfadeFrames],
+                  [musicBed.contentVolume, musicBed.outroVolume],
                   { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
                 );
               }
+
+              // Prompt 45: Hero con swell energético (22% → 25% → 22% entre frames 30-90)
               if (f < contentStart) {
-                return musicBed.heroVolume;
+                return interpolate(
+                  f,
+                  [heroImpact.energyRampStart, heroImpact.energyRampPeak, heroImpact.energyRampEnd],
+                  [musicBed.heroVolume, heroImpact.musicSwellPeak, musicBed.heroVolume],
+                  { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+                );
               }
+
+              // Crossfade hero → content
               if (f < contentStart + crossfadeFrames) {
                 return interpolate(
                   f,
@@ -300,12 +321,27 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
                   { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
                 );
               }
+
               return musicBed.contentVolume;
             }}
             loop
           />
         </Sequence>
       )}
+
+      {/* ==========================================
+          IMPACT SFX - Golpe editorial inicial (Prompt 45)
+          ==========================================
+          Sonido corto de impacto (~0.15s) en frame 0 para hook auditivo.
+          Capa de audio independiente — no afecta timing de narración ni música.
+          TODO: Replace with professional SFX file
+      */}
+      <Sequence from={0} durationInFrames={fps} name="ImpactSFX">
+        <Audio
+          src={staticFile(heroImpact.sfxSrc)}
+          volume={heroImpact.sfxVolume}
+        />
+      </Sequence>
 
       {/* ==========================================
           VOICE NARRATION - Voz TTS (Prompt 37-Fix1, Prompt 41)

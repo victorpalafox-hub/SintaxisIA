@@ -280,6 +280,15 @@ export const IMAGE_SCORING_CONFIG = {
   minimumScore: 35,
 
   /**
+   * Score mínimo para la PRIMERA imagen del video (segmentos 0-1).
+   * Más estricto que minimumScore para evitar imágenes genéricas
+   * que dañan credibilidad al inicio del video.
+   *
+   * @since Prompt 45
+   */
+  firstImageMinScore: 45,
+
+  /**
    * Score minimo de textRelevance para que una imagen sea considerada (GATE)
    * Si el score de textRelevance es menor a este valor, la imagen es rechazada
    * inmediatamente con score = 0, sin importar orientacion, resolucion o posicion.

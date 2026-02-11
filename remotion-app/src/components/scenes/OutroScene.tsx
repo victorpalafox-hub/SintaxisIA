@@ -21,6 +21,7 @@
  * @updated Prompt 19.9 - Fade-out final, Easing, config centralizada
  * @updated Prompt 19.11 - Crossfade: useVideoConfig, fade-in sincronizado con sceneTransition
  * @updated Prompt 20 - Migración a Tech Editorial: sombras sutiles, fondo transparente
+ * @updated Prompt 45 - Fade-out easing cúbico (1.5s gradual), cierre premium
  */
 
 import React from 'react';
@@ -77,12 +78,18 @@ export const OutroScene: React.FC<OutroSceneProps> = ({
     }
   );
 
-  // Fade-out suave en último segundo (Prompt 19.9)
+  // Fade-out gradual con easing cúbico (Prompt 45: 30→45 frames, Easing.out para cierre premium)
+  // Primeros 50% del fade toman ~1.1s (lento), últimos 50% en ~0.4s (rápido)
+  // El cerebro percibe "cierre suave progresivo" en lugar de "corte lineal"
   const fadeOut = interpolate(
     frame,
     [durationInFrames - outroAnimation.fadeOutFrames, durationInFrames],
     [1, 0],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+    {
+      extrapolateLeft: 'clamp',
+      extrapolateRight: 'clamp',
+      easing: Easing.out(Easing.cubic),
+    }
   );
 
   // Opacidad final: fade-in * fade-out

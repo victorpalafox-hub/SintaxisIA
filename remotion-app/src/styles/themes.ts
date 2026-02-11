@@ -343,8 +343,8 @@ export const outroAnimation = {
   glowMax: 0,
   /** Ciclo del glow pulsante (frames, 3s @ 30fps) */
   glowCycle: 90,
-  /** Frames para fade-out al final de la escena */
-  fadeOutFrames: 30,
+  /** Frames para fade-out al final de la escena (Prompt 45: 30→45 para cierre más gradual) */
+  fadeOutFrames: 45,
   /** Frame donde empieza el CTA (Prompt 41: 20→45 = 1.5s, logo se establece antes del CTA) */
   ctaDelayFrames: 45,
   /** Duración del fade-in del CTA (frames) */
@@ -383,6 +383,47 @@ export const heroAnimation = {
 };
 
 // ==========================================
+// CONFIGURACIÓN DE IMPACTO HERO (Prompt 45)
+// ==========================================
+
+/**
+ * Configuración del golpe editorial al inicio del video
+ *
+ * Flash intenso + micro-zoom snap + SFX de impacto + energy ramp.
+ * El espectador debe sentir "algo acaba de empezar" en < 1 segundo.
+ *
+ * @since Prompt 45
+ */
+export const heroImpact = {
+  /** Opacidad del flash de impacto (0.85 = 85% blanco, muy intenso, 1-2 frames) */
+  flashMaxOpacity: 0.85,
+  /** Frames que el flash se mantiene al máximo antes de decaer */
+  flashHoldFrames: 2,
+  /** Frames de decaimiento del flash hacia 0 */
+  flashDecayFrames: 4,
+  /** Escala inicial del micro-zoom (1.03 = 3% más grande, snap rápido) */
+  microZoomStart: 1.03,
+  /** Escala final del micro-zoom (1.0 = normal) */
+  microZoomEnd: 1.0,
+  /** Frames para completar el micro-zoom */
+  microZoomFrames: 10,
+  /** Volumen del SFX de impacto (0-1) */
+  sfxVolume: 0.75,
+  /** Ruta del archivo SFX de impacto */
+  sfxSrc: 'audio/impact-hit.wav',
+  /** Frame donde empieza el ramp de energía progresiva */
+  energyRampStart: 30,
+  /** Frame pico del ramp de energía */
+  energyRampPeak: 60,
+  /** Frame donde termina el ramp de energía */
+  energyRampEnd: 90,
+  /** Boost de escala en el pico del ramp (+2% = sutil pero perceptible) */
+  energyScaleBoost: 0.02,
+  /** Volumen pico del music swell durante el ramp (22% → 25% → 22%) */
+  musicSwellPeak: 0.25,
+};
+
+// ==========================================
 // CONFIGURACIÓN DE MUSIC BED (Prompt 27)
 // ==========================================
 
@@ -402,6 +443,8 @@ export const musicBed = {
   contentVolume: 0.08,
   /** Frames de fade-out al final del video (2s @ 30fps) */
   fadeOutFrames: 60,
+  /** Volumen durante OutroScene (más bajo que content para cierre suave) @since Prompt 45 */
+  outroVolume: 0.05,
   /** Ruta por defecto del archivo de audio bed */
   defaultSrc: 'audio/news-bed.wav',
 };

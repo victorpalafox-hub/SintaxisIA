@@ -14,6 +14,7 @@
  * @updated Prompt 19.1.6 - Integración Clearbit/Logo.dev, eliminado sufijo 'technology'
  * @updated Prompt 23 - Scoring inteligente + retry con queries alternativas
  * @updated Prompt 35 - Gate textRelevance, penalty generico, null en vez de UI Avatars
+ * @updated Prompt 45 - Gate editorial más estricto para primera imagen (firstImageMinScore: 45)
  */
 
 import { logger } from '../../utils/logger';
@@ -138,7 +139,7 @@ export class ImageOrchestrationService {
 
     // 1. Intentar Pexels con scoring inteligente (Prompt 23)
     if (isPexelsConfigured()) {
-      const scoredUrl = await this.searchPexelsWithScoring(searchQuery, searchQuery.split(' '));
+      const scoredUrl = await this.searchPexelsWithScoring(searchQuery, searchQuery.split(' '), index);
       if (scoredUrl) {
         return this.createSceneImage(index, startSecond, endSecond, scoredUrl, searchQuery, 'pexels');
       }
@@ -161,7 +162,7 @@ export class ImageOrchestrationService {
     for (const altQuery of smartQueries.alternatives) {
       if (isPexelsConfigured()) {
         logger.info(`[ImageOrchestration] Retry con alternativa: "${altQuery}"`);
-        const altUrl = await this.searchPexelsWithScoring(altQuery, altQuery.split(' '));
+        const altUrl = await this.searchPexelsWithScoring(altQuery, altQuery.split(' '), index);
         if (altUrl) {
           return this.createSceneImage(index, startSecond, endSecond, altUrl, altQuery, 'pexels');
         }
@@ -173,7 +174,7 @@ export class ImageOrchestrationService {
     const simplifiedQuery = translatedKeywords.slice(0, 2).join(' ');
     if (isPexelsConfigured() && simplifiedQuery !== searchQuery) {
       logger.info(`[ImageOrchestration] Retry simplificada: "${simplifiedQuery}"`);
-      const pexelsSimple = await this.searchPexelsWithScoring(simplifiedQuery, simplifiedQuery.split(' '));
+      const pexelsSimple = await this.searchPexelsWithScoring(simplifiedQuery, simplifiedQuery.split(' '), index);
       if (pexelsSimple) {
         return this.createSceneImage(index, startSecond, endSecond, pexelsSimple, simplifiedQuery, 'pexels');
       }
@@ -196,7 +197,8 @@ export class ImageOrchestrationService {
    */
   private async searchPexelsWithScoring(
     query: string,
-    queryKeywords: string[]
+    queryKeywords: string[],
+    segmentIndex: number = 99
   ): Promise<string | null> {
     const candidates = await searchPexelsMultiple(
       query,
@@ -222,7 +224,11 @@ export class ImageOrchestrationService {
       }
     }
 
-    if (bestCandidate && bestScore >= IMAGE_SCORING_CONFIG.minimumScore) {
+    // Prompt 45: Primer imagen requiere score más alto (45 vs 35)
+    const minScore = segmentIndex <= 1
+      ? IMAGE_SCORING_CONFIG.firstImageMinScore
+      : IMAGE_SCORING_CONFIG.minimumScore;
+    if (bestCandidate && bestScore >= minScore) {
       logger.info(`[ImageOrchestration] Pexels scoring: mejor=${bestScore.toFixed(0)}/66 (${bestCandidate.alt.substring(0, 40)})`);
       return bestCandidate.url;
     }

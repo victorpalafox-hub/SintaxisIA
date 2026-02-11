@@ -31,6 +31,8 @@ cache/
 *.wav
 # Excepción: audio bed bundled para HeroScene (Prompt 27)
 !remotion-app/public/audio/news-bed.wav
+# Excepción: impact SFX bundled para HeroScene (Prompt 45)
+!remotion-app/public/audio/impact-hit.wav
 
 # ===================================
 # CACHE Y TEMPORALES

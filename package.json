@@ -194,7 +194,9 @@
     "test:audio-duration": "playwright test tests/specs/prompt37-audio-duration-fix.spec.ts",
     "test:prompt37": "playwright test tests/specs/prompt37-audio-duration-fix.spec.ts",
     "test:editorial-integral": "playwright test tests/specs/prompt44-editorial-integral.spec.ts",
-    "test:prompt44": "playwright test tests/specs/prompt44-editorial-integral.spec.ts"
+    "test:prompt44": "playwright test tests/specs/prompt44-editorial-integral.spec.ts",
+    "test:micro-polish": "playwright test tests/specs/prompt45-micro-polish.spec.ts",
+    "test:prompt45": "playwright test tests/specs/prompt45-micro-polish.spec.ts"
   },
   "keywords": [
     "youtube",

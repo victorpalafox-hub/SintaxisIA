@@ -141,10 +141,10 @@ test.describe('Prompt 41 - Outro Pacing', () => {
 test.describe('Prompt 41 - Regresión', () => {
   const logger = new TestLogger({ testName: 'Prompt41-Regresion' });
 
-  test('outroAnimation.fadeOutFrames = 30 sin cambio', async () => {
-    logger.info('Verificando fadeOutFrames intacto');
+  test('outroAnimation.fadeOutFrames = 45 (Prompt 45 micro-polish)', async () => {
+    logger.info('Verificando fadeOutFrames gradual');
     const themes = fs.readFileSync(THEMES_PATH, 'utf-8');
-    expect(themes).toMatch(/fadeOutFrames:\s*30/);
+    expect(themes).toMatch(/fadeOutFrames:\s*45/);
   });
 
   test('crossfadeFrames = 30 sin cambio', async () => {

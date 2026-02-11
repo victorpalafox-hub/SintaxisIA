@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 1557 tests (1555 passing, 2 skipped)
+**Test Status**: 1584 tests (1582 passing, 2 skipped)
 
-**Last Updated**: 2026-02-10 (Prompt 44 - Corrección editorial integral: narración alineada con contentStart, music bed hero 22%, frases cortas 48 chars)
+**Last Updated**: 2026-02-10 (Prompt 45 - Micro-Polish Editorial: hook real impact flash+SFX, micro-zoom, energy ramp, image gate 45pts, outro breathing easing)
 
 ## Prerequisites
 
@@ -67,7 +67,7 @@ npm run check
 | CI validation | `npm run ci:validate` |
 | News Manager | `npm run news:history / news:stats / news:help` |
 
-**Test suites**: 1557 tests en 60 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
+**Test suites**: 1584 tests en 61 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
 
 **Playwright config**: 4 workers local / 1 en CI, timeout 2min por test, retries solo en CI (2), reporters: HTML + JSON + JUnit.
 
@@ -468,13 +468,14 @@ output/
 | EditorialShadow | textDepth, imageElevation, logoBrandTint | Reemplaza glows neón (Prompt 20) |
 | Anti-Duplicación | `PublishedNewsTracker` + `selectTopNewsExcluding()` | 3 capas: ID, titulo 80%, empresa+producto 7d |
 | SmartQuery | `translateKeywords()`, `generateQueries()` | 170+ ES→EN, max 3 kw/query, 2 alternativas |
-| ImageScoring | `searchPexelsWithScoring()`, `scoreCandidate()` | 5 candidatos, gate textRelevance≥8, penalty genérico -20, umbral 35, null si no relevante |
+| ImageScoring | `searchPexelsWithScoring()`, `scoreCandidate()` | 5 candidatos, gate textRelevance≥8, penalty genérico -20, umbral 35 (primera imagen 45), null si no relevante |
 | SafeImage | `SafeImage.tsx`, `hasError`, `return null` | Sin placeholder (Prompt 38-Fix2), error=null, no UI Avatars, fallbackSrc opcional |
 | News Manager CLI | `news-manager-cli.ts` (10 comandos: history/active/expired/search/view/unlock/cleanup/clear/stats/help) | Peer de cli.ts, ts-node directo para args |
 | NewsEnricher | `enrichAll()`, `detectCompany()`, `detectType()` | 81 aliases, 8 type patterns, PASO 2 real |
 | AudioSync | `Sequence(0)`, `phraseTimestamps` pipeline | Voz desde frame 0 (Prompt 37-Fix1), ContentScene offset contentStart/fps, lead 200ms, lag 150ms, max 3 img |
 | HeroFlash | `flashMaxOpacity`, `flashDurationFrames` | 0.15 opacity, 10 frames (~0.3s) |
-| MusicBed | `musicBed` config + `<Audio>` loop desde frame 0 | hero 22%, content 8%, fadeOut 60 frames |
+| HeroImpact | `heroImpact` config, impact flash+SFX, micro-zoom, energy ramp | flash 0.85, hold 2f, zoom 1.03→1.0, energy 30-90f, swell 22→25→22%, SFX 0.75 vol |
+| MusicBed | `musicBed` config + `<Audio>` loop desde frame 0 | hero 22%, content 8%, outro 5%, fadeOut 60 frames |
 | ImageEditorial | `imageAnimation` width/height/borderRadius | 920x520, borderRadius 24, crossfade real |
 | TopicSegmentation | `findTopicBoundaries()`, `findMarkerPositions()` | 18 marcadores ES, targets 33%/66%, min 8s, score ≥0.3 |
 | DynamicDuration | `calculateMetadata` en Root.tsx, `BREATHING_ROOM_FRAMES` | Composition dinámica via props, 1s breathing room antes de outro |
@@ -556,6 +557,7 @@ output/
 | 41 | Cierre editorial real | 21 | Narración termina en outroStart (no durationInFrames), breathing room 30→45f, CTA delay 20→45f, voice fade 30→45f |
 | 42 | Unificación fuente de texto | 37 | `HeroScene.tsx` titleDelayedIn/titleEarlyOut, `ContentScene.tsx` sin `\|\| description`, exclusividad texto por frame |
 | 44 | Corrección editorial integral | 22 | `AINewsShort.tsx` Narration from={contentStart}, music bed hero 22%→8% transición, `text-splitter.ts`/`themes.ts` maxChars 48 |
+| 45 | Micro-Polish Editorial | 27 | `heroImpact` config, impact flash 0.85+SFX, micro-zoom 1.03, energy ramp, `firstImageMinScore: 45`, outro easing cúbico, `outroVolume: 0.05` |
 
 ## Pendientes
 

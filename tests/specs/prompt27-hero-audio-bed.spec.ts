@@ -194,17 +194,17 @@ test.describe('Prompt 27 - AINewsShort BackgroundMusic', () => {
     await logger.info('AudioMixer solo con voice');
   });
 
-  test('5 Sequences totales (Hero, Content, Outro, BackgroundMusic, Narration)', async () => {
-    await logger.info('Verificando 5 Sequences');
+  test('7 Sequences totales (Hero, Content, Outro, BackgroundMusic, Narration, TitleCard, ImpactSFX)', async () => {
+    await logger.info('Verificando 7 Sequences');
 
     const content = fs.readFileSync(AI_NEWS_SHORT_PATH, 'utf-8');
 
     const matches = content.match(/<Sequence/g);
     expect(matches).toBeTruthy();
-    // Prompt 32: +1 TitleCard Sequence = 6 total
-    expect(matches!.length).toBe(6);
+    // Prompt 32: +1 TitleCard + Prompt 45: +1 ImpactSFX = 7 total
+    expect(matches!.length).toBe(7);
 
-    await logger.info('6 Sequences presentes');
+    await logger.info('7 Sequences presentes');
   });
 });
 
@@ -226,14 +226,15 @@ test.describe('Prompt 27 - HeroScene Micro Zoom-in', () => {
     await logger.info('sceneZoom presente');
   });
 
-  test('sceneZoom se aplica al container interno con transform: scale', async () => {
+  test('sceneZoom se aplica al container interno con transform: scale (Prompt 45: multiplicativo)', async () => {
     await logger.info('Verificando transform scale');
 
     const content = fs.readFileSync(HERO_SCENE_PATH, 'utf-8');
 
-    expect(content).toContain('scale(${sceneZoom})');
+    // Prompt 45: scale ahora es multiplicativo: sceneZoom * microZoom * (1 + energyBoost)
+    expect(content).toContain('sceneZoom * microZoom');
 
-    await logger.info('sceneZoom aplicado al container');
+    await logger.info('sceneZoom multiplicativo aplicado al container');
   });
 
   test('HeroScene tiene @updated Prompt 27', async () => {
