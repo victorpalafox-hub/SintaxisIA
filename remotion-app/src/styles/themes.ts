@@ -395,32 +395,32 @@ export const heroAnimation = {
  * @since Prompt 45
  */
 export const heroImpact = {
-  /** Opacidad del flash de impacto (0.85 = 85% blanco, muy intenso, 1-2 frames) */
-  flashMaxOpacity: 0.85,
+  /** Opacidad del flash de impacto (Prompt 47: 0.85→0.35 = golpe cinematográfico leve, no cegador) */
+  flashMaxOpacity: 0.35,
   /** Frames que el flash se mantiene al máximo antes de decaer */
   flashHoldFrames: 2,
   /** Frames de decaimiento del flash hacia 0 */
   flashDecayFrames: 4,
-  /** Escala inicial del micro-zoom (1.03 = 3% más grande, snap rápido) */
-  microZoomStart: 1.03,
+  /** Escala inicial del micro-zoom (Prompt 47: 1.03→1.06 = +6%, zoom más evidente) */
+  microZoomStart: 1.06,
   /** Escala final del micro-zoom (1.0 = normal) */
   microZoomEnd: 1.0,
-  /** Frames para completar el micro-zoom */
-  microZoomFrames: 10,
+  /** Frames para completar el micro-zoom (Prompt 47: 10→15 frames) */
+  microZoomFrames: 15,
   /** Volumen del SFX de impacto (0-1) */
   sfxVolume: 0.75,
   /** Ruta del archivo SFX de impacto */
   sfxSrc: 'audio/impact-hit.wav',
-  /** Frame donde empieza el ramp de energía progresiva */
-  energyRampStart: 30,
-  /** Frame pico del ramp de energía */
-  energyRampPeak: 60,
-  /** Frame donde termina el ramp de energía */
-  energyRampEnd: 90,
+  /** Frame donde empieza el ramp de energía progresiva (Prompt 47: 30→0 = desde frame 0) */
+  energyRampStart: 0,
+  /** Frame pico del ramp de energía (Prompt 47: 60→30 = peak más rápido, 1 segundo) */
+  energyRampPeak: 30,
+  /** Frame donde termina el ramp de energía (Prompt 47: 90→60) */
+  energyRampEnd: 60,
   /** Boost de escala en el pico del ramp (+2% = sutil pero perceptible) */
   energyScaleBoost: 0.02,
-  /** Volumen pico del music swell durante el ramp (22% → 25% → 22%) */
-  musicSwellPeak: 0.25,
+  /** Volumen pico del music swell durante el ramp (Prompt 47: 0.25→0.40 = swell más enérgico) */
+  musicSwellPeak: 0.40,
 };
 
 // ==========================================
@@ -437,8 +437,8 @@ export const heroImpact = {
  * @since Prompt 27
  */
 export const musicBed = {
-  /** Volumen durante HeroScene (sin competencia de voz) */
-  heroVolume: 0.22,
+  /** Volumen durante HeroScene (Prompt 47: 0.22→0.35 = más presente como hook auditivo) */
+  heroVolume: 0.35,
   /** Volumen durante Content/Outro (ducked por voz) */
   contentVolume: 0.08,
   /** Frames de fade-out al final del video (2s @ 30fps) */
@@ -447,6 +447,8 @@ export const musicBed = {
   outroVolume: 0.05,
   /** Ruta por defecto del archivo de audio bed */
   defaultSrc: 'audio/news-bed.wav',
+  /** Frames de fade-in al inicio del video (Prompt 47: 5 frames = ~0.17s, arranque suave sin pop) */
+  heroFadeInFrames: 5,
 };
 
 // ==========================================
@@ -808,6 +810,26 @@ export const editorialShadow = {
   logoBrandTint: (color: string) => `0 4px 24px ${color}25, 0 8px 32px rgba(0,0,0,0.3)`,
   /** Sombra para barra de progreso */
   progressBar: (color: string) => `0 0 8px ${color}40`,
+};
+
+// ==========================================
+// CONFIGURACIÓN DE BREATHING MOTION (Prompt 47)
+// ==========================================
+
+/**
+ * Movimiento de respiración permanente para HeroScene
+ *
+ * Animación senoidal muy sutil que asegura que nunca haya
+ * una imagen completamente estática. Evita la sensación de
+ * "video que todavía no empieza".
+ *
+ * @since Prompt 47
+ */
+export const breathingMotion = {
+  /** Amplitud del scale (0.005 = ±0.5%, imperceptible pero vivo) */
+  amplitude: 0.005,
+  /** Divisor del frame para frecuencia (40 = ~1.3s por ciclo @ 30fps) */
+  frequency: 40,
 };
 
 // Colección de todos los temas disponibles

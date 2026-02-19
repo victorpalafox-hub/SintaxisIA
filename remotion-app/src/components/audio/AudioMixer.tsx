@@ -46,7 +46,8 @@ import type { AudioMixerProps } from '../../types/audio.types';
  */
 export const AudioMixer: React.FC<AudioMixerProps> = ({
   voice,
-  music
+  music,
+  playbackRate = 1,
 }) => {
   // Obtener frame actual y configuración del video
   const frame = useCurrentFrame();
@@ -132,6 +133,7 @@ export const AudioMixer: React.FC<AudioMixerProps> = ({
   return (
     <>
       {/* Audio de voz TTS - Protagonista con fade-out (Prompt 32.1) */}
+      {/* Fix: playbackRate > 1 comprime el audio si el video supera SAFE_MAX_SECONDS */}
       {voice.src && (
         <Audio
           src={staticFile(normalizeAudioPath(voice.src))}
@@ -146,6 +148,7 @@ export const AudioMixer: React.FC<AudioMixerProps> = ({
             return voiceVolume * fadeOut;
           }}
           startFrom={voiceStartFrom}
+          playbackRate={playbackRate}
         />
       )}
 

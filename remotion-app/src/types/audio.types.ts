@@ -39,6 +39,12 @@ export interface AudioMixerProps {
   voice: AudioSource;
   /** Configuración opcional de música de fondo */
   music?: MusicConfig;
+  /**
+   * Velocidad de reproducción del audio de voz (default: 1).
+   * Fix: Si el audio excede SAFE_MAX_SECONDS, se comprime > 1 para caber en el límite.
+   * Solo se aplica cuando durationInFrames > SAFE_MAX_FRAMES.
+   */
+  playbackRate?: number;
 }
 
 /**

@@ -32,7 +32,7 @@ import {
   useVideoConfig,
   Easing,
 } from 'remotion';
-import { colors, spacing, heroAnimation, heroImpact, sceneTransition, editorialShadow, editorialText, titleCard } from '../../styles/themes';
+import { colors, spacing, heroAnimation, heroImpact, sceneTransition, editorialShadow, editorialText, titleCard, breathingMotion } from '../../styles/themes';
 import { SafeImage } from '../elements/SafeImage';
 import type { HeroSceneProps } from '../../types/video.types';
 
@@ -131,10 +131,23 @@ export const HeroScene: React.FC<HeroSceneProps> = ({
   // El título de Hero aparece gradualmente después de que TitleCard hace fade-out.
   const titleCardEnd = titleCard.durationFrames; // 90
   const titleCardFadeStart = titleCardEnd - titleCard.fadeOutFrames; // 75
+
+  // Prompt 47: Título con energía — visible desde frame 2, opacidad máxima en frame 10.
+  // Antes: fade lento frames [75,105] (2.5s de latencia). Ahora: entrada en 0.27s.
+  // El TitleCard overlay tapa visualmente este título hasta ~frame 75-90,
+  // así que no hay overlap perceptible — el título ya está listo cuando TitleCard se va.
   const titleDelayedIn = interpolate(
     frame,
-    [titleCardFadeStart, titleCardEnd + 15], // Fade in suave de frame 75 a 105
+    [2, 10], // 8 frames = ~0.27s de entrada energética
     [0, 1],
+    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+  );
+
+  // Prompt 47: Slide vertical -20px → 0 sincronizado con titleDelayedIn
+  const titleTranslateY = interpolate(
+    frame,
+    [2, 10],
+    [-20, 0],
     { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
   );
 
@@ -210,6 +223,11 @@ export const HeroScene: React.FC<HeroSceneProps> = ({
     { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
   );
 
+  // Prompt 47: Breathing motion — nunca imagen completamente estática.
+  // Movimiento senoidal ±0.5% imperceptible pero que da vida permanente.
+  // Regla: nunca > 60 frames de imagen totalmente quieta.
+  const breathingScale = 1 + Math.sin(frame / breathingMotion.frequency) * breathingMotion.amplitude;
+
   // ==========================================
   // FADE-OUT PARA CROSSFADE (Prompt 19.11)
   // ==========================================
@@ -244,7 +262,7 @@ export const HeroScene: React.FC<HeroSceneProps> = ({
           justifyContent: 'center',
           gap: spacing.padding.xl,
           padding: `${spacing.safe.top}px ${spacing.safe.horizontal}px ${spacing.safe.bottom}px`,
-          transform: `scale(${sceneZoom * microZoom * (1 + energyBoost)})`,
+          transform: `scale(${sceneZoom * microZoom * (1 + energyBoost) * breathingScale})`,
         }}
       >
         {/* IMAGEN HERO (Logo empresa) */}
@@ -275,9 +293,10 @@ export const HeroScene: React.FC<HeroSceneProps> = ({
         {/* TITULO PRINCIPAL — Prompt 42: exclusividad de texto por frame */}
         <div
           style={{
-            transform: `translateY(${titleY}px)`,
+            // Prompt 47: titleTranslateY añade slide -20px→0 en primeros 8 frames (energía de entrada)
+            transform: `translateY(${titleY + titleTranslateY}px)`,
             // Prompt 42: Opacidad compuesta = spring × delayed-in × early-out
-            // Invisible durante TitleCard (0-75), fade-in (75-105), fade-out antes de crossfade (195-210)
+            // Prompt 47: titleDelayedIn ahora usa frames [2,10] en lugar de [75,105]
             opacity: titleOpacity * titleDelayedIn * titleEarlyOut,
             fontFamily: 'Inter, Roboto, Arial, sans-serif',
             // Prompt 39-Fix3: Usar nivel headline de editorialText (fuente única de verdad)
