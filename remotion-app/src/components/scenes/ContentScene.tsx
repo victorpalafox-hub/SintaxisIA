@@ -30,6 +30,7 @@
  * @updated Prompt 38-Fix2 - Regla dura: no reutilizar imagen previa, null = no imagen
  * @updated Prompt 42 - Fuente única de texto: sin fallback a description cruda, exclusividad por frame
  * @updated Prompt 48 - Micro-dinámica: image breathing+X-drift, text micro-drift, transition zoom
+ * @updated Prompt 49 - Ritmo narrativo: curva de intensidad global modula amplitud de micro-dinámicas
  */
 
 import React, { useMemo } from 'react';
@@ -40,10 +41,10 @@ import {
   useVideoConfig,
   Easing,
 } from 'remotion';
-import { colors, spacing, textAnimation, imageAnimation, contentTextStyle, contentAnimation, sceneTransition, editorialShadow, editorialText, visualEmphasis, microDynamics } from '../../styles/themes';
+import { colors, spacing, textAnimation, imageAnimation, contentTextStyle, contentAnimation, sceneTransition, editorialShadow, editorialText, visualEmphasis, microDynamics, narrativeRhythm } from '../../styles/themes';
 import { ProgressBar } from '../ui/ProgressBar';
 import { SafeImage } from '../elements/SafeImage';
-import { splitIntoReadablePhrases, getPhraseTiming, getBlockTiming, buildEditorialBlocks, detectEmphasis, getEmphasisForBlock } from '../../utils';
+import { splitIntoReadablePhrases, getPhraseTiming, getBlockTiming, buildEditorialBlocks, detectEmphasis, getEmphasisForBlock, getIntensityMultiplier } from '../../utils';
 import type { ContentSceneProps } from '../../types/video.types';
 
 /**
@@ -163,6 +164,10 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
   // Prompt 25: Usar durationInFrames real del Sequence (no hardcoded 37*fps)
   const sceneDurationFrames = durationInFrames;
 
+  // Prompt 49: Curva de intensidad narrativa (modula amplitud de micro-dinámicas)
+  // 3 capas: curva por fase (opening→build→climax) × pausa rítmica × desaceleración pre-final
+  const intensity = getIntensityMultiplier(frame, fps, durationInFrames, narrativeRhythm);
+
   // ==========================================
   // EFECTOS DINÁMICOS DE IMAGEN (Prompt 19.8)
   // ==========================================
@@ -195,17 +200,17 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
     : 1.0;
 
   // Prompt 48: Breathing de imagen (scale senoidal permanente)
-  // Complementa el zoom lento existente con micro-pulso orgánico
+  // Prompt 49: Amplitud modulada por curva de intensidad narrativa
   const imageBreathingScale = dynamicEffects && contextImage
     ? 1 + Math.sin(frame * (2 * Math.PI / microDynamics.imageBreathing.cycleFrames))
-        * microDynamics.imageBreathing.amplitude
+        * microDynamics.imageBreathing.amplitude * intensity
     : 1;
 
   // Prompt 48: Drift horizontal senoidal (complementa parallax Y existente)
-  // Usa coseno para desfase de 90° respecto al breathing
+  // Prompt 49: Amplitud modulada por curva de intensidad narrativa
   const imageXDrift = dynamicEffects && contextImage
     ? Math.cos(frame * (2 * Math.PI / microDynamics.imageXDrift.cycleFrames))
-      * microDynamics.imageXDrift.amplitude
+      * microDynamics.imageXDrift.amplitude * intensity
     : 0;
 
   // Fade in de imagen (Prompt 19.3 - transición más suave)
@@ -330,9 +335,10 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
   // Solo activo cuando el slide-up completó (blockRelativeFrame > weightSlideFrames)
   // Senoidal muy sutil (2px) para dar vida al texto sin distraer la lectura
   const textEntryComplete = blockRelativeFrame > weightSlideFrames ? 1 : 0;
+  // Prompt 49: Amplitud modulada por curva de intensidad narrativa
   const textMicroDriftY = dynamicEffects && textEntryComplete
     ? Math.sin(frame * (2 * Math.PI / microDynamics.textMicroDrift.cycleFrames))
-      * microDynamics.textMicroDrift.amplitude
+      * microDynamics.textMicroDrift.amplitude * intensity
     : 0;
 
   // Énfasis visual del bloque actual (Prompt 34)

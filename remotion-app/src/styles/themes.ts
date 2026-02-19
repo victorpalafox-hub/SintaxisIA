@@ -8,6 +8,7 @@
  * Permite cambiar fácilmente entre estilos visuales.
  * Actualmente activo: Tech Editorial (Prompt 20)
  * @updated Prompt 39-Fix3 - Jerarquía tipográfica fija (headline 72, support 54, punch 84)
+ * @updated Prompt 49 - narrativeRhythm: curva de intensidad global (opening→build→climax + pausas + decel)
  *
  * Para cambiar de tema:
  * 1. Cambiar la línea: export const activeTheme = themes.techEditorial;
@@ -885,6 +886,55 @@ export const microDynamics = {
     amplitude: 0.003,
     /** Frames por ciclo completo (2s @ 30fps) */
     cycleFrames: 60,
+  },
+};
+
+// ==========================================
+// CONFIGURACIÓN DE RITMO NARRATIVO (Prompt 49)
+// ==========================================
+
+/**
+ * Curva de intensidad global que modula micro-dinámicas (Prompt 48)
+ *
+ * El video se divide en 3 fases con intensidad diferente:
+ * - Opening (0-20s): energía alta, captura atención
+ * - Build (20-40s): moderada, descanso visual
+ * - Climax (40s+): escalada final, cierre con fuerza
+ *
+ * Además aplica micro-pausas rítmicas periódicas y
+ * desaceleración pre-final para un cierre natural.
+ *
+ * @since Prompt 49
+ */
+export const narrativeRhythm = {
+  /** Curva de intensidad por fase del video (multiplica micro-dinámicas) */
+  intensityCurve: {
+    /** Segundo donde termina la apertura */
+    openingEnd: 20,
+    /** Intensidad durante la apertura (1.0 = 100%) */
+    openingIntensity: 1.0,
+    /** Segundo donde termina el desarrollo */
+    buildEnd: 40,
+    /** Intensidad durante el desarrollo (0.75 = descanso visual) */
+    buildIntensity: 0.75,
+    /** Intensidad durante el clímax (1.15 = escalada final) */
+    climaxIntensity: 1.15,
+  },
+  /** Micro-pausa rítmica: reduce intensidad brevemente cada ~5.5s */
+  rhythmPause: {
+    /** Frames entre micro-pausas (~5.5s @ 30fps) */
+    intervalFrames: 165,
+    /** Duración de la micro-pausa en frames (~0.5s) */
+    durationFrames: 15,
+    /** Factor de reducción durante pausa (0.4 = 40% de intensidad) */
+    dampingFactor: 0.4,
+  },
+  /** Desaceleración pre-final: calma visual antes del FinalFadeOut */
+  preFinalDecel: {
+    /** Frames antes del fin donde empieza la desaceleración (2s @ 30fps) */
+    leadFrames: 60,
+    /** Factor mínimo de intensidad al final */
+    minIntensity: 0.3,
   },
 };
 

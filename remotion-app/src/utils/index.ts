@@ -37,3 +37,7 @@ export {
   type BlockEmphasis,
   type EmphasisMap,
 } from './visual-emphasis';
+
+export {
+  getIntensityMultiplier,
+} from './narrative-rhythm';
