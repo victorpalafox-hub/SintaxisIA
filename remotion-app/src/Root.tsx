@@ -27,8 +27,17 @@ import type { VideoProps } from './types/video.types';
 const calculateMetadata: CalculateMetadataFunction<Partial<VideoProps>> = async ({ props }) => {
   const fps = props.config?.fps ?? 30;
   const duration = props.config?.duration ?? 50;
+
+  // Fix: YouTube Shorts tiene un límite de 60s. Usar 59.2s como margen seguro.
+  // Sin este cap, un audio de 60.05s genera durationInFrames = 1801 → excede límite.
+  const SAFE_MAX_SECONDS = 59.2;
+  const safeFrames = Math.min(
+    Math.floor(duration * fps),
+    Math.floor(SAFE_MAX_SECONDS * fps) // 1776 frames @ 30fps
+  );
+
   return {
-    durationInFrames: duration * fps,
+    durationInFrames: safeFrames,
     fps,
   };
 };

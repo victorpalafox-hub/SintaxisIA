@@ -719,8 +719,13 @@ class VideoRenderingService {
       audioSync,
       config: {
         // Prompt 30/37: Duración dinámica basada en audio real + breathing room
-        // Hero 8s + max(37s, audioDuration + 1s fade) + breathing 1s + Outro 5s
-        duration: Math.ceil(8 + Math.max(37, effectiveAudioDuration + 1) + 1 + 5),
+        // Hero 8s + max(37s, audioDuration + 1s fade) + breathing 1.5s + Outro 5s
+        // Fix: Cap a 59.2s para garantizar que nunca exceda el límite de YouTube Shorts (60s)
+        // Root.tsx → calculateMetadata también aplica este cap como segunda línea de defensa
+        duration: Math.min(
+          Math.ceil(8 + Math.max(37, effectiveAudioDuration + 1) + 1.5 + 5),
+          59.2 // SAFE_MAX_SECONDS: margen de 0.8s respecto al límite de 60s de Shorts
+        ),
         fps: VIDEO_CONFIG.specs.fps,
         enhancedEffects: true,
       },

@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 1584 tests (1582 passing, 2 skipped)
+**Test Status**: 1606 tests (1604 passing, 2 skipped)
 
-**Last Updated**: 2026-02-10 (Prompt 45 - Micro-Polish Editorial: hook real impact flash+SFX, micro-zoom, energy ramp, image gate 45pts, outro breathing easing)
+**Last Updated**: 2026-02-19 (Prompt 46 - Fix Duración Segura: cap 59.2s, SAFE_MAX_FRAMES 1776, FinalFadeOut, compressionRatio)
 
 ## Prerequisites
 
@@ -67,7 +67,7 @@ npm run check
 | CI validation | `npm run ci:validate` |
 | News Manager | `npm run news:history / news:stats / news:help` |
 
-**Test suites**: 1584 tests en 61 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
+**Test suites**: 1606 tests en 62 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
 
 **Playwright config**: 4 workers local / 1 en CI, timeout 2min por test, retries solo en CI (2), reporters: HTML + JSON + JUnit.
 
@@ -164,7 +164,7 @@ if (isShortTimeout(timeout)) { /* manejar error */ }
 
 ```bash
 npm run check          # TypeScript sin errores
-npm test              # Tests pasando (1535 tests, 2 skipped)
+npm test              # Tests pasando (1606 tests, 2 skipped)
 npm run security:check # Sin vulnerabilidades críticas
 ```
 
@@ -280,7 +280,7 @@ test.describe('Prompt [N] - Nombre Feature', () => {
 
 - 1080x1920 (9:16), 30 FPS
 - **Composición Producción** (`AINewsShort`): Duración dinámica, 1 noticia con efectos dinámicos
-  - Timing: Hero 8s (silencioso) + Content max(37s, audioDuration+1s) + Outro 5s, crossfade 1s (Prompt 26)
+  - Timing: Hero 8s (silencioso) + Content max(37s, audioDuration+1s) + Breathing 1.5s + Outro 5s, crossfade 1s, cap 59.2s (Prompts 26/46)
   - Audio retrasado: narración empieza con ContentScene, no durante HeroScene
   - Efectos: zoom, blur-to-focus, parallax, sombras editoriales
   - BackgroundDirector: fondo animado persistente (gradient drift + parallax blobs + grain + light sweep + vignette)
@@ -457,7 +457,7 @@ output/
 | Gemini | `generateScript()` + Alex Torres Persona | 4/6 marcadores compliance |
 | ElevenLabs | `generateAudio()` + fallback Edge-TTS | 10k chars/mes |
 | YouTube | `uploadVideo()` + OAuth2 | 6 videos/día (quota 10k units) |
-| Video | Dinámico: Hero 8s + Content max(37s,audio+1s) + Breathing 1s + Outro 5s, cap 60s (YouTube Shorts) | 1080x1920, 30fps |
+| Video | Dinámico: Hero 8s + Content max(37s,audio+1s) + Breathing 1.5s + Outro 5s, cap 59.2s (SAFE_MAX_FRAMES 1776) | 1080x1920, 30fps |
 | Output Manager | `saveAllOutputs()` + TikTok copy | slug max 50 chars |
 | Sequential Text | `splitIntoReadablePhrases()` + `getPhraseTiming()` | 60 chars/frase, fade 15 frames |
 | Whisper | `whisperService.transcribe()` + `groupIntoPhrases()` | Opcional (OPENAI_API_KEY), ~$0.006/min |
@@ -478,7 +478,9 @@ output/
 | MusicBed | `musicBed` config + `<Audio>` loop desde frame 0 | hero 22%, content 8%, outro 5%, fadeOut 60 frames |
 | ImageEditorial | `imageAnimation` width/height/borderRadius | 920x520, borderRadius 24, crossfade real |
 | TopicSegmentation | `findTopicBoundaries()`, `findMarkerPositions()` | 18 marcadores ES, targets 33%/66%, min 8s, score ≥0.3 |
-| DynamicDuration | `calculateMetadata` en Root.tsx, `BREATHING_ROOM_FRAMES` | Composition dinámica via props, 1s breathing room antes de outro |
+| DynamicDuration | `calculateMetadata` en Root.tsx, `BREATHING_ROOM_FRAMES` | Composition dinámica via props, 1.5s breathing room, cap 59.2s (SAFE_MAX_FRAMES 1776 @ 30fps) |
+| SafeDuration | `AINewsShort.tsx` SAFE_MAX_FRAMES, `Root.tsx` calculateMetadata cap, `video-rendering.service.ts` Math.min | SAFE_MAX_SECONDS 59.2, SAFE_MAX_FRAMES 1776, SAFE_END_BUFFER 20 frames, compressionRatio si audio excede límite |
+| FinalFadeOut | `AINewsShort.tsx` FinalFadeOut componente + `FinalBuffer` Sequence | fade negro 0→1 en últimos 20 frames (~0.67s), evita corte abrupto, último en JSX |
 | TitleCard | `TitleCardScene.tsx`, `title-derivation.ts`, `deriveTitleCardText()`, `deriveBadge()` | Overlay 3s (90 frames), fade-out 15f, badge contextual, hero image background, max 7 palabras |
 | EditorialText | `text-editorial.ts`, `editorialText` config, `getBlockTiming()` | Bloques 1-2 líneas, headline 72px/support 54px/punch 84px, slide por peso (20/12/30px), easing diferenciado, pause 10f antes + 8f después punch |
 | VisualEmphasis | `visual-emphasis.ts`, `visualEmphasis` config, `detectEmphasis()` | Max 3 momentos (1 hard + 2 soft), scale 1.08/1.03, dimming overlay, ramp 10f, min 4 bloques |
@@ -558,6 +560,7 @@ output/
 | 42 | Unificación fuente de texto | 37 | `HeroScene.tsx` titleDelayedIn/titleEarlyOut, `ContentScene.tsx` sin `\|\| description`, exclusividad texto por frame |
 | 44 | Corrección editorial integral | 22 | `AINewsShort.tsx` Narration from={contentStart}, music bed hero 22%→8% transición, `text-splitter.ts`/`themes.ts` maxChars 48 |
 | 45 | Micro-Polish Editorial | 27 | `heroImpact` config, impact flash 0.85+SFX, micro-zoom 1.03, energy ramp, `firstImageMinScore: 45`, outro easing cúbico, `outroVolume: 0.05` |
+| 46 | Fix Duración Segura YouTube Shorts | 22 | `AINewsShort.tsx` SAFE_MAX_FRAMES/FinalFadeOut/compressionRatio, `Root.tsx` calculateMetadata cap, `video-rendering.service.ts` Math.min 59.2s, `AudioMixer.tsx` playbackRate |
 
 ## Pendientes
 

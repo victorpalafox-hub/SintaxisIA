@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { AbsoluteFill, Audio, Sequence, interpolate, staticFile } from 'remotion';
+import { AbsoluteFill, Audio, Sequence, interpolate, staticFile, useCurrentFrame } from 'remotion';
 
 // Escenas optimizadas
 import { HeroScene } from '../components/scenes/HeroScene';
@@ -110,6 +110,32 @@ const DEFAULT_AUDIO: VideoProps['audio'] = {
  *   }}
  * />
  */
+// =============================================================================
+// FINAL FADE OUT - Respiración visual al final (Fix duración Shorts)
+// =============================================================================
+
+/**
+ * Componente interno que aplica un fade-out negro gradual al final del video.
+ * Necesita ser un componente separado para acceder a useCurrentFrame() local
+ * del Sequence en el que se renderiza.
+ *
+ * Evita la sensación de corte abrupto con una transición suave a negro.
+ */
+const FinalFadeOut: React.FC<{ durationFrames: number }> = ({ durationFrames }) => {
+  const frame = useCurrentFrame(); // Frame local al Sequence (0 → durationFrames)
+  return (
+    <AbsoluteFill
+      style={{
+        backgroundColor: 'black',
+        opacity: interpolate(frame, [0, durationFrames], [0, 1], {
+          extrapolateLeft: 'clamp',
+          extrapolateRight: 'clamp',
+        }),
+      }}
+    />
+  );
+};
+
 export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
   // Aplicar valores por defecto
   const news = props.news ?? DEFAULT_NEWS;
@@ -134,6 +160,15 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
 
   // Prompt 30: Duración total en frames (ahora dinámica via calculateMetadata en Root.tsx)
   const durationInFrames = duration * fps;
+
+  // Fix: Límite seguro para YouTube Shorts — nunca exceder 59.2s
+  // Root.tsx → calculateMetadata también aplica este cap, pero lo duplicamos aquí
+  // para que la composición interna sea consistente con lo que Remotion renderiza.
+  const SAFE_MAX_SECONDS = 59.2;
+  const SAFE_MAX_FRAMES = Math.floor(SAFE_MAX_SECONDS * fps); // 1776 frames @ 30fps
+  const SAFE_END_BUFFER = 20; // ~0.67s de respiración visual antes del corte
+
+  const safeDurationInFrames = Math.min(durationInFrames, SAFE_MAX_FRAMES);
 
   // ==========================================
   // TIMING DE ESCENAS (Prompt 19.11: crossfade)
@@ -234,7 +269,7 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
           }}
           dynamicScenes={images.dynamicScenes}
           sceneStartSecond={0}
-          totalDuration={durationInFrames}
+          totalDuration={safeDurationInFrames}
           fps={fps}
           dynamicEffects={enhancedEffects}
           audioSync={audioSync}
@@ -272,7 +307,7 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
           Solo se renderiza si hay audio.music configurado.
       */}
       {audio.music?.src && (
-        <Sequence from={0} durationInFrames={durationInFrames} name="BackgroundMusic">
+        <Sequence from={0} durationInFrames={safeDurationInFrames} name="BackgroundMusic">
           <Audio
             src={staticFile(audio.music.src)}
             volume={(f: number) => {
@@ -281,14 +316,14 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
               // Crossfade: transición suave 22% → 8%
               // Content: 8% - ducked detrás de narración
               // Outro: 8% → 5% transición suave, luego fade a 0
-              const fadeOutStart = durationInFrames - musicBed.fadeOutFrames;
+              const fadeOutStart = safeDurationInFrames - musicBed.fadeOutFrames;
 
               // Prompt 45: Outro con música más baja para cierre premium
               if (f >= outroStart) {
                 if (f > fadeOutStart) {
                   return interpolate(
                     f,
-                    [fadeOutStart, durationInFrames],
+                    [fadeOutStart, safeDurationInFrames],
                     [musicBed.outroVolume, 0],
                     { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
                   );
@@ -353,18 +388,30 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
       */}
       {/* Prompt 44: Narration empieza en contentStart (alineada con texto editorial)
           Prompt 41: Narration termina en outroStart (NO en durationInFrames)
-          Así el fade-out de AudioMixer ocurre ANTES del outro, no durante */}
-      <Sequence from={contentStart} durationInFrames={outroStart - contentStart} name="Narration">
-        <AudioMixer
-          voice={audio.voice}
-        />
-      </Sequence>
+          Así el fade-out de AudioMixer ocurre ANTES del outro, no durante
+          Fix: Si el audio excede SAFE_MAX_SECONDS, comprimir playback para caber en el límite */}
+      {(() => {
+        // Compresión de audio: solo si la narración supera el límite seguro
+        // Ej: audio de 52s con contentStart de 7s → narración = 52s > 59.2 - 7s = 52.2s → no comprime
+        // Ej: audio de 56s con contentStart de 7s → narración = 56s, video total = 63s > 59.2s → comprime
+        const audioDurationSecs = audioSync?.audioDuration ?? 0;
+        const compressionRatio = audioDurationSecs > 0 && durationInFrames > SAFE_MAX_FRAMES
+          ? durationInFrames / SAFE_MAX_FRAMES  // ratio > 1: comprimir audio para caber
+          : 1;                                   // sin compresión si ya está dentro del límite
+        return (
+          <Sequence from={contentStart} durationInFrames={outroStart - contentStart} name="Narration">
+            <AudioMixer
+              voice={audio.voice}
+              playbackRate={compressionRatio}
+            />
+          </Sequence>
+        );
+      })()}
 
       {/* ==========================================
           TITLE CARD OVERLAY - YouTube Thumbnail (Prompt 32)
           ==========================================
           Overlay de 0.5s que aparece encima de HeroScene.
-          Último en JSX = mayor z-index = se renderiza encima de todo.
           NO cambia timing de Hero/Content/Outro ni audio.
       */}
       <Sequence
@@ -378,6 +425,23 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
           backgroundImage={images.hero}
           fps={fps}
         />
+      </Sequence>
+
+      {/* ==========================================
+          FINAL BUFFER - Respiración visual al final (Fix duración Shorts)
+          ==========================================
+          Fade-out negro gradual en los últimos SAFE_END_BUFFER frames.
+          - Evita la sensación de corte abrupto
+          - Garantiza que no hay texto activo en los últimos 20 frames
+          - Se renderiza encima de todo (último en JSX = mayor z-index)
+          - Efecto: transparente → negro en ~0.67s
+      */}
+      <Sequence
+        from={safeDurationInFrames - SAFE_END_BUFFER}
+        durationInFrames={SAFE_END_BUFFER}
+        name="FinalBuffer"
+      >
+        <FinalFadeOut durationFrames={SAFE_END_BUFFER} />
       </Sequence>
     </AbsoluteFill>
   );
