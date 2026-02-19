@@ -26,6 +26,7 @@
  * @updated Prompt 41 - Cierre editorial: breathing room 1.5s, narración termina antes de outro
  * @updated Prompt 44 - Corrección editorial integral: narración alineada con contentStart, music bed hero 22%
  * @updated Prompt 45 - Micro-polish: impact SFX, music swell hero, outro volume 5%, cierre gradual
+ * @updated Prompt 50 - Color grading cinematográfico global (contrast+saturate+brightness)
  */
 
 import React from 'react';
@@ -50,7 +51,7 @@ import { TitleCardScene } from '../components/scenes/TitleCardScene';
 import { deriveTitleCardText, deriveBadge } from '../utils/title-derivation';
 
 // Estilos
-import { colors, sceneTransition, musicBed, heroImpact, titleCard } from '../styles/themes';
+import { colors, sceneTransition, musicBed, heroImpact, titleCard, cinematicGrade } from '../styles/themes';
 
 // =============================================================================
 // PROPS PARCIALES (para compatibilidad con Remotion Composition)
@@ -213,6 +214,8 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
     <AbsoluteFill
       style={{
         backgroundColor: colors.background.darker,
+        // Prompt 50: Color grading cinematográfico — profundiza sin alterar brillo percibido
+        filter: `contrast(${cinematicGrade.contrast}) saturate(${cinematicGrade.saturate}) brightness(${cinematicGrade.brightness})`,
       }}
     >
       {/* ==========================================

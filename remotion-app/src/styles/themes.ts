@@ -938,6 +938,23 @@ export const narrativeRhythm = {
   },
 };
 
+/**
+ * Color grading cinematográfico global
+ *
+ * Filtro CSS compuesto aplicado al wrapper principal de AINewsShort.
+ * Profundiza la imagen sin alterar brillo percibido.
+ *
+ * @since Prompt 50
+ */
+export const cinematicGrade = {
+  /** Contraste sutil — profundiza negros sin quemar blancos */
+  contrast: 1.08,
+  /** Saturación sutil — colores más ricos sin parecer filtro Instagram */
+  saturate: 1.05,
+  /** Brillo ligeramente reducido — sensación de profundidad, no oscuridad */
+  brightness: 0.98,
+};
+
 // Colección de todos los temas disponibles
 export const themes = {
   techEditorial: techEditorialTheme,

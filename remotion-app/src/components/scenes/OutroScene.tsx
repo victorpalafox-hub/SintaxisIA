@@ -23,6 +23,7 @@
  * @updated Prompt 20 - Migración a Tech Editorial: sombras sutiles, fondo transparente
  * @updated Prompt 45 - Fade-out easing cúbico (1.5s gradual), cierre premium
  * @updated Prompt 48 - Breathing sutil en contenedor (micro-dinámica anti-estático)
+ * @updated Prompt 50 - CTA premium: semi-bold, tracking, sombra editorial
  */
 
 import React from 'react';
@@ -194,15 +195,18 @@ export const OutroScene: React.FC<OutroSceneProps> = ({
         </div>
 
         {/* CTA - Call to Action */}
+        {/* Prompt 50: CTA premium — semi-bold, tracking, sombra editorial */}
         <div
           style={{
             opacity: ctaOpacity,
             fontFamily: 'Inter, Roboto, Arial, sans-serif',
-            fontWeight: 500,
+            fontWeight: 600,
             fontSize: 28,
             color: colors.text.secondary,
             textAlign: 'center',
             maxWidth: 800,
+            letterSpacing: 1,
+            textShadow: editorialShadow.textDepth,
           }}
         >
           Síguenos para más noticias de Inteligencia Artificial

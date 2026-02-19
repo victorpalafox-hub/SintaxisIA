@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 1705 tests (1703 passing, 2 skipped)
+**Test Status**: 1732 tests (1730 passing, 2 skipped)
 
-**Last Updated**: 2026-02-19 (Prompt 49 - Ritmo Narrativo Editorial: narrativeRhythm config, getIntensityMultiplier, curva opening→build→climax, micro-pausas, decel pre-final)
+**Last Updated**: 2026-02-19 (Prompt 50 - Polish Cinematográfico Premium: cinematicGrade filter global, CTA premium semi-bold+tracking+shadow)
 
 ## Prerequisites
 
@@ -67,7 +67,7 @@ npm run check
 | CI validation | `npm run ci:validate` |
 | News Manager | `npm run news:history / news:stats / news:help` |
 
-**Test suites**: 1705 tests en 65 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
+**Test suites**: 1732 tests en 66 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
 
 **Playwright config**: 4 workers local / 1 en CI, timeout 2min por test, retries solo en CI (2), reporters: HTML + JSON + JUnit.
 
@@ -164,7 +164,7 @@ if (isShortTimeout(timeout)) { /* manejar error */ }
 
 ```bash
 npm run check          # TypeScript sin errores
-npm test              # Tests pasando (1705 tests, 2 skipped)
+npm test              # Tests pasando (1732 tests, 2 skipped)
 npm run security:check # Sin vulnerabilidades críticas
 ```
 
@@ -489,6 +489,7 @@ output/
 | EditorialIntegral | `AINewsShort.tsx` Narration from={contentStart}, music bed hero/content, `text-splitter.ts` 48 chars | Voz alineada con texto, music bed 22%→8%, frases cortas editoriales |
 | MicroDynamics | `themes.ts` microDynamics config, `ContentScene.tsx` 4 micro-anims, `OutroScene.tsx` breathing | Image breathing ±0.4%/50f, X-drift ±6px/70f, text drift ±2px/80f, transition zoom in/out, outro breathing ±0.3%/60f |
 | NarrativeRhythm | `themes.ts` narrativeRhythm config, `narrative-rhythm.ts` getIntensityMultiplier, `ContentScene.tsx` intensity×amplitude | Opening 1.0 (0-20s), Build 0.75 (20-40s), Climax 1.15 (40s+), pausa 0.4 cada 165f, decel 0.3 últimos 60f |
+| CinematicGrade | `themes.ts` cinematicGrade config, `AINewsShort.tsx` filter CSS global | contrast 1.08, saturate 1.05, brightness 0.98, CTA fontWeight 600+letterSpacing 1+textShadow |
 
 ## Prompt History (Resumen)
 
@@ -566,6 +567,7 @@ output/
 | 47 | Fix Silencio Inicial (Hook Frame 0) | 30 | `themes.ts` breathingMotion/heroFadeInFrames/heroVolume 0.35/energyRampStart 0/microZoomStart 1.06, `HeroScene.tsx` titleDelayedIn [2,10]/titleTranslateY/breathingScale, `AINewsShort.tsx` fadeIn×energySwell |
 | 48 | Micro-Dinámica Permanente | 29 | `themes.ts` microDynamics config, `ContentScene.tsx` image breathing/X-drift/text micro-drift/transition zoom, `OutroScene.tsx` breathing container |
 | 49 | Ritmo Narrativo Editorial | 40 | `themes.ts` narrativeRhythm config, `narrative-rhythm.ts` getIntensityMultiplier, `ContentScene.tsx` micro-dinámicas moduladas por intensidad |
+| 50 | Polish Cinematográfico Premium | 27 | `themes.ts` cinematicGrade config, `AINewsShort.tsx` filter global, `OutroScene.tsx` CTA premium |
 
 ## Pendientes
 
