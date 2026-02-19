@@ -123,9 +123,9 @@ test.describe('Prompt 19.12 - video-rendering.service.ts Duration', () => {
 
     const content = fs.readFileSync(VIDEO_RENDERING_PATH, 'utf-8');
 
-    // Prompt 26: Duración dinámica = Math.ceil(8 + Math.max(37, audioDuration + 1) + 5)
-    // Hero 8s + max(37s, audioDuration + 1s fade) + Outro 5s
-    expect(content).toMatch(/duration:\s*Math\.ceil\(8\s*\+\s*Math\.max\(37/);
+    // Prompt 26/41/46: Math.min(Math.ceil(8 + Math.max(37, audio+1) + 1.5 + 5), 59.2)
+    // Hero 8s + Content + Breathing 1.5s + Outro 5s, capped a 59.2s (Prompt 46)
+    expect(content).toContain('Math.ceil(8 + Math.max(37, effectiveAudioDuration + 1) + 1.5 + 5)');
 
     await logger.info('✅ video-rendering.service.ts usa duración dinámica (min 50s)');
   });

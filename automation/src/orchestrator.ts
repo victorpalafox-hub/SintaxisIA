@@ -45,9 +45,8 @@ import {
   STORAGE_CONFIG,
   areNotificationsEnabled,
 } from './config/env.config';
-import { selectTopNews, selectTopNewsExcluding } from './news-scorer';
+import { selectTopNewsExcluding } from './news-scorer';
 import { PublishedNewsTracker } from './services/published-news-tracker.service';
-import { searchImagesV2 } from './image-searcher-v2';
 import { ScriptGenerator } from './scriptGen';
 import { SceneSegmenterService } from './services/scene-segmenter.service';
 import { ImageOrchestrationService } from './services/image-orchestration.service';
@@ -765,28 +764,7 @@ function getMockNews(): NewsItem[] {
 }
 
 // NOTE: generateMockScript eliminado en Prompt 15 - ahora usa ScriptGenerator real
-
-/**
- * Extrae topics de una noticia
- */
-function extractTopics(news: NewsItem): string[] {
-  const topics: string[] = [];
-
-  if (news.company) {
-    topics.push(news.company);
-  }
-
-  // Extraer palabras significativas del título
-  const titleWords = news.title
-    .split(' ')
-    .filter(word => word.length > 4 && /^[A-Z]/.test(word))
-    .slice(0, 3);
-
-  topics.push(...titleWords);
-
-  return topics.filter(Boolean);
-}
-
+// extractTopics() eliminado en Prompt 48 - lógica movida a NewsEnricherService
 // extractProductName() eliminado en Prompt 24 - lógica movida a NewsEnricherService
 
 /**

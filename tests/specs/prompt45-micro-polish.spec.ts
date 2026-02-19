@@ -50,12 +50,12 @@ test.describe('Prompt 45 - Hook Real (Impact)', () => {
     expect(parseInt(match![1])).toBe(2);
   });
 
-  test('heroImpact.microZoomStart = 1.03', async () => {
+  test('heroImpact.microZoomStart = 1.06 (Prompt 47: zoom más evidente)', async () => {
     logger.info('Verificando micro-zoom');
     const themes = fs.readFileSync(THEMES_PATH, 'utf-8');
     const match = themes.match(/microZoomStart:\s*([\d.]+)/);
     expect(match).toBeTruthy();
-    expect(parseFloat(match![1])).toBe(1.03);
+    expect(parseFloat(match![1])).toBe(1.06);
   });
 
   test('HeroScene usa impactFlash + combinedFlash', async () => {
@@ -94,12 +94,13 @@ test.describe('Prompt 45 - Hook Real (Impact)', () => {
 test.describe('Prompt 45 - Hero Energía Dinámica', () => {
   const logger = new TestLogger({ testName: 'Prompt45-HeroEnergy' });
 
-  test('heroImpact.energyRampStart/Peak/End configurado (30/60/90)', async () => {
+  test('heroImpact.energyRampStart/Peak/End configurado (0/30/60, Prompt 47: swell inmediato)', async () => {
     logger.info('Verificando energy ramp config');
     const themes = fs.readFileSync(THEMES_PATH, 'utf-8');
-    expect(themes).toMatch(/energyRampStart:\s*30/);
-    expect(themes).toMatch(/energyRampPeak:\s*60/);
-    expect(themes).toMatch(/energyRampEnd:\s*90/);
+    // Prompt 47: ramp empieza desde frame 0, peak más rápido
+    expect(themes).toMatch(/energyRampStart:\s*0/);
+    expect(themes).toMatch(/energyRampPeak:\s*30/);
+    expect(themes).toMatch(/energyRampEnd:\s*60/);
   });
 
   test('heroImpact.energyScaleBoost = 0.02', async () => {
@@ -110,12 +111,12 @@ test.describe('Prompt 45 - Hero Energía Dinámica', () => {
     expect(parseFloat(match![1])).toBe(0.02);
   });
 
-  test('heroImpact.musicSwellPeak = 0.25', async () => {
+  test('heroImpact.musicSwellPeak = 0.40 (Prompt 47: swell más enérgico)', async () => {
     logger.info('Verificando music swell');
     const themes = fs.readFileSync(THEMES_PATH, 'utf-8');
     const match = themes.match(/musicSwellPeak:\s*([\d.]+)/);
     expect(match).toBeTruthy();
-    expect(parseFloat(match![1])).toBe(0.25);
+    expect(parseFloat(match![1])).toBe(0.40);
   });
 
   test('Music bed callback usa heroImpact.musicSwellPeak', async () => {
@@ -235,10 +236,10 @@ test.describe('Prompt 45 - Regresión', () => {
     expect(parseInt(match![1])).toBeGreaterThanOrEqual(45);
   });
 
-  test('musicBed.heroVolume = 0.22 sin cambio', async () => {
+  test('musicBed.heroVolume = 0.35 (Prompt 47: hook auditivo más presente)', async () => {
     logger.info('Verificando heroVolume');
     const themes = fs.readFileSync(THEMES_PATH, 'utf-8');
-    expect(themes).toMatch(/heroVolume:\s*0\.22/);
+    expect(themes).toMatch(/heroVolume:\s*0\.35/);
   });
 
   test('musicBed.contentVolume = 0.08 sin cambio', async () => {

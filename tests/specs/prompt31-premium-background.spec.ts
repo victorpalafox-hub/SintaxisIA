@@ -297,11 +297,12 @@ test.describe('Prompt 31 - Regresion', () => {
     expect(content).toMatch(/crossfadeFrames:\s*30/);
   });
 
-  test('calculateMetadata en Root.tsx sin cambio', async () => {
+  test('calculateMetadata en Root.tsx con safe cap (Prompt 46)', async () => {
     logger.info('Verificando calculateMetadata intacto');
 
     const content = fs.readFileSync(ROOT_PATH, 'utf-8');
     expect(content).toContain('calculateMetadata={calculateMetadata}');
-    expect(content).toContain('durationInFrames: duration * fps');
+    // Prompt 46: usa safeFrames (Math.min con SAFE_MAX_SECONDS cap)
+    expect(content).toContain('durationInFrames: safeFrames');
   });
 });

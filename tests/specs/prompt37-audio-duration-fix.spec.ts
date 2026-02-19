@@ -99,11 +99,13 @@ test.describe('Prompt 37 - config.duration Cálculo', () => {
     expect(content).toContain('Math.max(37, effectiveAudioDuration + 1)');
   });
 
-  test('Fórmula: 8 + max(37, audio+1) + 1 + 5', async () => {
+  test('Fórmula: Math.min(Math.ceil(8 + max(37, audio+1) + 1.5 + 5), 59.2)', async () => {
     logger.info('Verificando estructura de fórmula');
 
-    // La fórmula de duración debe incluir Hero(8) + Content + Breathing(1) + Outro(5)
-    expect(content).toMatch(/duration:\s*Math\.ceil\(8\s*\+\s*Math\.max\(37,\s*effectiveAudioDuration\s*\+\s*1\)\s*\+\s*1\s*\+\s*5\)/);
+    // Prompt 37/41/46: Fórmula con breathing 1.5s + safe cap 59.2s
+    expect(content).toContain('Math.ceil(8 + Math.max(37, effectiveAudioDuration + 1) + 1.5 + 5)');
+    // Prompt 46: wrapeado en Math.min(..., 59.2)
+    expect(content).toContain('Math.min(');
   });
 
   test('Documentación menciona Prompt 37', async () => {

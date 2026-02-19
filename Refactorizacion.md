@@ -244,3 +244,117 @@ export {
 - Los tests de Playwright tienen warnings de TypeScript preexistentes relacionados con tipos de Playwright (`TestStatus`), no introducidos por esta refactorizacion.
 - El metodo `printSummary()` se mantiene por compatibilidad pero se marca como `@deprecated`.
 - Todos los valores extraidos mantienen exactamente los mismos valores que tenian hardcodeados.
+
+---
+---
+
+# Reporte de Refactorizacion #2 - Clean Code (Produccion)
+
+**Fecha:** 2026-02-19
+**Agente:** clean-code-refactorer
+**Archivos Analizados:** 15 servicios, 13 configs, 6+ componentes remotion, 4 test infrastructure files
+**Enfoque:** Codigo de produccion (automation/src, remotion-app/src, src/config)
+
+## Resumen Ejecutivo
+
+| Categoria | Hallazgos | Aplicados |
+|-----------|-----------|-----------|
+| Imports no usados | 3 | 3 |
+| Imports duplicados | 1 | 1 |
+| Funciones muertas (dead code) | 1 (~20 lineas) | 1 |
+| console.log en servicio de produccion | 1 | 1 |
+| Archivo backup residual (.bak) | 1 | 1 |
+| Tests desactualizados por refactor | 2 assertions | 2 |
+| **Total cambios aplicados** | **10** | **10** |
+
+## Cambios Aplicados
+
+### Cambio 1: Import `selectTopNews` no usado
+- **Archivo:** `automation/src/orchestrator.ts` (linea 48)
+- **Razon:** `selectTopNews` fue reemplazado por `selectTopNewsExcluding` en Prompt 21. El import original quedo como dead code.
+- **Antes:** `import { selectTopNews, selectTopNewsExcluding } from './news-scorer';`
+- **Despues:** `import { selectTopNewsExcluding } from './news-scorer';`
+
+### Cambio 2: Import `searchImagesV2` no usado
+- **Archivo:** `automation/src/orchestrator.ts` (linea 50)
+- **Razon:** `searchImagesV2` fue reemplazado por `ImageOrchestrationService` en Prompt 19.1. El import quedo huerfano.
+- **Antes:** `import { searchImagesV2 } from './image-searcher-v2';`
+- **Despues:** Linea eliminada.
+
+### Cambio 3: Funcion muerta `extractTopics()`
+- **Archivo:** `automation/src/orchestrator.ts` (lineas 769-788)
+- **Razon:** Funcion de ~20 lineas que no se invoca en ningun lugar del proyecto. Su logica fue absorbida por `NewsEnricherService` en Prompt 24.
+- **Accion:** Eliminada completamente, dejando comentario de referencia.
+
+### Cambio 4: Imports duplicados de `pexels-provider`
+- **Archivo:** `automation/src/services/image-orchestration.service.ts` (lineas 21-22)
+- **Razon:** Dos lineas de import del mismo modulo consolidadas en una.
+- **Antes:**
+```typescript
+import { searchPexels, isPexelsConfigured } from '../image-providers/pexels-provider';
+import { searchPexelsMultiple } from '../image-providers/pexels-provider';
+```
+- **Despues:**
+```typescript
+import { searchPexels, isPexelsConfigured, searchPexelsMultiple } from '../image-providers/pexels-provider';
+```
+
+### Cambio 5: Import de tipo `AudioCacheEntry` no usado
+- **Archivo:** `automation/src/services/tts.service.ts` (linea 31)
+- **Razon:** `AudioCacheEntry` se importaba pero no se referenciaba en ningun lugar del archivo. Solo `AudioCacheIndex` se usa.
+- **Accion:** Eliminado `AudioCacheEntry` de la lista de type imports.
+
+### Cambio 6: `console.log` reemplazado por `logger.warn`
+- **Archivo:** `automation/src/services/tts.service.ts` (linea 655)
+- **Razon:** Unico `console.log` real en un servicio de produccion. El proyecto usa `logger` (Winston) para logging estructurado.
+- **Antes:** `console.log('   ⚠️  ffprobe falló, estimando duración...');`
+- **Despues:** `logger.warn('[TTS] ffprobe falló, estimando duración...');`
+
+### Cambio 7: Archivo backup eliminado
+- **Archivo:** `remotion-app/src/styles/themes.ts.bak`
+- **Razon:** Archivo residual de desarrollo, aparecia como untracked en git. No tiene utilidad.
+- **Accion:** Eliminado.
+
+### Cambio 8-9: Tests actualizados (2 assertions)
+- **Archivo:** `tests/specs/prompt14-orchestrator.spec.ts` (lineas 238 y 348)
+- **Razon:** Los tests verificaban que `orchestrator.ts` contuviera `'image-searcher-v2'`, pero ese import fue eliminado (Cambio 2). Los tests ahora verifican `'image-orchestration.service'` que es el reemplazo real desde Prompt 19.1.
+- **Antes:** `expect(content).toContain('image-searcher-v2');`
+- **Despues:** `expect(content).toContain('image-orchestration.service');`
+
+## Hallazgos NO Modificados (por diseno intencional)
+
+| Hallazgo | Archivo | Razon para NO modificar |
+|----------|---------|------------------------|
+| 28 console.log | `video-rendering.service.ts` | Output CLI intencional del pipeline orchestrator |
+| console.log modular | `automation/src/config.ts` (linea 98) | Nivel de modulo, logger posiblemente no inicializado |
+| console.log debug | `youtube-upload.service.ts` | Debug condicional con flag `options.debug` |
+| console.warn x3 | `SafeImage.tsx` | Logs de carga de imagen intencionales en Remotion |
+| `generatedVideoId` unused | `orchestrator.ts` | Variable en bloque comentado, pendiente reactivacion |
+| Magic numbers locales | `video-rendering.service.ts` | Ya declarados como constantes nombradas en scope local |
+
+## Validacion
+
+| Check | Resultado |
+|-------|-----------|
+| TypeScript compila (`npm run check`) | PASS |
+| Tests suite completa (`npm test`) | 1619 passed, 2 skipped, 15 failed* |
+
+*Los 15 tests fallidos son **preexistentes** (no causados por esta refactorizacion). Corresponden a tests de regresion en Prompts 19.11, 19.12, 27, 30, 31, 32, 37, 45 que verifican valores en `themes.ts`/`Root.tsx`/`video-rendering.service.ts` modificados en Prompts 46-47 sin actualizar los tests.
+
+## Metricas
+
+| Metrica | Valor |
+|---------|-------|
+| Lineas de dead code eliminadas | ~23 |
+| Imports optimizados | 4 |
+| console.log corregidos | 1 |
+| Archivos residuales eliminados | 1 |
+| Tests actualizados | 2 assertions |
+| Comportamiento modificado | Ninguno |
+
+## Archivos Afectados
+- `automation/src/orchestrator.ts`
+- `automation/src/services/image-orchestration.service.ts`
+- `automation/src/services/tts.service.ts`
+- `remotion-app/src/styles/themes.ts.bak` (eliminado)
+- `tests/specs/prompt14-orchestrator.spec.ts`

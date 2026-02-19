@@ -235,7 +235,7 @@ test.describe('PROMPT 14: Orchestrator & Publication Calendar', () => {
       // Verificar que importa dependencias correctas
       expect(content).toContain('publication-calendar');
       expect(content).toContain('news-scorer');
-      expect(content).toContain('image-searcher-v2');
+      expect(content).toContain('image-orchestration.service');
 
       await logger.info('✅ orchestrator.ts presente con funciones requeridas');
     });
@@ -343,9 +343,9 @@ test.describe('PROMPT 14: Orchestrator & Publication Calendar', () => {
       );
       const content = fs.readFileSync(orchestratorPath, 'utf-8');
 
-      // Verificar imports de módulos del Prompt 11 y 12
+      // Verificar imports de módulos del Prompt 11 y 12 (Prompt 19.1: image-searcher-v2 reemplazado por ImageOrchestrationService)
       expect(content).toContain('./news-scorer');
-      expect(content).toContain('./image-searcher-v2');
+      expect(content).toContain('./services/image-orchestration.service');
       expect(content).toContain('./config/publication-calendar');
 
       // Verificar imports de types

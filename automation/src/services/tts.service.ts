@@ -28,7 +28,6 @@ import type {
   TTSResponseWithTimestamps,
   TTSQuotaStatus,
   TTSQuotaData,
-  AudioCacheEntry,
   AudioCacheIndex,
   TTSServiceOptions,
   AudioResult,
@@ -652,7 +651,7 @@ export class TTSService {
       // Usar estimación conservadora para evitar cortar audio
       const stats = fs.statSync(audioPath);
       const estimatedAt48kbps = stats.size / (6 * 1024);
-      console.log(`   ⚠️  ffprobe falló, estimando duración por tamaño: ~${estimatedAt48kbps.toFixed(1)}s (48kbps)`);
+      logger.warn(`[TTS] ffprobe falló, estimando duración por tamaño: ~${estimatedAt48kbps.toFixed(1)}s (48kbps)`);
       return estimatedAt48kbps;
     }
   }

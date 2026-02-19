@@ -18,8 +18,7 @@
  */
 
 import { logger } from '../../utils/logger';
-import { searchPexels, isPexelsConfigured } from '../image-providers/pexels-provider';
-import { searchPexelsMultiple } from '../image-providers/pexels-provider';
+import { searchPexels, isPexelsConfigured, searchPexelsMultiple } from '../image-providers/pexels-provider';
 import { searchUnsplash } from '../image-providers/unsplash-provider';
 import { searchGoogle } from '../image-providers/google-provider';
 import { searchClearbit, searchLogodev } from '../image-providers';

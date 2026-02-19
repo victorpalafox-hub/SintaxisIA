@@ -59,10 +59,11 @@ test.describe('Prompt 30 - Root.tsx calculateMetadata', () => {
     expect(content).toContain('props.config?.fps');
   });
 
-  test('calculateMetadata retorna durationInFrames calculado', async () => {
+  test('calculateMetadata retorna durationInFrames calculado (safe cap)', async () => {
     logger.info('Verificando retorno de durationInFrames');
 
-    expect(content).toContain('durationInFrames: duration * fps');
+    // Prompt 46: usa safeFrames (Math.min con cap de seguridad)
+    expect(content).toContain('durationInFrames: safeFrames');
   });
 
   test('Default fallback a 50s cuando no hay config', async () => {
@@ -131,11 +132,11 @@ test.describe('Prompt 30 - AINewsShort Breathing Room', () => {
     expect(content).toContain('const durationInFrames = duration * fps');
   });
 
-  test('Background music usa durationInFrames correcto', async () => {
+  test('Background music usa safeDurationInFrames correcto', async () => {
     logger.info('Verificando Background music duration');
 
-    // BackgroundMusic Sequence debe usar durationInFrames
-    expect(content).toContain('durationInFrames={durationInFrames}');
+    // Prompt 46: BackgroundMusic Sequence usa safeDurationInFrames (con cap de seguridad)
+    expect(content).toContain('durationInFrames={safeDurationInFrames}');
     expect(content).toContain('name="BackgroundMusic"');
   });
 
@@ -159,13 +160,12 @@ test.describe('Prompt 30 - video-rendering.service Duration', () => {
     content = fs.readFileSync(RENDERING_SERVICE_PATH, 'utf-8');
   });
 
-  test('config.duration incluye breathing room (+1)', async () => {
+  test('config.duration incluye breathing room (+1.5)', async () => {
     logger.info('Verificando breathing room en duration');
 
-    // La fórmula debe incluir + 1 para breathing room
-    // Prompt 37: Ahora usa effectiveAudioDuration (Whisper como source of truth)
-    // Math.ceil(8 + Math.max(37, effectiveAudioDuration + 1) + 1 + 5)
-    expect(content).toContain('effectiveAudioDuration + 1) + 1 + 5');
+    // La fórmula debe incluir + 1.5 para breathing room (Prompt 41: 1s → 1.5s)
+    // Prompt 37/41: Math.ceil(8 + Math.max(37, effectiveAudioDuration + 1) + 1.5 + 5)
+    expect(content).toContain('effectiveAudioDuration + 1) + 1.5 + 5');
   });
 
   test('Comentario menciona breathing room', async () => {
@@ -184,8 +184,8 @@ test.describe('Prompt 30 - video-rendering.service Duration', () => {
   test('Fórmula mantiene Outro 5s base', async () => {
     logger.info('Verificando Outro en fórmula');
 
-    // El + 5 al final de la fórmula
-    expect(content).toContain('+ 1 + 5)');
+    // El + 1.5 + 5 al final de la fórmula (Prompt 41: breathing 1.5s + outro 5s)
+    expect(content).toContain('+ 1.5 + 5)');
   });
 });
 

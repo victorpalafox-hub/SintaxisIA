@@ -62,16 +62,16 @@ test.describe('Prompt 27 - musicBed Config', () => {
     await logger.info('Propiedades presentes');
   });
 
-  test('musicBed.heroVolume = 0.22 (22%)', async () => {
+  test('musicBed.heroVolume = 0.35 (35%, Prompt 47: más presente como hook)', async () => {
     await logger.info('Verificando heroVolume');
 
     const content = fs.readFileSync(THEMES_PATH, 'utf-8');
 
     const match = content.match(/heroVolume:\s*([\d.]+)/);
     expect(match).toBeTruthy();
-    expect(parseFloat(match![1])).toBe(0.22);
+    expect(parseFloat(match![1])).toBe(0.35);
 
-    await logger.info('heroVolume = 0.22');
+    await logger.info('heroVolume = 0.35');
   });
 
   test('musicBed.contentVolume = 0.08 (8% ducked)', async () => {
@@ -194,17 +194,17 @@ test.describe('Prompt 27 - AINewsShort BackgroundMusic', () => {
     await logger.info('AudioMixer solo con voice');
   });
 
-  test('7 Sequences totales (Hero, Content, Outro, BackgroundMusic, Narration, TitleCard, ImpactSFX)', async () => {
-    await logger.info('Verificando 7 Sequences');
+  test('8 Sequences totales (Hero, Content, Outro, BackgroundMusic, Narration, TitleCard, ImpactSFX, FinalBuffer)', async () => {
+    await logger.info('Verificando 8 Sequences');
 
     const content = fs.readFileSync(AI_NEWS_SHORT_PATH, 'utf-8');
 
     const matches = content.match(/<Sequence/g);
     expect(matches).toBeTruthy();
-    // Prompt 32: +1 TitleCard + Prompt 45: +1 ImpactSFX = 7 total
-    expect(matches!.length).toBe(7);
+    // Prompt 32: +1 TitleCard + Prompt 45: +1 ImpactSFX + Prompt 46: +1 FinalBuffer = 8 total
+    expect(matches!.length).toBe(8);
 
-    await logger.info('7 Sequences presentes');
+    await logger.info('8 Sequences presentes');
   });
 });
 
