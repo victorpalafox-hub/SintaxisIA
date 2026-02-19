@@ -22,6 +22,7 @@
  * @updated Prompt 19.11 - Crossfade: useVideoConfig, fade-in sincronizado con sceneTransition
  * @updated Prompt 20 - Migración a Tech Editorial: sombras sutiles, fondo transparente
  * @updated Prompt 45 - Fade-out easing cúbico (1.5s gradual), cierre premium
+ * @updated Prompt 48 - Breathing sutil en contenedor (micro-dinámica anti-estático)
  */
 
 import React from 'react';
@@ -33,7 +34,7 @@ import {
   useVideoConfig,
   Easing,
 } from 'remotion';
-import { colors, spacing, outroAnimation, sceneTransition, editorialShadow, editorialText } from '../../styles/themes';
+import { colors, spacing, outroAnimation, sceneTransition, editorialShadow, editorialText, microDynamics } from '../../styles/themes';
 import type { OutroSceneProps } from '../../types/video.types';
 
 /**
@@ -122,6 +123,11 @@ export const OutroScene: React.FC<OutroSceneProps> = ({
     }
   );
 
+  // Prompt 48: Breathing sutil para que el cierre no se sienta estático
+  // Amplitud menor que ContentScene (0.3% vs 0.4%) para cierre sereno
+  const outroBreathingScale = 1 + Math.sin(frame * (2 * Math.PI / microDynamics.outroBreathing.cycleFrames))
+    * microDynamics.outroBreathing.amplitude;
+
   // ==========================================
   // RENDER
   // ==========================================
@@ -134,7 +140,7 @@ export const OutroScene: React.FC<OutroSceneProps> = ({
         opacity: finalOpacity,
       }}
     >
-      {/* Contenedor centrado */}
+      {/* Contenedor centrado - Prompt 48: breathing sutil aplicado */}
       <AbsoluteFill
         style={{
           display: 'flex',
@@ -143,6 +149,7 @@ export const OutroScene: React.FC<OutroSceneProps> = ({
           justifyContent: 'center',
           gap: spacing.padding.xl,
           padding: `${spacing.safe.top}px ${spacing.safe.horizontal}px ${spacing.safe.bottom}px`,
+          transform: `scale(${outroBreathingScale})`,
         }}
       >
         {/* LOGO "SINTAXIS IA" - Cuadrado con iniciales */}

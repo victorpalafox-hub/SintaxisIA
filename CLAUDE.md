@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 1636 tests (1634 passing, 2 skipped)
+**Test Status**: 1665 tests (1663 passing, 2 skipped)
 
-**Last Updated**: 2026-02-19 (Prompt 47 - Fix Silencio Inicial: breathingMotion, titleDelayedIn frames [2,10], musicBed.heroFadeInFrames, energyRampStart=0)
+**Last Updated**: 2026-02-19 (Prompt 48 - Micro-Dinámica Permanente: microDynamics config, image breathing+X-drift, text micro-drift, transition zoom, outro breathing)
 
 ## Prerequisites
 
@@ -67,7 +67,7 @@ npm run check
 | CI validation | `npm run ci:validate` |
 | News Manager | `npm run news:history / news:stats / news:help` |
 
-**Test suites**: 1636 tests en 63 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
+**Test suites**: 1665 tests en 64 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
 
 **Playwright config**: 4 workers local / 1 en CI, timeout 2min por test, retries solo en CI (2), reporters: HTML + JSON + JUnit.
 
@@ -164,7 +164,7 @@ if (isShortTimeout(timeout)) { /* manejar error */ }
 
 ```bash
 npm run check          # TypeScript sin errores
-npm test              # Tests pasando (1636 tests, 2 skipped)
+npm test              # Tests pasando (1665 tests, 2 skipped)
 npm run security:check # Sin vulnerabilidades críticas
 ```
 
@@ -487,6 +487,7 @@ output/
 | EditorialClosing | `AINewsShort.tsx` Narration→outroStart, `AudioMixer.tsx` fade 45f, `themes.ts` ctaDelay 45f | Voz termina antes de outro, breathing 1.5s, CTA delay 1.5s, voice fade 1.5s |
 | TextExclusivity | `HeroScene.tsx` titleDelayedIn/titleEarlyOut, `ContentScene.tsx` sin fallback | Max 1 texto por frame, TitleCard→Hero→Content→Outro sin overlap |
 | EditorialIntegral | `AINewsShort.tsx` Narration from={contentStart}, music bed hero/content, `text-splitter.ts` 48 chars | Voz alineada con texto, music bed 22%→8%, frases cortas editoriales |
+| MicroDynamics | `themes.ts` microDynamics config, `ContentScene.tsx` 4 micro-anims, `OutroScene.tsx` breathing | Image breathing ±0.4%/50f, X-drift ±6px/70f, text drift ±2px/80f, transition zoom in/out, outro breathing ±0.3%/60f |
 
 ## Prompt History (Resumen)
 
@@ -562,6 +563,7 @@ output/
 | 45 | Micro-Polish Editorial | 27 | `heroImpact` config, impact flash 0.85+SFX, micro-zoom 1.03, energy ramp, `firstImageMinScore: 45`, outro easing cúbico, `outroVolume: 0.05` |
 | 46 | Fix Duración Segura YouTube Shorts | 22 | `AINewsShort.tsx` SAFE_MAX_FRAMES/FinalFadeOut/compressionRatio, `Root.tsx` calculateMetadata cap, `video-rendering.service.ts` Math.min 59.2s, `AudioMixer.tsx` playbackRate |
 | 47 | Fix Silencio Inicial (Hook Frame 0) | 30 | `themes.ts` breathingMotion/heroFadeInFrames/heroVolume 0.35/energyRampStart 0/microZoomStart 1.06, `HeroScene.tsx` titleDelayedIn [2,10]/titleTranslateY/breathingScale, `AINewsShort.tsx` fadeIn×energySwell |
+| 48 | Micro-Dinámica Permanente | 29 | `themes.ts` microDynamics config, `ContentScene.tsx` image breathing/X-drift/text micro-drift/transition zoom, `OutroScene.tsx` breathing container |
 
 ## Pendientes
 

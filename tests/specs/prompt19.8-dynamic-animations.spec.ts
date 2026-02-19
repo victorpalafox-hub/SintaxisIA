@@ -112,7 +112,8 @@ test.describe('Prompt 19.8 - Per-Phrase Slide-Up', () => {
     const content = fs.readFileSync(CONTENT_SCENE_PATH, 'utf-8');
 
     // Debe usar blockTextY (Prompt 33, antes phraseTextY) en el transform
-    expect(content).toContain('translateY(${blockTextY}px)');
+    // Prompt 48: ahora incluye textMicroDriftY para micro-drift post-entrada
+    expect(content).toContain('translateY(${blockTextY + textMicroDriftY}px)');
 
     // No debe tener el textY anterior (one-shot)
     expect(content).not.toContain('translateY(${textY}px)');

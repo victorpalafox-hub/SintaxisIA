@@ -832,6 +832,62 @@ export const breathingMotion = {
   frequency: 40,
 };
 
+// ==========================================
+// CONFIGURACIÓN DE MICRO-DINÁMICAS (Prompt 48)
+// ==========================================
+
+/**
+ * Micro-animaciones permanentes para eliminar sensación estática
+ *
+ * Se aplican en ContentScene (imágenes + texto) y OutroScene (logo + CTA).
+ * Todas son senoidales de baja amplitud que se componen sobre
+ * las animaciones existentes (parallax, zoom, slide).
+ *
+ * Ciclos diferentes (50, 60, 70, 80) evitan sincronización mecánica:
+ * cuando uno está en pico, otro está en valle → movimiento orgánico.
+ *
+ * @since Prompt 48
+ */
+export const microDynamics = {
+  /** Breathing de imagen en ContentScene (scale senoidal) */
+  imageBreathing: {
+    /** Amplitud del scale (0.004 = ±0.4%, casi imperceptible) */
+    amplitude: 0.004,
+    /** Frames por ciclo completo (~1.67s @ 30fps) */
+    cycleFrames: 50,
+  },
+  /** Drift horizontal de imagen (complementa parallax Y existente) */
+  imageXDrift: {
+    /** Amplitud en px (6px = sutil en 920px de ancho) */
+    amplitude: 6,
+    /** Frames por ciclo completo (~2.33s, desfasado del breathing) */
+    cycleFrames: 70,
+  },
+  /** Micro-drift del texto después de que la animación de entrada termina */
+  textMicroDrift: {
+    /** Amplitud en px (2px = casi imperceptible pero vivo) */
+    amplitude: 2,
+    /** Frames por ciclo completo (~2.67s, desfasado de todo lo demás) */
+    cycleFrames: 80,
+  },
+  /** Zoom de transición de imagen (outgoing/incoming scale durante crossfade) */
+  imageTransitionZoom: {
+    /** Escala final de la imagen saliente (1.06 = zoom out 6%) */
+    outgoingScale: 1.06,
+    /** Escala inicial de la imagen entrante (ligeramente encogida) */
+    incomingStartScale: 0.95,
+    /** Escala final de la imagen entrante (tamaño normal) */
+    incomingEndScale: 1.0,
+  },
+  /** Breathing de OutroScene (logo + texto) */
+  outroBreathing: {
+    /** Amplitud del scale (0.003 = ±0.3%, más sutil que content) */
+    amplitude: 0.003,
+    /** Frames por ciclo completo (2s @ 30fps) */
+    cycleFrames: 60,
+  },
+};
+
 // Colección de todos los temas disponibles
 export const themes = {
   techEditorial: techEditorialTheme,

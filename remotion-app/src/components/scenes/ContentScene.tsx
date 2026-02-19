@@ -29,6 +29,7 @@
  * @updated Prompt 35 - Handle imageUrl null (sin imagen genérica, null → undefined)
  * @updated Prompt 38-Fix2 - Regla dura: no reutilizar imagen previa, null = no imagen
  * @updated Prompt 42 - Fuente única de texto: sin fallback a description cruda, exclusividad por frame
+ * @updated Prompt 48 - Micro-dinámica: image breathing+X-drift, text micro-drift, transition zoom
  */
 
 import React, { useMemo } from 'react';
@@ -39,7 +40,7 @@ import {
   useVideoConfig,
   Easing,
 } from 'remotion';
-import { colors, spacing, textAnimation, imageAnimation, contentTextStyle, contentAnimation, sceneTransition, editorialShadow, editorialText, visualEmphasis } from '../../styles/themes';
+import { colors, spacing, textAnimation, imageAnimation, contentTextStyle, contentAnimation, sceneTransition, editorialShadow, editorialText, visualEmphasis, microDynamics } from '../../styles/themes';
 import { ProgressBar } from '../ui/ProgressBar';
 import { SafeImage } from '../elements/SafeImage';
 import { splitIntoReadablePhrases, getPhraseTiming, getBlockTiming, buildEditorialBlocks, detectEmphasis, getEmphasisForBlock } from '../../utils';
@@ -193,6 +194,20 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
       )
     : 1.0;
 
+  // Prompt 48: Breathing de imagen (scale senoidal permanente)
+  // Complementa el zoom lento existente con micro-pulso orgánico
+  const imageBreathingScale = dynamicEffects && contextImage
+    ? 1 + Math.sin(frame * (2 * Math.PI / microDynamics.imageBreathing.cycleFrames))
+        * microDynamics.imageBreathing.amplitude
+    : 1;
+
+  // Prompt 48: Drift horizontal senoidal (complementa parallax Y existente)
+  // Usa coseno para desfase de 90° respecto al breathing
+  const imageXDrift = dynamicEffects && contextImage
+    ? Math.cos(frame * (2 * Math.PI / microDynamics.imageXDrift.cycleFrames))
+      * microDynamics.imageXDrift.amplitude
+    : 0;
+
   // Fade in de imagen (Prompt 19.3 - transición más suave)
   const imageOpacity = contextImage
     ? interpolate(frame, [0, imageAnimation.fadeInFrames], [0, 1], { extrapolateRight: 'clamp' })
@@ -311,6 +326,15 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
       )
     : 0;
 
+  // Prompt 48: Micro-drift permanente después de que la entrada (slide-up) termina
+  // Solo activo cuando el slide-up completó (blockRelativeFrame > weightSlideFrames)
+  // Senoidal muy sutil (2px) para dar vida al texto sin distraer la lectura
+  const textEntryComplete = blockRelativeFrame > weightSlideFrames ? 1 : 0;
+  const textMicroDriftY = dynamicEffects && textEntryComplete
+    ? Math.sin(frame * (2 * Math.PI / microDynamics.textMicroDrift.cycleFrames))
+      * microDynamics.textMicroDrift.amplitude
+    : 0;
+
   // Énfasis visual del bloque actual (Prompt 34)
   const currentEmphasis = getEmphasisForBlock(emphasisMap, currentBlockIndex);
   const emphasisConfig = currentEmphasis !== 'none'
@@ -400,7 +424,8 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
               position: 'relative',
               width: imageAnimation.width,
               height: imageAnimation.height,
-              transform: `translateY(${parallaxY}px) scale(${imageScale})`,
+              // Prompt 48: Compone parallaxY + X-drift + zoom*breathing
+              transform: `translateY(${parallaxY}px) translateX(${imageXDrift}px) scale(${imageScale * imageBreathingScale})`,
             }}
           >
             {/* Imagen PREVIA (fade-out durante crossfade) - Prompt 28 */}
@@ -416,6 +441,13 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
                   borderRadius: imageAnimation.borderRadius,
                   overflow: 'hidden',
                   boxShadow: editorialShadow.imageElevation,
+                  // Prompt 48: Imagen saliente hace zoom out durante crossfade
+                  transform: `scale(${interpolate(
+                    transitionProgress,
+                    [0, 1],
+                    [1, microDynamics.imageTransitionZoom.outgoingScale],
+                    { extrapolateRight: 'clamp' }
+                  )})`,
                 }}
               >
                 <SafeImage
@@ -455,6 +487,13 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
                   borderRadius: imageAnimation.borderRadius,
                   overflow: 'hidden',
                   boxShadow: editorialShadow.imageElevation,
+                  // Prompt 48: Imagen entrante empieza pequeña y crece a normal
+                  transform: `scale(${interpolate(
+                    transitionProgress,
+                    [0, 1],
+                    [microDynamics.imageTransitionZoom.incomingStartScale, microDynamics.imageTransitionZoom.incomingEndScale],
+                    { extrapolateRight: 'clamp' }
+                  )})`,
                 }}
               >
                 <SafeImage
@@ -487,7 +526,8 @@ export const ContentScene: React.FC<ContentSceneProps> = ({
         {/* DESCRIPCION - Bloques Editoriales (Prompt 33, antes: Texto Secuencial Prompt 19.2) */}
         <div
           style={{
-            transform: `translateY(${blockTextY}px) scale(${emphasisScale})`,
+            // Prompt 48: blockTextY + textMicroDriftY para texto con vida post-entrada
+            transform: `translateY(${blockTextY + textMicroDriftY}px) scale(${emphasisScale})`,
             opacity: descriptionOpacity,
             textAlign: 'center',
             // Prompt 36: Solo headline/punch tienen shadow, support sin shadow (body text limpio)
