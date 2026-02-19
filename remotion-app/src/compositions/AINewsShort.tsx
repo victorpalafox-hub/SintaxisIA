@@ -337,14 +337,22 @@ export const AINewsShort: React.FC<AINewsShortProps> = (props) => {
                 );
               }
 
-              // Prompt 45: Hero con swell energético (22% → 25% → 22% entre frames 30-90)
+              // Prompt 47: Hero con fade-in ultrarrápido (5 frames) + swell energético desde frame 0
+              // energyRampStart=0 → swell empieza inmediatamente (no espera frame 30)
               if (f < contentStart) {
-                return interpolate(
+                const fadeIn = interpolate(
+                  f,
+                  [0, musicBed.heroFadeInFrames],
+                  [0, 1],
+                  { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+                );
+                const energySwell = interpolate(
                   f,
                   [heroImpact.energyRampStart, heroImpact.energyRampPeak, heroImpact.energyRampEnd],
                   [musicBed.heroVolume, heroImpact.musicSwellPeak, musicBed.heroVolume],
                   { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
                 );
+                return fadeIn * energySwell;
               }
 
               // Crossfade hero → content

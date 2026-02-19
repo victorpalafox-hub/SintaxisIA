@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 1606 tests (1604 passing, 2 skipped)
+**Test Status**: 1636 tests (1634 passing, 2 skipped)
 
-**Last Updated**: 2026-02-19 (Prompt 46 - Fix Duración Segura: cap 59.2s, SAFE_MAX_FRAMES 1776, FinalFadeOut, compressionRatio)
+**Last Updated**: 2026-02-19 (Prompt 47 - Fix Silencio Inicial: breathingMotion, titleDelayedIn frames [2,10], musicBed.heroFadeInFrames, energyRampStart=0)
 
 ## Prerequisites
 
@@ -67,7 +67,7 @@ npm run check
 | CI validation | `npm run ci:validate` |
 | News Manager | `npm run news:history / news:stats / news:help` |
 
-**Test suites**: 1606 tests en 62 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
+**Test suites**: 1636 tests en 63 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
 
 **Playwright config**: 4 workers local / 1 en CI, timeout 2min por test, retries solo en CI (2), reporters: HTML + JSON + JUnit.
 
@@ -164,7 +164,7 @@ if (isShortTimeout(timeout)) { /* manejar error */ }
 
 ```bash
 npm run check          # TypeScript sin errores
-npm test              # Tests pasando (1606 tests, 2 skipped)
+npm test              # Tests pasando (1636 tests, 2 skipped)
 npm run security:check # Sin vulnerabilidades críticas
 ```
 
@@ -561,6 +561,7 @@ output/
 | 44 | Corrección editorial integral | 22 | `AINewsShort.tsx` Narration from={contentStart}, music bed hero 22%→8% transición, `text-splitter.ts`/`themes.ts` maxChars 48 |
 | 45 | Micro-Polish Editorial | 27 | `heroImpact` config, impact flash 0.85+SFX, micro-zoom 1.03, energy ramp, `firstImageMinScore: 45`, outro easing cúbico, `outroVolume: 0.05` |
 | 46 | Fix Duración Segura YouTube Shorts | 22 | `AINewsShort.tsx` SAFE_MAX_FRAMES/FinalFadeOut/compressionRatio, `Root.tsx` calculateMetadata cap, `video-rendering.service.ts` Math.min 59.2s, `AudioMixer.tsx` playbackRate |
+| 47 | Fix Silencio Inicial (Hook Frame 0) | 30 | `themes.ts` breathingMotion/heroFadeInFrames/heroVolume 0.35/energyRampStart 0/microZoomStart 1.06, `HeroScene.tsx` titleDelayedIn [2,10]/titleTranslateY/breathingScale, `AINewsShort.tsx` fadeIn×energySwell |
 
 ## Pendientes
 

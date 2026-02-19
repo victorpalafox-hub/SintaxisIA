@@ -198,7 +198,9 @@
     "test:micro-polish": "playwright test tests/specs/prompt45-micro-polish.spec.ts",
     "test:prompt45": "playwright test tests/specs/prompt45-micro-polish.spec.ts",
     "test:safe-duration": "playwright test tests/specs/prompt46-safe-duration.spec.ts",
-    "test:prompt46": "playwright test tests/specs/prompt46-safe-duration.spec.ts"
+    "test:prompt46": "playwright test tests/specs/prompt46-safe-duration.spec.ts",
+    "test:initial-hook": "playwright test tests/specs/prompt47-initial-hook.spec.ts",
+    "test:prompt47": "playwright test tests/specs/prompt47-initial-hook.spec.ts"
   },
   "keywords": [
     "youtube",
