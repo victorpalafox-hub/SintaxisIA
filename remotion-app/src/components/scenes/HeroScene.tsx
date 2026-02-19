@@ -21,6 +21,7 @@
  * @updated Prompt 27 - Micro zoom-in escena (0.96→1.0) para retención
  * @updated Prompt 42 - Exclusividad de texto: título invisible durante TitleCard, fade-out antes de crossfade
  * @updated Prompt 45 - Impact flash 0.85 + micro-zoom 1.03→1.0 + energy ramp frames 30-90
+ * @updated Prompt 51 - Fix empalme texto: titleDelayedIn [2,10]→[75,95] (crossfade con TitleCard)
  */
 
 import React from 'react';
@@ -132,21 +133,21 @@ export const HeroScene: React.FC<HeroSceneProps> = ({
   const titleCardEnd = titleCard.durationFrames; // 90
   const titleCardFadeStart = titleCardEnd - titleCard.fadeOutFrames; // 75
 
-  // Prompt 47: Título con energía — visible desde frame 2, opacidad máxima en frame 10.
-  // Antes: fade lento frames [75,105] (2.5s de latencia). Ahora: entrada en 0.27s.
-  // El TitleCard overlay tapa visualmente este título hasta ~frame 75-90,
-  // así que no hay overlap perceptible — el título ya está listo cuando TitleCard se va.
+  // Prompt 51: Título de Hero entra DESPUÉS de que TitleCard hace fade-out.
+  // Antes (Prompt 47): [2, 10] — título visible desde frame 10, empalme con TitleCard.
+  // Ahora: [titleCardFadeStart, titleCardFadeStart + 20] = [75, 95] — crossfade suave.
+  // Frames 0-74: solo TitleCard visible. Frames 75-90: crossfade. Frames 95+: solo Hero.
   const titleDelayedIn = interpolate(
     frame,
-    [2, 10], // 8 frames = ~0.27s de entrada energética
+    [titleCardFadeStart, titleCardFadeStart + 20], // [75, 95] crossfade con TitleCard
     [0, 1],
     { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
   );
 
-  // Prompt 47: Slide vertical -20px → 0 sincronizado con titleDelayedIn
+  // Prompt 51: Slide vertical sincronizado con titleDelayedIn
   const titleTranslateY = interpolate(
     frame,
-    [2, 10],
+    [titleCardFadeStart, titleCardFadeStart + 20],
     [-20, 0],
     { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
   );
@@ -296,7 +297,7 @@ export const HeroScene: React.FC<HeroSceneProps> = ({
             // Prompt 47: titleTranslateY añade slide -20px→0 en primeros 8 frames (energía de entrada)
             transform: `translateY(${titleY + titleTranslateY}px)`,
             // Prompt 42: Opacidad compuesta = spring × delayed-in × early-out
-            // Prompt 47: titleDelayedIn ahora usa frames [2,10] en lugar de [75,105]
+            // Prompt 51: titleDelayedIn usa [75,95] — crossfade con TitleCard
             opacity: titleOpacity * titleDelayedIn * titleEarlyOut,
             fontFamily: 'Inter, Roboto, Arial, sans-serif',
             // Prompt 39-Fix3: Usar nivel headline de editorialText (fuente única de verdad)

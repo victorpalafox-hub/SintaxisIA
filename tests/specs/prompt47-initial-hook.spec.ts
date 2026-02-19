@@ -11,7 +11,7 @@
  * - breathingMotion existe con amplitude y frequency
  * - HeroScene.tsx contiene titleTranslateY (entrada energética)
  * - HeroScene.tsx contiene breathingScale (movimiento permanente)
- * - HeroScene.tsx usa frames [2, 10] para titleDelayedIn (no [75, 105])
+ * - HeroScene.tsx usa titleCardFadeStart para titleDelayedIn (Prompt 51: crossfade con TitleCard)
  * - AINewsShort.tsx contiene heroFadeInFrames en BackgroundMusic
  *
  * @since Prompt 47 - Fix silencio inicial
@@ -133,13 +133,11 @@ test.describe('Prompt 47 - HeroScene.tsx visual hook', () => {
     expect(content).toContain('titleTranslateY');
   });
 
-  test('titleDelayedIn usa frames [2, 10] no [75, 105]', async () => {
+  test('titleDelayedIn usa titleCardFadeStart (Prompt 51: crossfade con TitleCard)', async () => {
     logger.info('Verificando frames de titleDelayedIn');
     const content = fs.readFileSync(HERO_PATH, 'utf-8');
-    // Debe contener [2, 10] en el contexto de titleDelayedIn
-    expect(content).toContain('[2, 10]');
-    // No debe contener [75, 105] como rango de titleDelayedIn
-    expect(content).not.toContain('[titleCardFadeStart, titleCardEnd + 15]');
+    // Prompt 51: Debe usar titleCardFadeStart para sincronizar con TitleCard fade-out
+    expect(content).toContain('[titleCardFadeStart, titleCardFadeStart + 20]');
   });
 
   test('titleTranslateY aplica slide -20px → 0', async () => {
@@ -227,33 +225,34 @@ test.describe('Prompt 47 - Validaciones matemáticas', () => {
     }
   });
 
-  test('titleDelayedIn en frame 2 = 0 (inicio de entrada)', async () => {
-    logger.info('Verificando titleDelayedIn frame 2');
-    const opacity = interpolate(2, [2, 10], [0, 1]);
+  // Prompt 51: titleDelayedIn ahora usa [75, 95] (titleCardFadeStart = 90-15 = 75)
+  test('titleDelayedIn en frame 75 = 0 (inicio de entrada, sync con TitleCard fade-out)', async () => {
+    logger.info('Verificando titleDelayedIn frame 75');
+    const opacity = interpolate(75, [75, 95], [0, 1]);
     expect(opacity).toBe(0);
   });
 
-  test('titleDelayedIn en frame 10 = 1 (entrada completa)', async () => {
-    logger.info('Verificando titleDelayedIn frame 10');
-    const opacity = interpolate(10, [2, 10], [0, 1]);
+  test('titleDelayedIn en frame 95 = 1 (entrada completa)', async () => {
+    logger.info('Verificando titleDelayedIn frame 95');
+    const opacity = interpolate(95, [75, 95], [0, 1]);
     expect(opacity).toBe(1);
   });
 
-  test('titleDelayedIn en frame 6 = 0.5 (mitad de la entrada)', async () => {
-    logger.info('Verificando titleDelayedIn frame 6');
-    const opacity = interpolate(6, [2, 10], [0, 1]);
+  test('titleDelayedIn en frame 85 = 0.5 (mitad del crossfade)', async () => {
+    logger.info('Verificando titleDelayedIn frame 85');
+    const opacity = interpolate(85, [75, 95], [0, 1]);
     expect(opacity).toBeCloseTo(0.5, 2);
   });
 
-  test('titleTranslateY en frame 2 = -20px (inicio del slide)', async () => {
-    logger.info('Verificando titleTranslateY frame 2');
-    const y = interpolate(2, [2, 10], [-20, 0]);
+  test('titleTranslateY en frame 75 = -20px (inicio del slide)', async () => {
+    logger.info('Verificando titleTranslateY frame 75');
+    const y = interpolate(75, [75, 95], [-20, 0]);
     expect(y).toBe(-20);
   });
 
-  test('titleTranslateY en frame 10 = 0 (posición final)', async () => {
-    logger.info('Verificando titleTranslateY frame 10');
-    const y = interpolate(10, [2, 10], [-20, 0]);
+  test('titleTranslateY en frame 95 = 0 (posición final)', async () => {
+    logger.info('Verificando titleTranslateY frame 95');
+    const y = interpolate(95, [75, 95], [-20, 0]);
     expect(y).toBe(0);
   });
 

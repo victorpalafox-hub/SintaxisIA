@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 1732 tests (1730 passing, 2 skipped)
+**Test Status**: 1753 tests (1751 passing, 2 skipped)
 
-**Last Updated**: 2026-02-19 (Prompt 50 - Polish Cinematográfico Premium: cinematicGrade filter global, CTA premium semi-bold+tracking+shadow)
+**Last Updated**: 2026-02-19 (Prompt 51 - Fix Empalme Texto: titleDelayedIn [2,10]→[75,95], crossfade suave Hero↔TitleCard)
 
 ## Prerequisites
 
@@ -67,7 +67,7 @@ npm run check
 | CI validation | `npm run ci:validate` |
 | News Manager | `npm run news:history / news:stats / news:help` |
 
-**Test suites**: 1732 tests en 66 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
+**Test suites**: 1753 tests en 67 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
 
 **Playwright config**: 4 workers local / 1 en CI, timeout 2min por test, retries solo en CI (2), reporters: HTML + JSON + JUnit.
 
@@ -164,7 +164,7 @@ if (isShortTimeout(timeout)) { /* manejar error */ }
 
 ```bash
 npm run check          # TypeScript sin errores
-npm test              # Tests pasando (1732 tests, 2 skipped)
+npm test              # Tests pasando (1753 tests, 2 skipped)
 npm run security:check # Sin vulnerabilidades críticas
 ```
 
@@ -485,7 +485,7 @@ output/
 | EditorialText | `text-editorial.ts`, `editorialText` config, `getBlockTiming()` | Bloques 1-2 líneas, headline 72px/support 54px/punch 84px, slide por peso (20/12/30px), easing diferenciado, pause 10f antes + 8f después punch |
 | VisualEmphasis | `visual-emphasis.ts`, `visualEmphasis` config, `detectEmphasis()` | Max 3 momentos (1 hard + 2 soft), scale 1.08/1.03, dimming overlay, ramp 10f, min 4 bloques |
 | EditorialClosing | `AINewsShort.tsx` Narration→outroStart, `AudioMixer.tsx` fade 45f, `themes.ts` ctaDelay 45f | Voz termina antes de outro, breathing 1.5s, CTA delay 1.5s, voice fade 1.5s |
-| TextExclusivity | `HeroScene.tsx` titleDelayedIn/titleEarlyOut, `ContentScene.tsx` sin fallback | Max 1 texto por frame, TitleCard→Hero→Content→Outro sin overlap |
+| TextExclusivity | `HeroScene.tsx` titleDelayedIn [75,95]/titleEarlyOut [195,210], `ContentScene.tsx` sin fallback | Max 1 texto por frame, TitleCard fade-out→Hero fade-in crossfade, sin overlap |
 | EditorialIntegral | `AINewsShort.tsx` Narration from={contentStart}, music bed hero/content, `text-splitter.ts` 48 chars | Voz alineada con texto, music bed 22%→8%, frases cortas editoriales |
 | MicroDynamics | `themes.ts` microDynamics config, `ContentScene.tsx` 4 micro-anims, `OutroScene.tsx` breathing | Image breathing ±0.4%/50f, X-drift ±6px/70f, text drift ±2px/80f, transition zoom in/out, outro breathing ±0.3%/60f |
 | NarrativeRhythm | `themes.ts` narrativeRhythm config, `narrative-rhythm.ts` getIntensityMultiplier, `ContentScene.tsx` intensity×amplitude | Opening 1.0 (0-20s), Build 0.75 (20-40s), Climax 1.15 (40s+), pausa 0.4 cada 165f, decel 0.3 últimos 60f |
@@ -568,6 +568,7 @@ output/
 | 48 | Micro-Dinámica Permanente | 29 | `themes.ts` microDynamics config, `ContentScene.tsx` image breathing/X-drift/text micro-drift/transition zoom, `OutroScene.tsx` breathing container |
 | 49 | Ritmo Narrativo Editorial | 40 | `themes.ts` narrativeRhythm config, `narrative-rhythm.ts` getIntensityMultiplier, `ContentScene.tsx` micro-dinámicas moduladas por intensidad |
 | 50 | Polish Cinematográfico Premium | 27 | `themes.ts` cinematicGrade config, `AINewsShort.tsx` filter global, `OutroScene.tsx` CTA premium |
+| 51 | Fix Empalme Texto Hero+TitleCard | 21 | `HeroScene.tsx` titleDelayedIn [2,10]→[75,95], crossfade suave con TitleCard fade-out |
 
 ## Pendientes
 
