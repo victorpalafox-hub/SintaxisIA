@@ -186,7 +186,7 @@ test.describe('Prompt 33 - editorialText Config', () => {
 
     expect(content).toMatch(/punch:[\s\S]*?fontSize:\s*84/);
     expect(content).toMatch(/punch:[\s\S]*?fontWeight:\s*800/);
-    expect(content).toContain("color: '#4DA3FF'");
+    expect(content).toContain("color: '#4CC2F1'");
   });
 
   test('pauseFramesBeforePunch >= 6 (Prompt 40-Fix4: 6→10)', async () => {

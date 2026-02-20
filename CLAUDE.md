@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 1753 tests (1751 passing, 2 skipped)
+**Test Status**: 1789 tests (1787 passing, 2 skipped)
 
-**Last Updated**: 2026-02-19 (Prompt 51 - Fix Empalme Texto: titleDelayedIn [2,10]→[75,95], crossfade suave Hero↔TitleCard)
+**Last Updated**: 2026-02-19 (Prompt 52 - Color Upgrade: paleta The Verge #4CC2F1, blobs+glow visibles, brightness>1.0)
 
 ## Prerequisites
 
@@ -67,7 +67,7 @@ npm run check
 | CI validation | `npm run ci:validate` |
 | News Manager | `npm run news:history / news:stats / news:help` |
 
-**Test suites**: 1753 tests en 67 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
+**Test suites**: 1789 tests en 68 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
 
 **Playwright config**: 4 workers local / 1 en CI, timeout 2min por test, retries solo en CI (2), reporters: HTML + JSON + JUnit.
 
@@ -164,7 +164,7 @@ if (isShortTimeout(timeout)) { /* manejar error */ }
 
 ```bash
 npm run check          # TypeScript sin errores
-npm test              # Tests pasando (1753 tests, 2 skipped)
+npm test              # Tests pasando (1789 tests, 2 skipped)
 npm run security:check # Sin vulnerabilidades críticas
 ```
 
@@ -489,7 +489,7 @@ output/
 | EditorialIntegral | `AINewsShort.tsx` Narration from={contentStart}, music bed hero/content, `text-splitter.ts` 48 chars | Voz alineada con texto, music bed 22%→8%, frases cortas editoriales |
 | MicroDynamics | `themes.ts` microDynamics config, `ContentScene.tsx` 4 micro-anims, `OutroScene.tsx` breathing | Image breathing ±0.4%/50f, X-drift ±6px/70f, text drift ±2px/80f, transition zoom in/out, outro breathing ±0.3%/60f |
 | NarrativeRhythm | `themes.ts` narrativeRhythm config, `narrative-rhythm.ts` getIntensityMultiplier, `ContentScene.tsx` intensity×amplitude | Opening 1.0 (0-20s), Build 0.75 (20-40s), Climax 1.15 (40s+), pausa 0.4 cada 165f, decel 0.3 últimos 60f |
-| CinematicGrade | `themes.ts` cinematicGrade config, `AINewsShort.tsx` filter CSS global | contrast 1.08, saturate 1.05, brightness 0.98, CTA fontWeight 600+letterSpacing 1+textShadow |
+| CinematicGrade | `themes.ts` cinematicGrade config, `AINewsShort.tsx` filter CSS global | contrast 1.10, saturate 1.18, brightness 1.03, CTA fontWeight 600+letterSpacing 1+textShadow |
 
 ## Prompt History (Resumen)
 
@@ -569,6 +569,7 @@ output/
 | 49 | Ritmo Narrativo Editorial | 40 | `themes.ts` narrativeRhythm config, `narrative-rhythm.ts` getIntensityMultiplier, `ContentScene.tsx` micro-dinámicas moduladas por intensidad |
 | 50 | Polish Cinematográfico Premium | 27 | `themes.ts` cinematicGrade config, `AINewsShort.tsx` filter global, `OutroScene.tsx` CTA premium |
 | 51 | Fix Empalme Texto Hero+TitleCard | 21 | `HeroScene.tsx` titleDelayedIn [2,10]→[75,95], crossfade suave con TitleCard fade-out |
+| 52 | Color Upgrade: Paleta The Verge | 36 | `themes.ts` paleta #4CC2F1, fondos negros profundos, blobs+glow visibles, cinematicGrade brightness>1.0, editorialText colors alineados |
 
 ## Pendientes
 

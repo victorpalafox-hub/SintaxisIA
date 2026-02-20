@@ -39,39 +39,39 @@ test.describe('Prompt 36 - Colores del tema Tech Editorial', () => {
     themes = fs.readFileSync(THEMES_PATH, 'utf-8');
   });
 
-  test('text.primary es #F5F7FA (blanco premium)', async () => {
-    logger.info('Verificando blanco premium editorial');
-    expect(themes).toContain("primary: '#F5F7FA'");
+  test('text.primary es #FFFFFF (blanco puro, Prompt 52)', async () => {
+    logger.info('Verificando blanco puro The Verge');
+    expect(themes).toContain("primary: '#FFFFFF'");
   });
 
-  test('text.secondary es #C9CED6 (gris claro legible)', async () => {
-    logger.info('Verificando gris secundario claro');
-    expect(themes).toContain("secondary: '#C9CED6'");
+  test('text.secondary es #D4E8F5 (azul claro, Prompt 52)', async () => {
+    logger.info('Verificando secundario azul claro');
+    expect(themes).toContain("secondary: '#D4E8F5'");
   });
 
-  test('text.muted es #9AA1AC (gris editorial medio)', async () => {
-    logger.info('Verificando gris muted editorial');
-    expect(themes).toContain("muted: '#9AA1AC'");
+  test('text.muted es #8BA4B8 (azul grisáceo, Prompt 52)', async () => {
+    logger.info('Verificando muted azul grisáceo');
+    expect(themes).toContain("muted: '#8BA4B8'");
   });
 
-  test('background.dark es #0B0D10 (base editorial)', async () => {
-    logger.info('Verificando fondo base editorial');
-    expect(themes).toContain("dark: '#0B0D10'");
+  test('background.dark es #080A0F (negro profundo, Prompt 52)', async () => {
+    logger.info('Verificando fondo negro profundo');
+    expect(themes).toContain("dark: '#080A0F'");
   });
 
-  test('background.darker es #12151C (elevado editorial)', async () => {
-    logger.info('Verificando fondo elevado editorial');
-    expect(themes).toContain("darker: '#12151C'");
+  test('background.darker es #04060A (negro puro azul, Prompt 52)', async () => {
+    logger.info('Verificando fondo negro puro azul');
+    expect(themes).toContain("darker: '#04060A'");
   });
 
-  test('colors.primary es #4DA3FF (azul editorial premium)', async () => {
-    logger.info('Verificando primary color');
-    expect(themes).toContain("primary: '#4DA3FF'");
+  test('colors.primary es #4CC2F1 (azul The Verge, Prompt 52)', async () => {
+    logger.info('Verificando primary color The Verge');
+    expect(themes).toContain("primary: '#4CC2F1'");
   });
 
-  test('colors.accent unificado con primary (#4DA3FF)', async () => {
+  test('colors.accent unificado con primary (#4CC2F1)', async () => {
     logger.info('Verificando accent unificado');
-    expect(themes).toContain("accent: '#4DA3FF'");
+    expect(themes).toContain("accent: '#4CC2F1'");
   });
 });
 
@@ -87,19 +87,19 @@ test.describe('Prompt 36 - Overlays con nuevo accent', () => {
     themes = fs.readFileSync(THEMES_PATH, 'utf-8');
   });
 
-  test('overlay.light usa #4DA3FF08', async () => {
+  test('overlay.light usa #4CC2F110 (Prompt 52)', async () => {
     logger.info('Verificando overlay light');
-    expect(themes).toContain("light: '#4DA3FF08'");
+    expect(themes).toContain("light: '#4CC2F110'");
   });
 
-  test('overlay.medium usa #4DA3FF15', async () => {
+  test('overlay.medium usa #4CC2F120 (Prompt 52)', async () => {
     logger.info('Verificando overlay medium');
-    expect(themes).toContain("medium: '#4DA3FF15'");
+    expect(themes).toContain("medium: '#4CC2F120'");
   });
 
-  test('overlay.strong usa #4DA3FF25', async () => {
+  test('overlay.strong usa #4CC2F135 (Prompt 52)', async () => {
     logger.info('Verificando overlay strong');
-    expect(themes).toContain("strong: '#4DA3FF25'");
+    expect(themes).toContain("strong: '#4CC2F135'");
   });
 });
 
@@ -176,32 +176,31 @@ test.describe('Prompt 36 - Editorial text colors premium', () => {
     themes = fs.readFileSync(THEMES_PATH, 'utf-8');
   });
 
-  test('headline.color es #F5F7FA (blanco premium, no puro)', async () => {
-    logger.info('Verificando headline color premium');
-    // editorialText headline color
+  test('headline.color es #FFFFFF (blanco puro, Prompt 52)', async () => {
+    logger.info('Verificando headline color blanco puro');
     const headlineSection = themes.substring(
       themes.indexOf('headline: {'),
       themes.indexOf('support: {')
     );
-    expect(headlineSection).toContain("color: '#F5F7FA'");
+    expect(headlineSection).toContain("color: '#FFFFFF'");
   });
 
-  test('support.color es #C9CED6 (gris claro, no rgba)', async () => {
-    logger.info('Verificando support color legible');
+  test('support.color es #D4E8F5 (azul claro, Prompt 52)', async () => {
+    logger.info('Verificando support color azul claro');
     const supportSection = themes.substring(
       themes.indexOf('support: {'),
       themes.indexOf('punch: {')
     );
-    expect(supportSection).toContain("color: '#C9CED6'");
+    expect(supportSection).toContain("color: '#D4E8F5'");
   });
 
-  test('punch.color es #4DA3FF (accent unificado)', async () => {
-    logger.info('Verificando punch color accent');
+  test('punch.color es #4CC2F1 (accent The Verge, Prompt 52)', async () => {
+    logger.info('Verificando punch color accent The Verge');
     const punchSection = themes.substring(
       themes.indexOf('punch: {'),
       themes.indexOf('pauseFramesBeforePunch')
     );
-    expect(punchSection).toContain("color: '#4DA3FF'");
+    expect(punchSection).toContain("color: '#4CC2F1'");
   });
 });
 

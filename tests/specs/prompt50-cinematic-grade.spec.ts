@@ -41,7 +41,7 @@ test.describe('Prompt 50 - Config cinematicGrade en themes.ts', () => {
     expect(themes).toContain('export const cinematicGrade');
   });
 
-  test('contrast > 1.0 y <= 1.15 (sutil)', async () => {
+  test('contrast > 1.0 y <= 1.15 (Prompt 52: 1.10)', async () => {
     logger.info('Verificando contrast');
     const match = themes.match(/cinematicGrade[\s\S]*?contrast:\s*([\d.]+)/);
     expect(match).toBeTruthy();
@@ -50,22 +50,22 @@ test.describe('Prompt 50 - Config cinematicGrade en themes.ts', () => {
     expect(val).toBeLessThanOrEqual(1.15);
   });
 
-  test('saturate > 1.0 y <= 1.10 (sutil)', async () => {
+  test('saturate > 1.0 y <= 1.25 (Prompt 52: 1.18, vibrante)', async () => {
     logger.info('Verificando saturate');
     const match = themes.match(/cinematicGrade[\s\S]*?saturate:\s*([\d.]+)/);
     expect(match).toBeTruthy();
     const val = parseFloat(match![1]);
     expect(val).toBeGreaterThan(1.0);
-    expect(val).toBeLessThanOrEqual(1.10);
+    expect(val).toBeLessThanOrEqual(1.25);
   });
 
-  test('brightness < 1.0 y >= 0.95 (profundidad sin oscurecer)', async () => {
+  test('brightness >= 1.0 y <= 1.08 (Prompt 52: 1.03, corrige oscuridad)', async () => {
     logger.info('Verificando brightness');
     const match = themes.match(/cinematicGrade[\s\S]*?brightness:\s*([\d.]+)/);
     expect(match).toBeTruthy();
     const val = parseFloat(match![1]);
-    expect(val).toBeLessThan(1.0);
-    expect(val).toBeGreaterThanOrEqual(0.95);
+    expect(val).toBeGreaterThanOrEqual(1.0);
+    expect(val).toBeLessThanOrEqual(1.08);
   });
 
   test('Prompt 50 documentado', async () => {

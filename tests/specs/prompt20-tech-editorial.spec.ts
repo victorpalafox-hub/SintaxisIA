@@ -94,11 +94,11 @@ test.describe('Prompt 20 - Tech Editorial Theme', () => {
     logger.info('[PASS] activeTheme = techEditorialTheme');
   });
 
-  test('debe usar paleta azul editorial premium (#4DA3FF)', () => {
+  test('debe usar paleta azul editorial The Verge (#4CC2F1)', () => {
     const content = readFile(THEMES_PATH);
-    // techEditorialTheme debe tener el azul premium como primary (Prompt 36)
-    expect(content).toMatch(/primary:\s*'#4DA3FF'/);
-    logger.info('[PASS] Paleta azul editorial premium configurada');
+    // techEditorialTheme debe tener el azul The Verge como primary (Prompt 52)
+    expect(content).toMatch(/primary:\s*'#4CC2F1'/);
+    logger.info('[PASS] Paleta azul editorial The Verge configurada');
   });
 
   test('debe tener theme.ts actualizado con colores editoriales', () => {

@@ -9,6 +9,7 @@
  * Actualmente activo: Tech Editorial (Prompt 20)
  * @updated Prompt 39-Fix3 - Jerarquía tipográfica fija (headline 72, support 54, punch 84)
  * @updated Prompt 49 - narrativeRhythm: curva de intensidad global (opening→build→climax + pausas + decel)
+ * @updated Prompt 52 - Color upgrade: paleta The Verge (#4CC2F1), blobs+glow visibles, brightness>1.0
  *
  * Para cambiar de tema:
  * 1. Cambiar la línea: export const activeTheme = themes.techEditorial;
@@ -180,27 +181,27 @@ export const minimalistTheme: Theme = {
 export const techEditorialTheme: Theme = {
   name: 'Tech Editorial',
   colors: {
-    primary: '#4DA3FF',      // Azul editorial premium (Prompt 36)
-    secondary: '#64748B',    // Slate gray
-    accent: '#4DA3FF',       // Unificado con primary (Prompt 36: 1 accent por escena)
+    primary: '#4CC2F1',      // Azul The Verge — brillante pero editorial (Prompt 52)
+    secondary: '#1A8FD1',    // Azul medio para contraste (Prompt 52)
+    accent: '#4CC2F1',       // Unificado con primary (Prompt 52)
     background: {
-      dark: '#0B0D10',       // Base editorial oscuro (Prompt 36)
-      darker: '#12151C',     // Elevado editorial (Prompt 36)
+      dark: '#080A0F',       // Negro más profundo (Prompt 52)
+      darker: '#04060A',     // Negro puro con tinte azul (Prompt 52)
       gradient: {
-        start: '#0C1220',    // Azul profundo saturado
-        middle: '#141E30',   // Azul-navy real
-        end: '#0B1628',      // Azul oscuro con saturación
+        start: '#080A0F',    // Negro azulado (Prompt 52)
+        middle: '#0C1828',   // Navy profundo saturado (Prompt 52)
+        end: '#071220',      // Azul-negro oscuro (Prompt 52)
       },
     },
     text: {
-      primary: '#F5F7FA',    // Blanco premium editorial (Prompt 36)
-      secondary: '#C9CED6',  // Gris claro legible (Prompt 36)
-      muted: '#9AA1AC',      // Gris editorial medio (Prompt 36)
+      primary: '#FFFFFF',    // Blanco puro — máxima legibilidad (Prompt 52)
+      secondary: '#D4E8F5',  // Azul muy claro — tinte The Verge (Prompt 52)
+      muted: '#8BA4B8',      // Azul grisáceo editorial (Prompt 52)
     },
     overlay: {
-      light: '#4DA3FF08',    // Azul editorial 8% (Prompt 36)
-      medium: '#4DA3FF15',   // Azul editorial 15% (Prompt 36)
-      strong: '#4DA3FF25',   // Azul editorial 25% (Prompt 36)
+      light: '#4CC2F110',    // Azul The Verge 10% (Prompt 52)
+      medium: '#4CC2F120',   // Azul The Verge 20% (Prompt 52)
+      strong: '#4CC2F135',   // Azul The Verge 35% (Prompt 52)
     },
   },
   spacing: {
@@ -526,7 +527,7 @@ export const editorialText = {
   headline: {
     fontSize: 72,
     fontWeight: 700 as const,
-    color: '#F5F7FA',
+    color: '#FFFFFF',
     letterSpacing: -0.5,
     // Prompt 40-Fix4: Slide estándar — ritmo informativo normal
     slideDistance: 20,
@@ -536,7 +537,7 @@ export const editorialText = {
   support: {
     fontSize: 54,
     fontWeight: 500 as const,
-    color: '#C9CED6',
+    color: '#D4E8F5',
     letterSpacing: 0,
     // Prompt 40-Fix4: Más suave y lento — contexto, no impacto
     slideDistance: 12,
@@ -546,7 +547,7 @@ export const editorialText = {
   punch: {
     fontSize: 84,
     fontWeight: 800 as const,
-    color: '#4DA3FF',
+    color: '#4CC2F1',
     letterSpacing: -1,
     // Prompt 40-Fix4: Rápido y dramático — entrada con energía
     slideDistance: 30,
@@ -630,12 +631,12 @@ export const backgroundAnimation = {
   vignetteStrength: 0.35,
   /** % desde centro donde empieza el vignette - Prompt 32.1: centro más claro */
   vignetteTransparentStop: 70,
-  /** Opacidad del blob primario - Prompt 32.1: +33% (era 0.30) */
-  blobPrimaryOpacity: 0.40,
-  /** Opacidad del blob secundario - Prompt 32.1: +36% (era 0.22) */
-  blobSecondaryOpacity: 0.30,
-  /** Radio de blur de los blobs (px) - Prompt 32.1: menos difuso = más visible */
-  blobBlur: 65,
+  /** Opacidad del blob primario - Prompt 52: 0.40→0.65 (blobs claramente visibles) */
+  blobPrimaryOpacity: 0.65,
+  /** Opacidad del blob secundario - Prompt 52: 0.30→0.45 */
+  blobSecondaryOpacity: 0.45,
+  /** Radio de blur de los blobs (px) - Prompt 52: 65→50 (menos difuso = más definido) */
+  blobBlur: 50,
   /** Amplitud de drift de blobs en % - Prompt 31: +20% rango */
   blobDriftAmplitude: { x: 30, y: 22 },
   /** Multiplicador de parallax por sección - Prompt 31: hero +20%, outro +40% */
@@ -730,8 +731,8 @@ export const premiumBackground = {
   colorPulseRange: 10,
   /** Velocidad del color pulse (rad/frame) */
   colorPulseSpeed: 0.008,
-  /** Opacidad del accent glow spot - Prompt 32.1: +67% */
-  accentGlowOpacity: 0.25,
+  /** Opacidad del accent glow spot - Prompt 52: 0.25→0.40 (más presente) */
+  accentGlowOpacity: 0.40,
   /** Blur del accent glow spot (px) */
   accentGlowBlur: 60,
   /** Tamaño del accent glow spot (% del viewport) - Prompt 32.1: +20% */
@@ -947,12 +948,12 @@ export const narrativeRhythm = {
  * @since Prompt 50
  */
 export const cinematicGrade = {
-  /** Contraste sutil — profundiza negros sin quemar blancos */
-  contrast: 1.08,
-  /** Saturación sutil — colores más ricos sin parecer filtro Instagram */
-  saturate: 1.05,
-  /** Brillo ligeramente reducido — sensación de profundidad, no oscuridad */
-  brightness: 0.98,
+  /** Contraste — profundiza negros sin quemar blancos (Prompt 52: 1.08→1.10) */
+  contrast: 1.10,
+  /** Saturación — colores más vivos y vibrantes (Prompt 52: 1.05→1.18) */
+  saturate: 1.18,
+  /** Brillo ligeramente aumentado — corrige oscuridad (Prompt 52: 0.98→1.03) */
+  brightness: 1.03,
 };
 
 // Colección de todos los temas disponibles
