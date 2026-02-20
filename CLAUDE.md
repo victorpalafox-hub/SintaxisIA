@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **User Profile**: QA Manual → QA Automation. Código debe incluir comentarios educativos.
 
-**Test Status**: 1789 tests (1787 passing, 2 skipped)
+**Test Status**: 1818 tests (1816 passing, 2 skipped)
 
-**Last Updated**: 2026-02-19 (Prompt 52 - Color Upgrade: paleta The Verge #4CC2F1, blobs+glow visibles, brightness>1.0)
+**Last Updated**: 2026-02-19 (Prompt 53 - Smart Image Query: tech context obligatorio, sanitización banned terms, anti-dilución scoring)
 
 ## Prerequisites
 
@@ -67,7 +67,7 @@ npm run check
 | CI validation | `npm run ci:validate` |
 | News Manager | `npm run news:history / news:stats / news:help` |
 
-**Test suites**: 1789 tests en 68 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
+**Test suites**: 1818 tests en 69 suites. Convención: `npm run test:[nombre]` o `npm run test:prompt[N]` (alias). Ver `package.json` para lista completa.
 
 **Playwright config**: 4 workers local / 1 en CI, timeout 2min por test, retries solo en CI (2), reporters: HTML + JSON + JUnit.
 
@@ -164,7 +164,7 @@ if (isShortTimeout(timeout)) { /* manejar error */ }
 
 ```bash
 npm run check          # TypeScript sin errores
-npm test              # Tests pasando (1789 tests, 2 skipped)
+npm test              # Tests pasando (1818 tests, 2 skipped)
 npm run security:check # Sin vulnerabilidades críticas
 ```
 
@@ -467,7 +467,7 @@ output/
 | BackgroundDirector | gradient drift + parallax blobs + color pulse + accent glow + grain + light sweep dual | Persistente, configs en themes.ts + premiumBackground |
 | EditorialShadow | textDepth, imageElevation, logoBrandTint | Reemplaza glows neón (Prompt 20) |
 | Anti-Duplicación | `PublishedNewsTracker` + `selectTopNewsExcluding()` | 3 capas: ID, titulo 80%, empresa+producto 7d |
-| SmartQuery | `translateKeywords()`, `generateQueries()` | 170+ ES→EN, max 3 kw/query, 2 alternativas |
+| SmartQuery | `translateKeywords()`, `generateQueries()`, `sanitizeQuery()`, `enrichWithTechContext()` | 170+ ES→EN, max 3 kw/query, 2 alternativas, TECH_CONTEXT_TERMS rotate, BANNED_QUERY_TERMS 26 terms, anti-dilución scoring |
 | ImageScoring | `searchPexelsWithScoring()`, `scoreCandidate()` | 5 candidatos, gate textRelevance≥8, penalty genérico -20, umbral 35 (primera imagen 45), null si no relevante |
 | SafeImage | `SafeImage.tsx`, `hasError`, `return null` | Sin placeholder (Prompt 38-Fix2), error=null, no UI Avatars, fallbackSrc opcional |
 | News Manager CLI | `news-manager-cli.ts` (10 comandos: history/active/expired/search/view/unlock/cleanup/clear/stats/help) | Peer de cli.ts, ts-node directo para args |
@@ -570,6 +570,7 @@ output/
 | 50 | Polish Cinematográfico Premium | 27 | `themes.ts` cinematicGrade config, `AINewsShort.tsx` filter global, `OutroScene.tsx` CTA premium |
 | 51 | Fix Empalme Texto Hero+TitleCard | 21 | `HeroScene.tsx` titleDelayedIn [2,10]→[75,95], crossfade suave con TitleCard fade-out |
 | 52 | Color Upgrade: Paleta The Verge | 36 | `themes.ts` paleta #4CC2F1, fondos negros profundos, blobs+glow visibles, cinematicGrade brightness>1.0, editorialText colors alineados |
+| 53 | Smart Image Query Tech Context | 29 | `smart-image.config.ts` TECH_CONTEXT_TERMS+BANNED_QUERY_TERMS, `smart-query-generator.ts` sanitizeQuery+enrichWithTechContext, `image-orchestration.service.ts` searchWithFallback sanitize+enrich |
 
 ## Pendientes
 

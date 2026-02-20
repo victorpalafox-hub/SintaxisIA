@@ -19,12 +19,13 @@
  * ```
  *
  * @author Sintaxis IA
- * @version 1.0.0
+ * @version 1.1.0
  * @since Prompt 23
+ * @updated Prompt 53 - Tech context enrichment + query sanitization
  */
 
 import { logger } from '../../utils/logger';
-import { SPANISH_TO_ENGLISH, QUERY_CONFIG } from '../config/smart-image.config';
+import { SPANISH_TO_ENGLISH, QUERY_CONFIG, TECH_CONTEXT_TERMS, BANNED_QUERY_TERMS } from '../config/smart-image.config';
 import type { SmartQueryResult } from '../types/image.types';
 
 // =============================================================================
@@ -126,6 +127,59 @@ export class SmartQueryGenerator {
   }
 
   /**
+   * Elimina términos banned de un query para evitar resultados de stock genéricos.
+   * Si todos los términos son banned, retorna un fallback seguro.
+   *
+   * @param query - Query a sanitizar
+   * @returns Query sin términos banned
+   *
+   * @since Prompt 53
+   */
+  sanitizeQuery(query: string): string {
+    const words = query.toLowerCase().split(/\s+/).filter(w => w.length > 0);
+    const safe = words.filter(w => !BANNED_QUERY_TERMS.includes(w));
+
+    if (safe.length === 0) {
+      logger.info(`[SmartQuery] Sanitize: all words banned in "${query}", using fallback`);
+      return 'artificial intelligence technology';
+    }
+
+    const result = safe.join(' ');
+    if (result !== query.toLowerCase()) {
+      logger.info(`[SmartQuery] Sanitize: "${query}" → "${result}"`);
+    }
+
+    return result;
+  }
+
+  /**
+   * Agrega un término de contexto tech al query si no tiene uno ya.
+   * Rota el término por segmentIndex para variedad visual entre segmentos.
+   *
+   * @param query - Query a enriquecer
+   * @param segmentIndex - Índice del segmento para rotación (default 0)
+   * @returns Query con contexto tech
+   *
+   * @since Prompt 53
+   */
+  enrichWithTechContext(query: string, segmentIndex: number = 0): string {
+    const lower = query.toLowerCase();
+
+    // No enriquecer si ya contiene un término tech
+    if (TECH_CONTEXT_TERMS.some(term => lower.includes(term))) {
+      return query;
+    }
+
+    // Rotar término tech por índice de segmento
+    const techTerm = TECH_CONTEXT_TERMS[segmentIndex % TECH_CONTEXT_TERMS.length];
+    const enriched = `${query} ${techTerm}`;
+
+    logger.info(`[SmartQuery] Enrich: "${query}" → "${enriched}"`);
+
+    return enriched;
+  }
+
+  /**
    * Genera queries alternativas diferentes a la principal.
    *
    * Estrategia:
@@ -145,19 +199,18 @@ export class SmartQueryGenerator {
     const alternatives: string[] = [];
     const maxAlts = QUERY_CONFIG.maxAlternatives;
 
-    // Alt 1: empresa + primera keyword traducida
+    // Alt 1: empresa + primera keyword + contexto IA (Prompt 53: tech context obligatorio)
     if (company && translatedKeywords.length > 0) {
-      const alt1 = `${company.toLowerCase()} ${translatedKeywords[0]}`;
+      const alt1 = `${company.toLowerCase()} ${translatedKeywords[0]} artificial intelligence`;
       if (alt1 !== primaryQuery) {
         alternatives.push(alt1);
       }
     }
 
-    // Alt 2: si tenemos suficientes keywords, combinar de forma diferente
+    // Alt 2: keywords diferentes + tech term (Prompt 53: tech context obligatorio)
     if (alternatives.length < maxAlts && translatedKeywords.length >= 2) {
-      // Usar la segunda y tercera keyword (diferente a la primary que usa la primera)
       const alt2Keywords = translatedKeywords.slice(1, 3);
-      const alt2 = alt2Keywords.join(' ');
+      const alt2 = `${alt2Keywords.join(' ')} technology`;
       if (alt2 !== primaryQuery && !alternatives.includes(alt2)) {
         alternatives.push(alt2);
       }

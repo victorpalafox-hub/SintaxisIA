@@ -15,6 +15,7 @@
  * @updated Prompt 23 - Scoring inteligente + retry con queries alternativas
  * @updated Prompt 35 - Gate textRelevance, penalty generico, null en vez de UI Avatars
  * @updated Prompt 45 - Gate editorial más estricto para primera imagen (firstImageMinScore: 45)
+ * @updated Prompt 53 - Tech context enrichment + query sanitization en searchWithFallback
  */
 
 import { logger } from '../../utils/logger';
@@ -136,44 +137,55 @@ export class ImageOrchestrationService {
       return this.searchLogoWithCascade(index, startSecond, endSecond, company, keywords);
     }
 
+    // Prompt 53: Sanitizar + enriquecer query primario con contexto tech
+    const sanitizedQuery = this.queryGenerator.sanitizeQuery(searchQuery);
+    const enrichedQuery = this.queryGenerator.enrichWithTechContext(sanitizedQuery, index);
+    // Keywords originales (sin tech term) para scoring — evita diluir matchRatio
+    const scoringKeywords = sanitizedQuery.split(' ');
+
     // 1. Intentar Pexels con scoring inteligente (Prompt 23)
     if (isPexelsConfigured()) {
-      const scoredUrl = await this.searchPexelsWithScoring(searchQuery, searchQuery.split(' '), index);
+      const scoredUrl = await this.searchPexelsWithScoring(enrichedQuery, scoringKeywords, index);
       if (scoredUrl) {
-        return this.createSceneImage(index, startSecond, endSecond, scoredUrl, searchQuery, 'pexels');
+        return this.createSceneImage(index, startSecond, endSecond, scoredUrl, enrichedQuery, 'pexels');
       }
     }
 
-    // 2. Intentar Unsplash (fallback 1)
-    const unsplashUrl = await searchUnsplash(searchQuery);
+    // 2. Intentar Unsplash (fallback 1) — query enriquecido
+    const unsplashUrl = await searchUnsplash(enrichedQuery);
     if (unsplashUrl) {
-      return this.createSceneImage(index, startSecond, endSecond, unsplashUrl, searchQuery, 'unsplash');
+      return this.createSceneImage(index, startSecond, endSecond, unsplashUrl, enrichedQuery, 'unsplash');
     }
 
-    // 3. Intentar Google (fallback 2)
-    const googleUrl = await searchGoogle(searchQuery, 'screenshot');
+    // 3. Intentar Google (fallback 2) — query enriquecido
+    const googleUrl = await searchGoogle(enrichedQuery, 'screenshot');
     if (googleUrl) {
-      return this.createSceneImage(index, startSecond, endSecond, googleUrl, searchQuery, 'google');
+      return this.createSceneImage(index, startSecond, endSecond, googleUrl, enrichedQuery, 'google');
     }
 
     // 4-5. Retry con queries alternativas (Prompt 23)
     const smartQueries = this.queryGenerator.generateQueries(keywords, segment.text);
     for (const altQuery of smartQueries.alternatives) {
       if (isPexelsConfigured()) {
-        logger.info(`[ImageOrchestration] Retry con alternativa: "${altQuery}"`);
-        const altUrl = await this.searchPexelsWithScoring(altQuery, altQuery.split(' '), index);
+        // Prompt 53: Sanitizar alternativas antes de buscar
+        const safeAlt = this.queryGenerator.sanitizeQuery(altQuery);
+        logger.info(`[ImageOrchestration] Retry con alternativa: "${safeAlt}"`);
+        const altUrl = await this.searchPexelsWithScoring(safeAlt, safeAlt.split(' '), index);
         if (altUrl) {
-          return this.createSceneImage(index, startSecond, endSecond, altUrl, altQuery, 'pexels');
+          return this.createSceneImage(index, startSecond, endSecond, altUrl, safeAlt, 'pexels');
         }
       }
     }
 
     // 6. Intentar con query simplificada (SIN sufijo genérico - Prompt 19.1.6)
     const translatedKeywords = this.queryGenerator.translateKeywords(keywords);
-    const simplifiedQuery = translatedKeywords.slice(0, 2).join(' ');
-    if (isPexelsConfigured() && simplifiedQuery !== searchQuery) {
+    const simplifiedRaw = translatedKeywords.slice(0, 2).join(' ');
+    // Prompt 53: Sanitizar + enriquecer query simplificado
+    const simplifiedSanitized = this.queryGenerator.sanitizeQuery(simplifiedRaw);
+    const simplifiedQuery = this.queryGenerator.enrichWithTechContext(simplifiedSanitized, index);
+    if (isPexelsConfigured() && simplifiedQuery !== enrichedQuery) {
       logger.info(`[ImageOrchestration] Retry simplificada: "${simplifiedQuery}"`);
-      const pexelsSimple = await this.searchPexelsWithScoring(simplifiedQuery, simplifiedQuery.split(' '), index);
+      const pexelsSimple = await this.searchPexelsWithScoring(simplifiedQuery, simplifiedSanitized.split(' '), index);
       if (pexelsSimple) {
         return this.createSceneImage(index, startSecond, endSecond, pexelsSimple, simplifiedQuery, 'pexels');
       }

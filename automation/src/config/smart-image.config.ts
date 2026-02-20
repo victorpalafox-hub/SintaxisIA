@@ -365,3 +365,40 @@ export const GENERIC_PENALTY_PATTERNS: RegExp[] = [
   /\bglowing\b/i,
   /\b3d render/i,
 ];
+
+// =============================================================================
+// TECH CONTEXT TERMS (Prompt 53)
+// =============================================================================
+
+/**
+ * Términos de contexto tech que se agregan a queries de contenido
+ * para forzar resultados relevantes de IA/tecnología en APIs de imágenes.
+ * Se rotan por segmentIndex para variedad visual entre segmentos.
+ *
+ * @since Prompt 53
+ */
+export const TECH_CONTEXT_TERMS: string[] = [
+  'technology',
+  'digital',
+  'computer',
+  'screen',
+];
+
+// =============================================================================
+// BANNED QUERY TERMS (Prompt 53)
+// =============================================================================
+
+/**
+ * Términos eliminados de queries antes de enviar a APIs de imágenes.
+ * Estos producen fotos genéricas de stock (personas, oficinas, naturaleza)
+ * en vez de contenido tech relevante.
+ *
+ * @since Prompt 53
+ */
+export const BANNED_QUERY_TERMS: string[] = [
+  'person', 'people', 'man', 'woman', 'face', 'portrait',
+  'nature', 'flower', 'plant', 'tree', 'landscape', 'sky',
+  'food', 'animal', 'hands', 'building', 'office', 'desk',
+  'meeting', 'team', 'group', 'crowd',
+  'corporate', 'business', 'presentation', 'happy', 'smiling', 'working',
+];
