@@ -17,7 +17,7 @@ import axios from 'axios';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
-import { exec } from 'child_process';
+import { exec, execFile } from 'child_process';
 import { promisify } from 'util';
 import { TTS_CONFIG, getElevenLabsTTSUrl } from '../config/tts.config';
 import { config } from '../config';
@@ -38,6 +38,7 @@ import type {
 import { whisperService } from './whisper.service';
 
 const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 // =============================================================================
 // CLASE PRINCIPAL
@@ -441,20 +442,19 @@ export class TTSService {
 
     logger.info(`[TTS] Generando con Edge-TTS (fallback)...`);
 
-    // Escapar texto para linea de comandos
-    const escapedText = text
-      .replace(/"/g, '\\"')
-      .replace(/`/g, '\\`')
-      .replace(/\$/g, '\\$');
-
-    // Edge-TTS command - intentar ambas formas (directa y via python -m)
-    const edgeTtsArgs = `--voice "${edgeTts.voice}" --rate "${edgeTts.rate}" --pitch "${edgeTts.pitch}" --text "${escapedText}" --write-media "${audioPath}"`;
-    const commandDirect = `edge-tts ${edgeTtsArgs}`;
-    const commandPython = `python -m edge_tts ${edgeTtsArgs}`;
+    // Argumentos como array - SEGURO: execFileAsync no pasa por shell,
+    // evitando inyección de comandos via metacaracteres (;, |, &&, $(), etc.)
+    const edgeTtsArgs = [
+      '--voice', edgeTts.voice,
+      '--rate', edgeTts.rate,
+      '--pitch', edgeTts.pitch,
+      '--text', text,
+      '--write-media', audioPath,
+    ];
 
     try {
-      // Intentar primero el comando directo
-      await execAsync(commandDirect, { timeout: 120000 });
+      // Intentar primero el comando directo (execFileAsync = sin shell)
+      await execFileAsync('edge-tts', edgeTtsArgs, { timeout: 120000 });
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
 
@@ -462,11 +462,12 @@ export class TTSService {
       if (
         errorMsg.includes('not found') ||
         errorMsg.includes('not recognized') ||
-        errorMsg.includes('no se reconoce')
+        errorMsg.includes('no se reconoce') ||
+        errorMsg.includes('ENOENT')
       ) {
         logger.info(`[TTS] edge-tts no está en PATH, intentando con python -m edge_tts...`);
         try {
-          await execAsync(commandPython, { timeout: 120000 });
+          await execFileAsync('python', ['-m', 'edge_tts', ...edgeTtsArgs], { timeout: 120000 });
         } catch (pythonError) {
           // Si ambos fallan, dar instrucciones claras
           throw new Error(
@@ -640,10 +641,13 @@ export class TTSService {
 
   private async getAudioDuration(audioPath: string): Promise<number> {
     try {
-      // Usar ffprobe para obtener duracion exacta
-      const { stdout } = await execAsync(
-        `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${audioPath}"`
-      );
+      // Usar ffprobe para obtener duracion exacta (execFileAsync = sin shell)
+      const { stdout } = await execFileAsync('ffprobe', [
+        '-v', 'error',
+        '-show_entries', 'format=duration',
+        '-of', 'default=noprint_wrappers=1:nokey=1',
+        audioPath,
+      ]);
       return parseFloat(stdout.trim());
     } catch {
       // Fallback: estimar por tamano de archivo

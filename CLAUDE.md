@@ -451,126 +451,66 @@ output/
 
 ## Quick Reference
 
+### Pipeline Services
+
 | Componente | Función Principal | Umbral/Límite |
 |------------|-------------------|---------------|
 | Carnita Score | `scoreNews()`, `selectPublishableNews()` | 75 pts mínimo, 97 máximo |
 | Gemini | `generateScript()` + Alex Torres Persona | 4/6 marcadores compliance |
 | ElevenLabs | `generateAudio()` + fallback Edge-TTS | 10k chars/mes |
 | YouTube | `uploadVideo()` + OAuth2 | 6 videos/día (quota 10k units) |
-| Video | Dinámico: Hero 8s + Content max(37s,audio+1s) + Breathing 1.5s + Outro 5s, cap 59.2s (SAFE_MAX_FRAMES 1776) | 1080x1920, 30fps |
 | Output Manager | `saveAllOutputs()` + TikTok copy | slug max 50 chars |
-| Sequential Text | `splitIntoReadablePhrases()` + `getPhraseTiming()` | 60 chars/frase, fade 15 frames |
-| Whisper | `whisperService.transcribe()` + `groupIntoPhrases()` | Opcional (OPENAI_API_KEY), ~$0.006/min |
-| ContentAnimation | parallax + zoom + per-phrase slide | Full 37s duration, config en themes.ts |
-| OutroAnimation | fade-out + Easing + textShadow editorial | 5s, spring + config en themes.ts |
-| SceneTransition | crossfade 30 frames entre Sequences | sceneTransition en themes.ts |
-| BackgroundDirector | gradient drift + parallax blobs + color pulse + accent glow + grain + light sweep dual | Persistente, configs en themes.ts + premiumBackground |
-| EditorialShadow | textDepth, imageElevation, logoBrandTint | Reemplaza glows neón (Prompt 20) |
 | Anti-Duplicación | `PublishedNewsTracker` + `selectTopNewsExcluding()` | 3 capas: ID, titulo 80%, empresa+producto 7d |
-| SmartQuery | `translateKeywords()`, `generateQueries()`, `sanitizeQuery()`, `enrichWithTechContext()` | 170+ ES→EN, max 3 kw/query, 2 alternativas, TECH_CONTEXT_TERMS rotate, BANNED_QUERY_TERMS 26 terms, anti-dilución scoring |
-| ImageScoring | `searchPexelsWithScoring()`, `scoreCandidate()` | 5 candidatos, gate textRelevance≥8, penalty genérico -20, umbral 35 (primera imagen 45), null si no relevante |
-| SafeImage | `SafeImage.tsx`, `hasError`, `return null` | Sin placeholder (Prompt 38-Fix2), error=null, no UI Avatars, fallbackSrc opcional |
-| News Manager CLI | `news-manager-cli.ts` (10 comandos: history/active/expired/search/view/unlock/cleanup/clear/stats/help) | Peer de cli.ts, ts-node directo para args |
-| NewsEnricher | `enrichAll()`, `detectCompany()`, `detectType()` | 81 aliases, 8 type patterns, PASO 2 real |
-| AudioSync | `Sequence(0)`, `phraseTimestamps` pipeline | Voz desde frame 0 (Prompt 37-Fix1), ContentScene offset contentStart/fps, lead 200ms, lag 150ms, max 3 img |
-| HeroFlash | `flashMaxOpacity`, `flashDurationFrames` | 0.15 opacity, 10 frames (~0.3s) |
-| HeroImpact | `heroImpact` config, impact flash+SFX, micro-zoom, energy ramp | flash 0.85, hold 2f, zoom 1.03→1.0, energy 30-90f, swell 22→25→22%, SFX 0.75 vol |
-| MusicBed | `musicBed` config + `<Audio>` loop desde frame 0 | hero 22%, content 8%, outro 5%, fadeOut 60 frames |
-| ImageEditorial | `imageAnimation` width/height/borderRadius | 920x520, borderRadius 24, crossfade real |
-| TopicSegmentation | `findTopicBoundaries()`, `findMarkerPositions()` | 18 marcadores ES, targets 33%/66%, min 8s, score ≥0.3 |
-| DynamicDuration | `calculateMetadata` en Root.tsx, `BREATHING_ROOM_FRAMES` | Composition dinámica via props, 1.5s breathing room, cap 59.2s (SAFE_MAX_FRAMES 1776 @ 30fps) |
-| SafeDuration | `AINewsShort.tsx` SAFE_MAX_FRAMES, `Root.tsx` calculateMetadata cap, `video-rendering.service.ts` Math.min | SAFE_MAX_SECONDS 59.2, SAFE_MAX_FRAMES 1776, SAFE_END_BUFFER 20 frames, compressionRatio si audio excede límite |
-| FinalFadeOut | `AINewsShort.tsx` FinalFadeOut componente + `FinalBuffer` Sequence | fade negro 0→1 en últimos 20 frames (~0.67s), evita corte abrupto, último en JSX |
-| TitleCard | `TitleCardScene.tsx`, `title-derivation.ts`, `deriveTitleCardText()`, `deriveBadge()` | Overlay 3s (90 frames), fade-out 15f, badge contextual, hero image background, max 7 palabras |
-| EditorialText | `text-editorial.ts`, `editorialText` config, `getBlockTiming()` | Bloques 1-2 líneas, headline 72px/support 54px/punch 84px, slide por peso (20/12/30px), easing diferenciado, pause 10f antes + 8f después punch |
-| VisualEmphasis | `visual-emphasis.ts`, `visualEmphasis` config, `detectEmphasis()` | Max 3 momentos (1 hard + 2 soft), scale 1.08/1.03, dimming overlay, ramp 10f, min 4 bloques |
-| EditorialClosing | `AINewsShort.tsx` Narration→outroStart, `AudioMixer.tsx` fade 45f, `themes.ts` ctaDelay 45f | Voz termina antes de outro, breathing 1.5s, CTA delay 1.5s, voice fade 1.5s |
-| TextExclusivity | `HeroScene.tsx` titleDelayedIn [75,95]/titleEarlyOut [195,210], `ContentScene.tsx` sin fallback | Max 1 texto por frame, TitleCard fade-out→Hero fade-in crossfade, sin overlap |
-| EditorialIntegral | `AINewsShort.tsx` Narration from={contentStart}, music bed hero/content, `text-splitter.ts` 48 chars | Voz alineada con texto, music bed 22%→8%, frases cortas editoriales |
-| MicroDynamics | `themes.ts` microDynamics config, `ContentScene.tsx` 4 micro-anims, `OutroScene.tsx` breathing | Image breathing ±0.4%/50f, X-drift ±6px/70f, text drift ±2px/80f, transition zoom in/out, outro breathing ±0.3%/60f |
-| NarrativeRhythm | `themes.ts` narrativeRhythm config, `narrative-rhythm.ts` getIntensityMultiplier, `ContentScene.tsx` intensity×amplitude | Opening 1.0 (0-20s), Build 0.75 (20-40s), Climax 1.15 (40s+), pausa 0.4 cada 165f, decel 0.3 últimos 60f |
-| CinematicGrade | `themes.ts` cinematicGrade config, `AINewsShort.tsx` filter CSS global | contrast 1.10, saturate 1.18, brightness 1.03, CTA fontWeight 600+letterSpacing 1+textShadow |
+| NewsEnricher | `enrichAll()`, `detectCompany()`, `detectType()` | 81 aliases, 8 type patterns |
+| SmartQuery | `translateKeywords()`, `sanitizeQuery()`, `enrichWithTechContext()` | 170+ ES→EN, BANNED_QUERY_TERMS 26 terms |
+| ImageScoring | `scoreCandidate()` gate textRelevance≥8 | umbral 35 (primera 45), null si no relevante |
 
-## Prompt History (Resumen)
+### Video Rendering
 
-| # | Feature | Tests | Archivos Clave |
-|---|---------|-------|----------------|
-| 4 | EnvironmentManager + AppConfig | - | `src/config/EnvironmentManager.ts` |
-| 5 | TestLogger (Winston) | 4 | `tests/utils/TestLogger.ts` |
-| 6 | Service Objects | 4 | `tests/page-objects/services/` |
-| 7 | Video Generation Tests | 19 | `tests/specs/prompt7-*.spec.ts` |
-| 8 | Content Validation Tests | 23 | `tests/specs/prompt8-*.spec.ts` |
-| 9 | CI/CD + npm scripts | - | `.github/workflows/test.yml` |
-| 10 | AudioMixer + ProgressBar + Temas | 29 | `remotion-app/src/styles/themes.ts` |
-| 11 | News Scoring "Carnita" | 33 | `automation/src/news-scorer.ts`, `config/scoring-rules.ts` |
-| 12 | Image Search Multi-Provider | 23 | `automation/src/image-searcher-v2.ts`, `image-providers/` |
-| 13 | Video Optimizado (1 noticia) | 22 | `remotion-app/src/` (HeroScene, ContentScene, OutroScene) |
-| 13.1 | SafeImage CORS Fix | 7 | `remotion-app/src/components/elements/SafeImage.tsx` |
-| 13.2 | Cleanup Composiciones | 8 | Eliminadas SintaxisIA* (obsoletas) |
-| 14 | Orchestrator + Calendario | 16 | `automation/src/orchestrator.ts`, `cli.ts` |
-| 14.1 | Notificaciones Email + Telegram | 12 | `automation/src/notifiers/` |
-| 14.2 | Fix Callbacks Telegram | 12 | Aprobación desde Telegram sin dashboard |
-| 15 | Gemini Script Generation | 45 | `automation/src/scriptGen.ts`, `services/compliance-validator.ts` |
-| 16 | ElevenLabs TTS | 27 | `automation/src/services/tts.service.ts` |
-| 17-A | Carnita Score Refactor | - | Eliminado Twitter/X, umbral 75, max 97 |
-| 17 | Video Rendering Service | 27 | `automation/src/services/video-rendering.service.ts` |
-| 18 | YouTube Upload Service | 53 | `automation/src/services/youtube-upload.service.ts` |
-| 19 | Output Manager + Dry-Run Real | 43 | `automation/src/services/output-manager.service.ts` |
-| 19.1 | Dynamic Images per Segment | 36 | `scene-segmenter.service.ts`, `image-orchestration.service.ts` |
-| 19.2 | Texto Secuencial en Escenas | 41 | `remotion-app/src/utils/text-splitter.ts`, `phrase-timing.ts` |
-| 19.3 | Image Preload & Transitions | 26 | `themes.ts` (imageAnimation), `SafeImage.tsx` (delayRender) |
-| 19.3.1 | ELEVENLABS Optional Fallback | - | TTS usa Edge-TTS si API key no definida |
-| 19.2.6 | No Bullet Points | 21 | Solo texto secuencial en ContentScene |
-| 19.2.7 | Large Text | 25 | fontSize 72px, maxCharsPerPhrase 60, contentTextStyle |
-| 19.4 | Outro Duration Sync | 16 | Reducido de 10s a 5s |
-| 19.3.2 | SafeImage Preload | 17 | delayRender + continueRender |
-| 19.1.6 | Specific Queries | 17 | Clearbit/Logo.dev para logos, sin sufijos genéricos |
-| 19.5 | Visual Queries | 24 | `extractVisualConcepts()` en scene-segmenter |
-| 19.6 | Hero Image Fallback | 10 | Fallback a URL si archivo local no existe |
-| 19.7 | Audio Sync (Whisper) | 29 | `whisper.service.ts`, timestamps reales texto-voz |
-| 19.8 | Dynamic Animations | 16 | parallax/zoom/glow/slide en ContentScene |
-| 19.9 | OutroScene Mejorado | 13 | fade-out, glow cíclico, Easing, textShadow |
-| 19.10 | Glow Intenso | 13 | heroAnimation config, multi-layer glow +50% |
-| 19.11 | Smooth Transitions | 37 | crossfade 30 frames, sceneTransition config |
-| 19.12 | Duration Fix | 12 | Composition 50s = Sequences 50s |
-| 20 | Tech Editorial + Background Animado | 45 | `BackgroundDirector.tsx`, `GrainOverlay.tsx`, `LightSweep.tsx`, `themes.ts` |
-| 20.1 | Background Revival (fix visibilidad) | 15 | Fix doble alpha, `SubtleGrid.tsx`, micro-zoom, transition boost |
-| 21 | Anti-Duplicación de Noticias | 35 | `PublishedNewsTracker`, `selectTopNewsExcluding`, 3-layer dedup |
-| 22 | CLI News Manager | 42 | `automation/src/news-manager-cli.ts`, nuevos métodos tracker, TrackerStats |
-| 23 | Smart Image Selector | 49 | `smart-query-generator.ts`, `smart-image.config.ts`, scoring en pexels, retry alternativas |
-| 24 | NewsData.io Integration | 44 | `newsdata.config.ts`, `news-enricher.service.ts`, PASO 2 real, 81 company aliases |
-| 25 | Audio Sync Fix + Hook Visual | 34 | Frame offset, phraseTimestamps pipeline, flash overlay, MAX_IMAGE_SEGMENTS=3 |
-| 25.2 | Fix texto fade-out prematuro | - | phraseEndFrame + fadeOutFrames buffer en phrase-timing.ts |
-| 25.3 | Sync broadcast-grade | - | sceneStartSecond fix (8→7s crossfade), captionLeadMs/LagMs (200/150ms) |
-| 26 | Audio retrasado + Duración dinámica | - | AudioMixer en Sequence(contentStart), duración basada en audioDuration, HeroScene silenciosa |
-| 27 | Hero Audio Bed + Visual Hook | 23 | `musicBed` en themes.ts, BackgroundMusic Sequence, sceneZoom en HeroScene, `generate-news-bed.js` |
-| 28 | Imágenes Editoriales + Crossfade Real | 25 | imageAnimation width/height, ContentScene 920x520, crossfade dual, newsTitle en queries |
-| 29 | Segmentación Topic-Aware | 35 | TRANSITION_MARKERS, `findTopicBoundaries()`, marcadores ES→cortes 33%/66%, fallback uniforme |
-| 30 | Duración Dinámica + CTA Fix | 23 | `calculateMetadata` en Root.tsx, `BREATHING_ROOM_FRAMES`, duration +1s breathing |
-| 31 | Fondo Premium "con vida" | 25 | Boost configs 2-3x, color pulse hue-rotate, accent glow blob, dual LightSweep, GrainOverlay variable, secciones dinámicas |
-| 32 | Title Card / Thumbnail Topic-Aware | 31 | `TitleCardScene.tsx`, `title-derivation.ts`, overlay 0.5s, badge contextual, SafeImage hero background |
-| 32.1 | Fix Title Card + Audio + Fondo + Timeout | - | TitleCard 3s fade-out, voice fade-out 30f, gradientes azul-navy, accent blob, timeout 20x |
-| 33 | Texto Editorial Humano | 46 | `text-editorial.ts`, `editorialText` config, bloques headline/support/punch, getBlockTiming, agrupación de frases |
-| 34 | Sistema de Énfasis Visual | 48 | `visual-emphasis.ts`, `visualEmphasis` config, detectEmphasis, scale/dimming/letterSpacing en momentos de impacto |
-| 35 | Fix Imágenes Genéricas | 53 | Gate textRelevance en `scoreCandidate()`, `GENERIC_PENALTY_PATTERNS`, pesos rebalanceados, null fallback (sin UI Avatars), `imageUrl: string \| null` |
-| 36 | Polish Editorial Premium | 30 | Colores premium (#F5F7FA/#C9CED6/#0B0D10), accent unificado #4DA3FF, glows=0, sombras sutiles, overlay editorial imágenes, shadow condicional |
-| 37 | Fix audioDuration incorrecto | 21 | Whisper override en `video-rendering.service.ts`, fallback 48kbps en `tts.service.ts`, dynamicScenes recalc, cap 60s YouTube Shorts |
-| 37-Fix1 | Voz desde frame 0 (anti-silencio) | 6 | Narration from=0, music ducked siempre, sceneStartSecond=contentStart/fps |
-| 38-Fix2 | Regla dura imagenes (render) | 22 | SafeImage sin placeholder (hasError+null), ContentScene no reuse imagen previa |
-| 39-Fix3 | Jerarquía tipográfica fija | 18 | headline 78→72, support 66→54, punch 84, HeroScene/OutroScene via editorialText |
-| 40-Fix4 | Ritmo humano + Fix ElevenLabs | 24 | Slide/easing por peso (punch rápido, support suave), pausas dramáticas 10f/8f, validateElevenLabsKey, logging detallado axios |
-| 41 | Cierre editorial real | 21 | Narración termina en outroStart (no durationInFrames), breathing room 30→45f, CTA delay 20→45f, voice fade 30→45f |
-| 42 | Unificación fuente de texto | 37 | `HeroScene.tsx` titleDelayedIn/titleEarlyOut, `ContentScene.tsx` sin `\|\| description`, exclusividad texto por frame |
-| 44 | Corrección editorial integral | 22 | `AINewsShort.tsx` Narration from={contentStart}, music bed hero 22%→8% transición, `text-splitter.ts`/`themes.ts` maxChars 48 |
-| 45 | Micro-Polish Editorial | 27 | `heroImpact` config, impact flash 0.85+SFX, micro-zoom 1.03, energy ramp, `firstImageMinScore: 45`, outro easing cúbico, `outroVolume: 0.05` |
-| 46 | Fix Duración Segura YouTube Shorts | 22 | `AINewsShort.tsx` SAFE_MAX_FRAMES/FinalFadeOut/compressionRatio, `Root.tsx` calculateMetadata cap, `video-rendering.service.ts` Math.min 59.2s, `AudioMixer.tsx` playbackRate |
-| 47 | Fix Silencio Inicial (Hook Frame 0) | 30 | `themes.ts` breathingMotion/heroFadeInFrames/heroVolume 0.35/energyRampStart 0/microZoomStart 1.06, `HeroScene.tsx` titleDelayedIn [2,10]/titleTranslateY/breathingScale, `AINewsShort.tsx` fadeIn×energySwell |
-| 48 | Micro-Dinámica Permanente | 29 | `themes.ts` microDynamics config, `ContentScene.tsx` image breathing/X-drift/text micro-drift/transition zoom, `OutroScene.tsx` breathing container |
-| 49 | Ritmo Narrativo Editorial | 40 | `themes.ts` narrativeRhythm config, `narrative-rhythm.ts` getIntensityMultiplier, `ContentScene.tsx` micro-dinámicas moduladas por intensidad |
-| 50 | Polish Cinematográfico Premium | 27 | `themes.ts` cinematicGrade config, `AINewsShort.tsx` filter global, `OutroScene.tsx` CTA premium |
-| 51 | Fix Empalme Texto Hero+TitleCard | 21 | `HeroScene.tsx` titleDelayedIn [2,10]→[75,95], crossfade suave con TitleCard fade-out |
-| 52 | Color Upgrade: Paleta The Verge | 36 | `themes.ts` paleta #4CC2F1, fondos negros profundos, blobs+glow visibles, cinematicGrade brightness>1.0, editorialText colors alineados |
-| 53 | Smart Image Query Tech Context | 29 | `smart-image.config.ts` TECH_CONTEXT_TERMS+BANNED_QUERY_TERMS, `smart-query-generator.ts` sanitizeQuery+enrichWithTechContext, `image-orchestration.service.ts` searchWithFallback sanitize+enrich |
+| Componente | Función Principal | Umbral/Límite |
+|------------|-------------------|---------------|
+| Video | Hero 8s + Content max(37s,audio+1s) + Breathing 1.5s + Outro 5s | 1080x1920, 30fps, cap 59.2s |
+| SafeDuration | SAFE_MAX_FRAMES 1776, SAFE_END_BUFFER 20f | compressionRatio si audio excede |
+| SafeImage | `hasError` → `return null` | Sin placeholder, no UI Avatars |
+| AudioSync | Voz desde frame 0, phraseTimestamps pipeline | lead 200ms, lag 150ms, max 3 img |
+| TextExclusivity | Max 1 texto por frame | TitleCard→Hero crossfade sin overlap |
+| EditorialText | headline 72px/support 54px/punch 84px | Bloques 1-2 líneas, pause dramática |
+
+**Todos los detalles visuales** (microDynamics, narrativeRhythm, cinematicGrade, heroImpact, musicBed, backgroundDirector, etc.) están centralizados en `remotion-app/src/styles/themes.ts`. Consultar ese archivo para valores específicos.
+
+## Prompt History (por categoría)
+
+Total: 53 prompts. Convención: `tests/specs/prompt[N]-*.spec.ts` + `npm run test:prompt[N]`.
+
+### Infraestructura (4-9)
+Config, tests, CI/CD: `EnvironmentManager.ts`, `TestLogger.ts`, Service Objects, `.github/workflows/test.yml`
+
+### Pipeline de Contenido (11-12, 14-19, 21-24)
+| Grupo | Archivos Clave |
+|-------|----------------|
+| Scoring + Noticias | `news-scorer.ts`, `scoring-rules.ts`, `news-enricher.service.ts`, `newsdata.config.ts`, `PublishedNewsTracker` |
+| Imágenes | `image-searcher-v2.ts`, `image-providers/`, `smart-query-generator.ts`, `smart-image.config.ts`, `image-orchestration.service.ts` |
+| Script + Audio | `scriptGen.ts`, `compliance-validator.ts`, `tts.service.ts` (ElevenLabs + Edge-TTS fallback) |
+| Orchestrator | `orchestrator.ts`, `cli.ts`, `news-manager-cli.ts`, `notifiers/` |
+| Output + Upload | `output-manager.service.ts`, `video-rendering.service.ts`, `youtube-upload.service.ts` |
+
+### Video / Remotion (10, 13, 19.x, 20, 25-35)
+| Grupo | Archivos Clave |
+|-------|----------------|
+| Escenas | `HeroScene.tsx`, `ContentScene.tsx`, `OutroScene.tsx`, `TitleCardScene.tsx`, `AINewsShort.tsx` |
+| Texto + Audio Sync | `text-splitter.ts`, `phrase-timing.ts`, `text-editorial.ts`, `visual-emphasis.ts`, `whisper.service.ts` |
+| Fondo + Efectos | `BackgroundDirector.tsx`, `GrainOverlay.tsx`, `LightSweep.tsx`, `SubtleGrid.tsx` |
+| Imágenes dinámicas | `scene-segmenter.service.ts`, `SafeImage.tsx`, `title-derivation.ts` |
+| Segmentación | `findTopicBoundaries()` (18 marcadores ES), `narrative-rhythm.ts` |
+| Config central | `themes.ts` (tema, colores, animaciones, timing, microDynamics, narrativeRhythm, cinematicGrade) |
+
+### Polish + Fixes (36-53)
+Ajustes visuales, tipográficos, de timing y duración. Archivos principales:
+- `themes.ts` (colores premium #4CC2F1, cinematicGrade, microDynamics, heroImpact, musicBed)
+- `AINewsShort.tsx` (SAFE_MAX_FRAMES 1776, FinalFadeOut, compressionRatio, filter global)
+- `HeroScene.tsx` (titleDelayedIn, breathingScale, energySwell)
+- `ContentScene.tsx` (micro-dinámicas moduladas por intensidad, text exclusivity)
+- `smart-query-generator.ts` (sanitizeQuery, enrichWithTechContext, BANNED_QUERY_TERMS)
 
 ## Pendientes
 
